@@ -11,6 +11,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** List your organizations */
         get: operations["listMyOrgs"];
         put?: never;
         post?: never;
@@ -27,8 +28,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** List projects */
         get: operations["listOrgProjects"];
         put?: never;
+        /** Create a project */
         post: operations["createProject"];
         delete?: never;
         options?: never;
@@ -49,6 +52,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
+        /** Update a project */
         patch: operations["updateProject"];
         trace?: never;
     };
@@ -59,6 +63,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** List a project's repositories */
         get: operations["listProjectRepos"];
         put?: never;
         post?: never;
@@ -75,6 +80,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** List a project's MCP connections */
         get: operations["listProjectMcpConnections"];
         put?: never;
         post?: never;
@@ -91,6 +97,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** List a project's skill connections */
         get: operations["listProjectSkillConnections"];
         put?: never;
         post?: never;
@@ -107,6 +114,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** List project members */
         get: operations["listProjectMembers"];
         put?: never;
         post?: never;
@@ -123,6 +131,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Read an organization's subscription */
         get: operations["getOrgSubscription"];
         put?: never;
         post?: never;
@@ -139,8 +148,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * List sandboxes
+         * @description Newest first. Deleted sandboxes are excluded.
+         */
         get: operations["listOrgSandboxes"];
         put?: never;
+        /**
+         * Create a sandbox
+         * @description `agent` (`claude` or `codex`) and `projectId` are required; every other field falls back to the project's defaults, the selected profile, or a server-generated value. `profile` picks a workload shape (`auto`, `agent-small`, `agent-standard`, `build-heavy`, `browser-heavy`, `repo-large` or `long-running`), and `machineSize` overrides its initial machine tier. `region` picks where it runs; an unavailable region is refused rather than replaced. Infrastructure tier comes from the org's plan. `endUserId` and `metadata` attribute the sandbox to one of your own users. The sandbox is returned while it is still provisioning; poll GET /sandboxes/{sandboxId} until it is ready.
+         */
         post: operations["createSandbox"];
         delete?: never;
         options?: never;
@@ -157,6 +174,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Put a sandbox to sleep
+         * @description Snapshots the sandbox, releases its machine and ends machine-time billing. A sleeping sandbox reports status `stopped` and keeps everything for wake. An ephemeral sandbox has no snapshot to keep, so sleeping ends it.
+         */
         post: operations["sleepSandbox"];
         delete?: never;
         options?: never;
@@ -174,6 +195,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
+         * Stop a sandbox
          * @deprecated
          * @description Deprecated: use POST /sandboxes/{sandboxId}/sleep.
          */
@@ -193,6 +215,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Destroy a sandbox
+         * @description Permanently deletes the sandbox and its retained snapshot. Sleep it instead if you intend to come back to it.
+         */
         post: operations["destroySandbox"];
         delete?: never;
         options?: never;
@@ -209,6 +235,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Renew an ephemeral sandbox
+         * @description Extends a running ephemeral sandbox's expiry by its configured TTL. The plan's session cap still applies; once it is exhausted the sandbox can no longer be renewed.
+         */
         post: operations["renewSandbox"];
         delete?: never;
         options?: never;
@@ -225,6 +255,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Resize a sandbox
+         * @description Sets an exact allocation. A sleeping sandbox's allocation changes immediately. A running sandbox is resized live only when the provider can verify the change; otherwise the shape is stored as `pendingAllocation` and applied on the next wake.
+         */
         post: operations["resizeSandbox"];
         delete?: never;
         options?: never;
@@ -241,6 +275,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Wake a sleeping sandbox
+         * @description Boots a sleeping sandbox from its own snapshot.
+         */
         post: operations["wakeSandbox"];
         delete?: never;
         options?: never;
@@ -258,6 +296,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
+         * Resume a sandbox
          * @deprecated
          * @description Deprecated: use POST /sandboxes/{sandboxId}/wake.
          */
@@ -275,7 +314,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Retrieve a sandbox */
+        /**
+         * Retrieve a sandbox
+         * @description Poll this to follow provisioning and lifecycle changes. The platform does not send lifecycle webhooks.
+         */
         get: operations["getSandbox"];
         put?: never;
         post?: never;
@@ -296,7 +338,7 @@ export interface paths {
         put?: never;
         /**
          * Run a command in a sandbox
-         * @description Runs a non-interactive command to completion. Standard output and error are each capped at 64 KiB; the tail is kept when either is truncated. The default timeout is 120 seconds.
+         * @description Runs a non-interactive command through /bin/sh in /code and waits for it to exit. The sandbox must be running or ready. Standard output and error are each capped at 64 KiB; the tail is kept when either is truncated. The default timeout is 120 seconds. A non-zero exitCode is still a successful request: the command ran and failed. A command that hits the timeout returns timedOut true and exitCode 124.
          */
         post: operations["execSandboxCommand"];
         delete?: never;
@@ -332,7 +374,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Read a sandbox file */
+        /**
+         * Read a sandbox file
+         * @description Returns the content as UTF-8, or as base64 for binary files, with its size in bytes. Relative paths resolve beneath /code.
+         */
         get: operations["readSandboxFile"];
         /**
          * Write a sandbox file
@@ -361,7 +406,7 @@ export interface paths {
         put?: never;
         /**
          * Create a sandbox preview
-         * @description A team preview (the default) is a signed URL for signed-in organization members. A public preview is a persistent, revocable link with its own expiry; it requires sandbox.preview.share.
+         * @description A team preview (the default) is a signed URL for signed-in organization members. A public preview is a persistent, revocable link that anyone holding the URL can open; it requires sandbox.preview.share and expires after expiresInSeconds (24 hours by default, 30 days at most).
          */
         post: operations["createSandboxPreview"];
         delete?: never;
@@ -554,7 +599,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Release an idle managed session to its native terminal without deleting its saved conversation. Requires agent_session.send and bridge v8. Refuses active turns; interrupt first. Returns resume arguments only after the bridge and agent processes exit. Retry on an uncertain response; repeated release is safe. Close manual CLI ownership before using recover to restore remote control. Native terminal surfaces are unsupported. */
+        /**
+         * Release a session to its native terminal
+         * @description Release an idle managed session to its native terminal without deleting its saved conversation. Requires agent_session.send and bridge v8. Refuses active turns; interrupt first. Returns resume arguments only after the bridge and agent processes exit. Retry on an uncertain response; repeated release is safe. Close manual CLI ownership before using recover to restore remote control. Native terminal surfaces are unsupported.
+         */
         post: operations["releaseAgentSession"];
         delete?: never;
         options?: never;
@@ -569,9 +617,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** List personal agent tokens */
         get: operations["listAgentAccessTokens"];
         put?: never;
-        /** @description User sign-in required. Explicit delegation across accessible organizations; does not alter organization API keys. sandbox.create permits waking existing sandboxes only. Token returned once. */
+        /**
+         * Create a personal agent token
+         * @description User sign-in required. Explicit delegation across accessible organizations; does not alter organization API keys. sandbox.create permits waking existing sandboxes only. Token returned once.
+         */
         post: operations["createAgentAccessToken"];
         delete?: never;
         options?: never;
@@ -589,6 +641,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
+        /** Revoke a personal agent token */
         delete: operations["revokeAgentAccessToken"];
         options?: never;
         head?: never;
@@ -602,7 +655,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Discover registered sessions across accessible projects. Organization API keys retain their org limit; personal agent tokens span accessible orgs. New Codex terminals are registered; existing standalone and native Claude sessions are not attached. State is last known; read a session to refresh it. Pages are ordered by stable session ID, not activity. */
+        /**
+         * Discover agent sessions
+         * @description Discover registered sessions across accessible projects. Organization API keys retain their org limit; personal agent tokens span accessible orgs. New Codex terminals are registered; existing standalone and native Claude sessions are not attached. State is last known; read a session to refresh it. Pages are ordered by stable session ID, not activity.
+         */
         get: operations["discoverAgentSessions"];
         put?: never;
         post?: never;
@@ -621,7 +677,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Start a separate managed conversation using this running sandbox's configured agent. Does not attach to its native terminal conversation. Requires agent_session.send. */
+        /**
+         * Start an agent session
+         * @description Start a separate managed conversation using this running sandbox's configured agent. Does not attach to its native terminal conversation. Requires agent_session.send.
+         */
         post: operations["createAgentSession"];
         delete?: never;
         options?: never;
@@ -636,6 +695,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** List a project's agent sessions */
         get: operations["listAgentSessions"];
         put?: never;
         post?: never;
@@ -652,6 +712,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Retrieve an agent session */
         get: operations["getAgentSession"];
         put?: never;
         post?: never;
@@ -668,6 +729,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Read agent replies */
         get: operations["getAgentOutput"];
         put?: never;
         post?: never;
@@ -684,6 +746,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Stream agent session events */
         get: operations["streamAgentSessionEvents"];
         put?: never;
         post?: never;
@@ -700,6 +763,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Wait for an agent session to change */
         get: operations["waitForAgentSession"];
         put?: never;
         post?: never;
@@ -718,6 +782,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Send a message to an agent */
         post: operations["sendAgentMessage"];
         delete?: never;
         options?: never;
@@ -734,6 +799,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Answer an agent's prompt */
         post: operations["answerAgentPrompt"];
         delete?: never;
         options?: never;
@@ -750,6 +816,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Interrupt the current turn */
         post: operations["interruptAgentTurn"];
         delete?: never;
         options?: never;
@@ -766,7 +833,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Resume a saved managed Claude or Codex conversation, or a registered native Codex session. Requires agent_session.send and the original running sandbox with saved history. Already-ready sessions are unchanged; known live previous processes prevent restart. Queued work is never replayed; interrupted turns have uncertain prior effects. Native Claude attachment is not supported. */
+        /**
+         * Recover an agent session
+         * @description Resume a saved managed Claude or Codex conversation, or a registered native Codex session. Requires agent_session.send and the original running sandbox with saved history. Already-ready sessions are unchanged; known live previous processes prevent restart. Queued work is never replayed; interrupted turns have uncertain prior effects. Native Claude attachment is not supported.
+         */
         post: operations["recoverAgentSession"];
         delete?: never;
         options?: never;
