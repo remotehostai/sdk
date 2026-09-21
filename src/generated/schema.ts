@@ -545,23 +545,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/agent-sessions/{sessionId}/release": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description Release an idle managed session to its native terminal without deleting its saved conversation. Requires agent_session.send and bridge v8. Refuses active turns; interrupt first. Returns resume arguments only after the bridge and agent processes exit. Retry on an uncertain response; repeated release is safe. Close manual CLI ownership before using recover to restore remote control. Native terminal surfaces are unsupported. */
-        post: operations["releaseAgentSession"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/me/agent-tokens": {
         parameters: {
             query?: never;
@@ -1077,7 +1060,7 @@ export interface components {
         AgentSessionCommunication: {
             /** @enum {string} */
             status: "ready" | "starting" | "restart_required" | "setup_required" | "unavailable" | "unsupported";
-            capabilities: ("messages" | "output" | "approvals" | "interrupt" | "recover" | "release")[];
+            capabilities: ("messages" | "output" | "approvals" | "interrupt" | "recover")[];
             message: string | null;
             requirements: {
                 code: string;
@@ -1117,8 +1100,6 @@ export interface components {
             error: string | null;
             /** @enum {string|null} */
             bridgeState: "starting" | "ready" | "closed" | null;
-            released: boolean;
-            releasing: boolean;
             bridgeEventSeq: number | null;
             drifted: boolean;
             problems: {
@@ -5100,130 +5081,6 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    releaseAgentSession: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                sessionId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Control released; resume in the same sandbox using the returned command, arguments and directory. Resume is null if no vendor conversation exists yet. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AgentSessionState"] & {
-                        resume: {
-                            command: string;
-                            args: string[];
-                            cwd: string;
-                        } | null;
-                    };
-                };
-            };
-            /** @description The operation could not be completed; inspect error.message and error.code. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error: {
-                            message: string;
-                            code?: string;
-                            turnId?: string;
-                            communication?: components["schemas"]["AgentSessionCommunication"];
-                        };
-                    };
-                };
-            };
-            /** @description The operation could not be completed; inspect error.message and error.code. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error: {
-                            message: string;
-                            code?: string;
-                            turnId?: string;
-                            communication?: components["schemas"]["AgentSessionCommunication"];
-                        };
-                    };
-                };
-            };
-            /** @description The operation could not be completed; inspect error.message and error.code. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error: {
-                            message: string;
-                            code?: string;
-                            turnId?: string;
-                            communication?: components["schemas"]["AgentSessionCommunication"];
-                        };
-                    };
-                };
-            };
-            /** @description The operation could not be completed; inspect error.message and error.code. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error: {
-                            message: string;
-                            code?: string;
-                            turnId?: string;
-                            communication?: components["schemas"]["AgentSessionCommunication"];
-                        };
-                    };
-                };
-            };
-            /** @description The operation could not be completed; inspect error.message and error.code. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error: {
-                            message: string;
-                            code?: string;
-                            turnId?: string;
-                            communication?: components["schemas"]["AgentSessionCommunication"];
-                        };
-                    };
-                };
-            };
-            /** @description The operation could not be completed; inspect error.message and error.code. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error: {
-                            message: string;
-                            code?: string;
-                            turnId?: string;
-                            communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
                 };
