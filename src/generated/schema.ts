@@ -756,6 +756,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/agent-sessions/{sessionId}/transcript": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read an agent session's conversation */
+        get: operations["getAgentTranscript"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/agent-sessions/{sessionId}/wait": {
         parameters: {
             query?: never;
@@ -6378,7 +6395,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Server-sent events. `ready` ({cursor}) opens the stream; `state` carries the same body as getAgentSession whenever it changes (always once on connect); `output` carries one reply and its id is the output cursor; `reconnect` ({cursor, reason}) closes a rotated stream; `unavailable` ({code, message}) closes when the sandbox cannot be followed; `error` ({code, message}) closes on lost access. Streams rotate within four minutes; reconnect with Last-Event-ID to continue without gaps or repeats. Requires agent_session.read. */
+            /** @description Server-sent events. `ready` ({cursor}) opens the stream; `state` carries the same body as getAgentSession whenever it changes (always once on connect); `output` carries one reply (with itemId when it was streamed) and its id is the output cursor; `conversation` carries one conversation event (user.message, agent.delta, agent.thought, tool.started, tool.output, tool.completed; bridge v9+) under the same cursor; `reconnect` ({cursor, reason}) closes a rotated stream; `unavailable` ({code, message}) closes when the sandbox cannot be followed; `error` ({code, message}) closes on lost access. Streams rotate within four minutes; reconnect with Last-Event-ID to continue without gaps or repeats. Requires agent_session.read. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -6482,6 +6499,160 @@ export interface operations {
                 };
             };
             /** @description Event streaming is not enabled on this API. */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getAgentTranscript: {
+        parameters: {
+            query?: {
+                after?: number | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The conversation in order, read in the guest: user.message (origin caller or terminal), agent.message, agent.thought, tool.started, tool.completed (kind command | file_change | mcp | web_search | tool; status completed | failed | declined; bounded output tail and diff), plus turn and approval markers. Streaming deltas are folded into their final item; `partial` holds text still streaming when the page reaches the end of the log. Follow getAgentSessionEvents from nextCursor afterwards. Requires bridge v9 (409 session_transcript_upgrade_required otherwise) and agent_session.read. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        items: ({
+                            seq: number;
+                            at: string;
+                            type: string;
+                            turnId: string | null;
+                        } & {
+                            [key: string]: unknown;
+                        })[];
+                        partial: ({
+                            seq: number;
+                            type: string;
+                            itemId: string;
+                            text: string;
+                        } & {
+                            [key: string]: unknown;
+                        })[];
+                        nextCursor: number;
+                        hasMore: boolean;
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description Transcripts are not enabled on this API. */
             501: {
                 headers: {
                     [name: string]: unknown;
