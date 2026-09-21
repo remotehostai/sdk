@@ -1,5 +1,17 @@
 # @remotehost/sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- 91b9f42: Expose agent-independent communication capabilities and setup/restart requirements
+  on agent sessions. Session agent IDs are extensible strings; supported operations
+  are reported separately from caller permissions.
+- ba2f505: Add typed agent-session discovery, creation, output, messaging, approvals,
+  interruption and Codex recovery endpoints, plus personal agent-token management
+  for access across authorized projects and organizations.
+- 177ef49: Add optional agent-message request keys and replay responses so clients can retry lost responses without creating another turn.
+
 ## 0.2.0
 
 ### Minor Changes
