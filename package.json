@@ -35,7 +35,7 @@
     "lint": "npm run typecheck",
     "prepack": "node scripts/sync-version.mjs --check && npm run build",
     "prepublishOnly": "npm test",
-    "test": "tsx --test \"tests/*.test.ts\"",
+    "test": "node scripts/test.mjs",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json"
   },
   "engines": {
