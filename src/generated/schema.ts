@@ -545,6 +545,153 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/agent-sessions/{sessionId}/recover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Resume a stopped managed bridge in the same running sandbox using its saved vendor conversation. Idempotent when already ready. Interrupted work and pending approvals are not replayed. Requires agent_session.send; cannot recover destroyed sandbox storage. */
+        post: operations["recoverAgentSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agent-sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Discover registered sessions across accessible projects. API keys retain their organization and permission limits. Native terminal sessions are not automatically registered. State is last known; read a session to refresh it. Pages are ordered by stable session ID, not activity. */
+        get: operations["discoverAgentSessions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sandboxes/{sandboxId}/agent-sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Start a separate managed conversation using this running sandbox's configured agent. Does not attach to its native terminal conversation. Requires agent_session.send. */
+        post: operations["createAgentSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/agent-sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listAgentSessions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agent-sessions/{sessionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getAgentSession"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agent-sessions/{sessionId}/output": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getAgentOutput"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agent-sessions/{sessionId}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["sendAgentMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agent-sessions/{sessionId}/answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["answerAgentPrompt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agent-sessions/{sessionId}/interrupt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["interruptAgentTurn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -876,6 +1023,35 @@ export interface components {
             revoked_at: string | null;
             expires_at: string | null;
             scopes: string[] | null;
+        };
+        AgentSessionState: {
+            id: string;
+            sessionId: string;
+            projectId: string;
+            sandboxId: string | null;
+            /** @enum {string} */
+            agent: "claude" | "codex";
+            /** @enum {string} */
+            status: "active" | "closed";
+            turnId: string | null;
+            /** @enum {string|null} */
+            turnState: "submitted" | "working" | "input-required" | "completed" | "failed" | "canceled" | null;
+            needsYou: boolean;
+            waitingOn: string | null;
+            pendingInput: {
+                requestId: string | number;
+                kind: string;
+                summary: string;
+            } | null;
+            error: string | null;
+            /** @enum {string|null} */
+            bridgeState: "starting" | "ready" | "closed" | null;
+            drifted: boolean;
+            problems: {
+                seq: number;
+                event: string;
+                reason: string;
+            }[];
         };
     };
     responses: never;
@@ -4850,6 +5026,1036 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    recoverAgentSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bridge ready with its saved conversation. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentSessionState"];
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    discoverAgentSessions: {
+        parameters: {
+            query?: {
+                orgId?: string;
+                projectId?: string;
+                sandboxId?: string;
+                after?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Permission-filtered page. Follow nextCursor with after while hasMore is true. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        sessions: {
+                            id: string;
+                            org_id: string;
+                            project_id: string;
+                            sandbox_id: string | null;
+                            /** @enum {string} */
+                            agent: "claude" | "codex";
+                            /** @enum {string} */
+                            status: "active" | "closed";
+                            last_activity_at: string;
+                            sandbox_status: string | null;
+                            turn_id: string | null;
+                            /** @enum {string|null} */
+                            turn_state: "submitted" | "working" | "input-required" | "completed" | "failed" | "canceled" | null;
+                            needs_you: boolean;
+                            permissions: ("agent_session.read" | "agent_session.send" | "agent_session.approve")[];
+                        }[];
+                        nextCursor: string | null;
+                        hasMore: boolean;
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    createAgentSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sandboxId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bridge ready. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentSessionState"];
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listAgentSessions: {
+        parameters: {
+            query: {
+                orgId: string;
+            };
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Most recent session index records. Read a session for reconciled turn state. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        sessions: ({
+                            id: string;
+                            org_id: string;
+                            project_id: string;
+                            sandbox_id: string | null;
+                            /** @enum {string} */
+                            agent: "claude" | "codex";
+                            /** @enum {string} */
+                            status: "active" | "closed";
+                            vendor_session_id: string | null;
+                            last_activity_at: string;
+                        } & {
+                            [key: string]: unknown;
+                        })[];
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getAgentSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reconciled state, including the most recent completed turn or pending approval. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentSessionState"];
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getAgentOutput: {
+        parameters: {
+            query?: {
+                after?: number | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Replies read in the guest; each reader keeps its own nextCursor. Unavailable while asleep. Pages contain at most 128 Ki UTF-16 code units of text; a larger individual reply is explicitly marked truncated. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        messages: {
+                            seq: number;
+                            turnId: string | null;
+                            at: string;
+                            text: string;
+                            truncated: boolean;
+                        }[];
+                        nextCursor: number;
+                        hasMore: boolean;
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    sendAgentMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    text: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Turn reserved and command enqueued. Poll getAgentSession and read replies with getAgentOutput. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        turnId: string;
+                        /** @enum {string} */
+                        state: "submitted";
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    answerAgentPrompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    requestId: string | number;
+                    /** @enum {string} */
+                    decision: "accept" | "decline" | "cancel";
+                };
+            };
+        };
+        responses: {
+            /** @description Decision enqueued for this exact prompt. Requires agent_session.approve. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        accepted: boolean;
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    interruptAgentTurn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Interrupt requested. Requires agent_session.send. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        accepted: boolean;
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
                         };
                     };
                 };
