@@ -1,5 +1,12 @@
 # @remotehost/sdk
 
+## 0.1.1
+
+### Patch Changes
+
+- a88e5d9: License the SDK under MIT and publish its implementation, tests, and standalone
+  build configuration at https://github.com/remotehostai/sdk.
+
 ## 0.1.0
 
 ### Minor Changes
