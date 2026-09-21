@@ -545,7 +545,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/agent-sessions/{sessionId}/recover": {
+    "/me/agent-tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listAgentAccessTokens"];
+        put?: never;
+        /** @description User sign-in required. Explicit delegation across accessible organizations; does not alter organization API keys. sandbox.create permits waking existing sandboxes only. Token returned once. */
+        post: operations["createAgentAccessToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/agent-tokens/{tokenId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -554,9 +571,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Resume a stopped managed bridge in the same running sandbox using its saved vendor conversation. Idempotent when already ready. Interrupted work and pending approvals are not replayed. Requires agent_session.send; cannot recover destroyed sandbox storage. */
-        post: operations["recoverAgentSession"];
-        delete?: never;
+        post?: never;
+        delete: operations["revokeAgentAccessToken"];
         options?: never;
         head?: never;
         patch?: never;
@@ -569,7 +585,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Discover registered sessions across accessible projects. API keys retain their organization and permission limits. Native terminal sessions are not automatically registered. State is last known; read a session to refresh it. Pages are ordered by stable session ID, not activity. */
+        /** @description Discover registered sessions across accessible projects. Organization API keys retain their org limit; personal agent tokens span accessible orgs. New Codex terminals are registered; existing standalone and native Claude sessions are not attached. State is last known; read a session to refresh it. Pages are ordered by stable session ID, not activity. */
         get: operations["discoverAgentSessions"];
         put?: never;
         post?: never;
@@ -686,6 +702,23 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["interruptAgentTurn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agent-sessions/{sessionId}/recover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Resume a saved managed Claude or Codex conversation, or a registered native Codex session. Requires agent_session.send and the original running sandbox with saved history. Already-ready sessions are unchanged; known live previous processes prevent restart. Queued work is never replayed; interrupted turns have uncertain prior effects. Native Claude attachment is not supported. */
+        post: operations["recoverAgentSession"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1032,6 +1065,8 @@ export interface components {
             /** @enum {string} */
             agent: "claude" | "codex";
             /** @enum {string} */
+            surface: "terminal" | "managed";
+            /** @enum {string} */
             status: "active" | "closed";
             turnId: string | null;
             /** @enum {string|null} */
@@ -1046,6 +1081,7 @@ export interface components {
             error: string | null;
             /** @enum {string|null} */
             bridgeState: "starting" | "ready" | "closed" | null;
+            bridgeEventSeq: number | null;
             drifted: boolean;
             problems: {
                 seq: number;
@@ -5032,24 +5068,265 @@ export interface operations {
             };
         };
     };
-    recoverAgentSession: {
+    listAgentAccessTokens: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                sessionId: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Bridge ready with its saved conversation. */
+            /** @description The signed-in user's tokens. No token hashes or secrets. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AgentSessionState"];
+                    "application/json": {
+                        tokens: {
+                            /** Format: uuid */
+                            id: string;
+                            name: string;
+                            token_prefix: string;
+                            scopes: ("agent_session.read" | "agent_session.send" | "agent_session.approve" | "sandbox.create")[];
+                            created_at: string;
+                            expires_at: string;
+                            revoked_at: string | null;
+                        }[];
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    createAgentAccessToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                    scopes: ("agent_session.read" | "agent_session.send" | "agent_session.approve" | "sandbox.create")[];
+                    expiresInDays?: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Personal token created. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        agentToken: {
+                            /** Format: uuid */
+                            id: string;
+                            name: string;
+                            token_prefix: string;
+                            scopes: ("agent_session.read" | "agent_session.send" | "agent_session.approve" | "sandbox.create")[];
+                            created_at: string;
+                            expires_at: string;
+                            revoked_at: string | null;
+                        };
+                        token: string;
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    revokeAgentAccessToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tokenId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revoked. User sign-in required. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        revoked: boolean;
+                    };
                 };
             };
             /** @description The operation could not be completed; inspect error.message and error.code. */
@@ -5170,6 +5447,8 @@ export interface operations {
                             /** @enum {string} */
                             status: "active" | "closed";
                             last_activity_at: string;
+                            /** @enum {string} */
+                            surface: "terminal" | "managed";
                             sandbox_status: string | null;
                             turn_id: string | null;
                             /** @enum {string|null} */
@@ -5974,6 +6253,112 @@ export interface operations {
                     "application/json": {
                         accepted: boolean;
                     };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    recoverAgentSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Saved conversation resumed. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentSessionState"];
                 };
             };
             /** @description The operation could not be completed; inspect error.message and error.code. */
