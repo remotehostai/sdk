@@ -5126,6 +5126,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5141,6 +5142,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5156,6 +5158,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5171,6 +5174,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5186,6 +5190,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5201,6 +5206,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5256,6 +5262,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5271,6 +5278,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5286,6 +5294,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5301,6 +5310,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5316,6 +5326,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5331,6 +5342,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5370,6 +5382,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5385,6 +5398,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5400,6 +5414,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5415,6 +5430,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5430,6 +5446,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5445,6 +5462,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5508,6 +5526,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5523,6 +5542,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5538,6 +5558,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5553,6 +5574,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5568,6 +5590,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5583,6 +5606,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5620,6 +5644,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5635,6 +5660,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5650,6 +5676,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5665,6 +5692,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5680,6 +5708,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5695,6 +5724,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5749,6 +5779,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5764,6 +5795,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5779,6 +5811,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5794,6 +5827,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5809,6 +5843,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5824,6 +5859,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5861,6 +5897,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5876,6 +5913,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5891,6 +5929,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5906,6 +5945,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5921,6 +5961,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5936,6 +5977,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -5986,6 +6028,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6001,6 +6044,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6016,6 +6060,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6031,6 +6076,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6046,6 +6092,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6061,6 +6108,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6081,6 +6129,8 @@ export interface operations {
             content: {
                 "application/json": {
                     text: string;
+                    /** @description Reuse the same key and text to retry without creating another turn. */
+                    requestKey?: string;
                 };
             };
         };
@@ -6094,7 +6144,8 @@ export interface operations {
                     "application/json": {
                         turnId: string;
                         /** @enum {string} */
-                        state: "submitted";
+                        state: "submitted" | "working" | "input-required" | "completed" | "failed" | "canceled";
+                        replayed?: boolean;
                     };
                 };
             };
@@ -6108,6 +6159,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6123,6 +6175,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6138,6 +6191,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6153,6 +6207,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6168,6 +6223,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6183,6 +6239,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6230,6 +6287,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6245,6 +6303,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6260,6 +6319,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6275,6 +6335,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6290,6 +6351,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6305,6 +6367,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6344,6 +6407,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6359,6 +6423,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6374,6 +6439,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6389,6 +6455,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6404,6 +6471,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6419,6 +6487,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6456,6 +6525,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6471,6 +6541,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6486,6 +6557,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6501,6 +6573,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6516,6 +6589,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
@@ -6531,6 +6605,7 @@ export interface operations {
                         error: {
                             message: string;
                             code?: string;
+                            turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
                         };
                     };
