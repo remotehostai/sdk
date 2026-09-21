@@ -424,6 +424,127 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/sandboxes/{sandboxId}/files/snapshot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read a directory tree
+         * @description Returns directory entries grouped by parent path. This is a filesystem listing, not a persistent sandbox backup. Requires a running Firecracker sandbox and sandbox.files.read.
+         */
+        get: operations["snapshotSandboxFiles"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the authenticated caller's identity */
+        get: operations["getCurrentUser"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read machine-hour usage for the current billing period
+         * @description Requires billing.read. Optional filters attribute usage to a project or your own end user.
+         */
+        get: operations["getOrgUsage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/usage/end-users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read usage grouped by your end users
+         * @description Requires billing.read. Unattributed usage is excluded. Results are ordered by machine hours descending.
+         */
+        get: operations["getOrgUsageByEndUser"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/api-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List API key metadata
+         * @description Requires a user session with api_keys.manage. API keys cannot call this operation. Secret tokens are never returned.
+         */
+        get: operations["listApiKeys"];
+        put?: never;
+        /**
+         * Mint an organization-bound API key
+         * @description Requires a user session with api_keys.manage. API keys cannot mint keys. Scopes narrow the creator's permissions; omitted or null means unscoped, while [] grants no permissions. Store the returned token securely: it is shown only once.
+         */
+        post: operations["createApiKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/api-keys/{keyId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoke an API key
+         * @description Requires a user session with api_keys.manage. API keys cannot call this operation.
+         */
+        delete: operations["revokeApiKey"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -721,6 +842,40 @@ export interface components {
                 someAvg60: number;
             } | null;
             memoryWarning: components["schemas"]["MemoryPressureWarning"];
+        };
+        Usage: {
+            /** @enum {string} */
+            plan: "individual" | "pro" | "max" | "team" | "enterprise";
+            projectId: string | null;
+            endUserId: string | null;
+            periodStartsAt: string;
+            periodEndsAt: string | null;
+            includedMachineHours: number | null;
+            sandboxMachineHourLimit: number | null;
+            sandboxMachineHourLimitOverride: number | null;
+            projectSandboxMachineHourLimit: number | null;
+            sandboxOverageEnabled: boolean;
+            usedMachineHours: number;
+            remainingMachineHours: number | null;
+            overageMachineHours: number;
+            overageCostUsd: number | null;
+            usageAlert: {
+                percentUsed: number | null;
+                /** @enum {string} */
+                status: "uncapped" | "normal" | "approaching" | "critical" | "exhausted";
+                message: string;
+            };
+        };
+        ApiKey: {
+            id: string;
+            org_id: string;
+            name: string;
+            key_prefix: string;
+            last_used_at: string | null;
+            created_at: string;
+            revoked_at: string | null;
+            expires_at: string | null;
+            scopes: string[] | null;
         };
     };
     responses: never;
@@ -4208,6 +4363,493 @@ export interface operations {
                             planMaximum?: number | null;
                             profile?: string;
                             minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    snapshotSandboxFiles: {
+        parameters: {
+            query?: {
+                path?: string;
+                depth?: number;
+            };
+            header?: never;
+            path: {
+                sandboxId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Directory tree. Large trees may be truncated. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        path: string;
+                        truncated: boolean;
+                        directories: {
+                            [key: string]: components["schemas"]["FilesystemEntry"][];
+                        };
+                    };
+                };
+            };
+            /** @description Invalid path, provider, or sandbox state. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Permission sandbox.files.read is required. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Sandbox not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Filesystem operation failed. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getCurrentUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description For an API key, the identity of its creator. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        email: string | null;
+                        displayName: string | null;
+                    };
+                };
+            };
+        };
+    };
+    getOrgUsage: {
+        parameters: {
+            query?: {
+                projectId?: string;
+                endUserId?: string;
+            };
+            header?: never;
+            path: {
+                orgId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Usage, caps, overage and alert state. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Usage"];
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getOrgUsageByEndUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current billing period and attributed usage. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        periodStartsAt: string;
+                        periodEndsAt: string | null;
+                        endUsers: {
+                            endUserId: string;
+                            machineHours: number;
+                            estimatedCogsUsd: number;
+                        }[];
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listApiKeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Keys, including expired and revoked keys, newest first. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        apiKeys: components["schemas"]["ApiKey"][];
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    createApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                    expiresInDays?: number | null;
+                    scopes?: string[] | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Created key and its one-time secret token. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        apiKey: components["schemas"]["ApiKey"];
+                        token: string;
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    revokeApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                keyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Key revoked. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        ok: boolean;
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
                         };
                     };
                 };
