@@ -677,6 +677,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/agent-sessions/{sessionId}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["streamAgentSessionEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agent-sessions/{sessionId}/wait": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["waitForAgentSession"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/agent-sessions/{sessionId}/messages": {
         parameters: {
             query?: never;
@@ -6237,6 +6269,321 @@ export interface operations {
                             code?: string;
                             turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+        };
+    };
+    streamAgentSessionEvents: {
+        parameters: {
+            query?: {
+                /** @description Output cursor to resume from when no Last-Event-ID header is sent. */
+                after?: number | null;
+            };
+            header?: {
+                /** @description The id of the last output event received; takes precedence over after. */
+                "last-event-id"?: string;
+            };
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Server-sent events. `ready` ({cursor}) opens the stream; `state` carries the same body as getAgentSession whenever it changes (always once on connect); `output` carries one reply and its id is the output cursor; `reconnect` ({cursor, reason}) closes a rotated stream; `unavailable` ({code, message}) closes when the sandbox cannot be followed; `error` ({code, message}) closes on lost access. Streams rotate within four minutes; reconnect with Last-Event-ID to continue without gaps or repeats. Requires agent_session.read. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": string;
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description Too many event streams are open for this credential. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description Event streaming is not enabled on this API. */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+        };
+    };
+    waitForAgentSession: {
+        parameters: {
+            query?: {
+                after?: number | null;
+                timeoutMs?: number;
+            };
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Long-poll for clients that cannot hold an event stream. Returns as soon as a reply, turn transition or approval request lands after `after`, or with changed: false at the timeout (default 25 s). `output` follows the same cursor and page bounds as getAgentOutput. Requires agent_session.read. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        changed: boolean;
+                        session: components["schemas"]["AgentSessionState"];
+                        output: {
+                            messages: {
+                                seq: number;
+                                turnId: string | null;
+                                at: string;
+                                text: string;
+                                truncated: boolean;
+                            }[];
+                            nextCursor: number;
+                            hasMore: boolean;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description Too many waits or event streams are open for this credential. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            code?: string;
+                            turnId?: string;
+                            communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description Waiting is not enabled on this API. */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
                         };
                     };
                 };
