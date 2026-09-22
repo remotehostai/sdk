@@ -1,5 +1,11 @@
 # @remotehost/sdk
 
+## 0.5.0
+
+### Minor Changes
+
+- 119ba8d: A sandbox whose machine was lost before it could be snapshotted now says so instead of waking into older state silently. `Sandbox` carries `vm_lost_at`, and `wake()` takes `acknowledgeLostState` to restore the surviving older snapshot anyway; without it such a wake is refused with `409 vm_lost`, naming both the date the machine was lost and the date of the snapshot it would restore.
+
 ## 0.4.0
 
 ### Minor Changes
