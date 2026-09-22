@@ -1,5 +1,17 @@
 # @remotehost/sdk
 
+## 0.4.0
+
+### Minor Changes
+
+- ab4f66b: Add the agent-session conversation transcript (`getAgentTranscript`): user messages, replies, tool calls with status, output and diffs, reasoning summaries, and turn and approval markers. The event stream now also carries `conversation` events and reply `itemId`s.
+- 4350f94: Add agent-session event streaming types: `streamAgentSessionEvents` (server-sent events with resumable output cursors) and `waitForAgentSession` (long-poll that returns when a reply, turn transition or approval request arrives).
+- 7e65ee8: Add managed agent-session release types and terminal resume instructions for Claude Code and Codex. Session state now includes released and releasing flags.
+
+### Patch Changes
+
+- e06d6a9: Document every generated API operation: each now carries a summary, and the sandbox lifecycle, command and file operations describe their behavior. Types are unchanged.
+
 ## 0.3.0
 
 ### Minor Changes
