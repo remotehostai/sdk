@@ -205,11 +205,24 @@ export class Sandbox {
     return this.update(data.sandbox);
   }
 
-  /** Wake a sleeping persistent sandbox. */
-  async wake(options: RequestOptions = {}): Promise<this> {
+  /**
+   * Wake a sleeping persistent sandbox.
+   *
+   * A sandbox whose machine was lost before it could be snapshotted refuses
+   * to wake with 409 `vm_lost`, because the snapshot it would restore is
+   * older than the work that was in it. `acknowledgeLostState` wakes it from
+   * that older snapshot anyway. `vm_lost_at` on the sandbox says whether
+   * this applies, and the error names both dates.
+   */
+  async wake(
+    options: RequestOptions & { acknowledgeLostState?: boolean } = {},
+  ): Promise<this> {
     const data = await unwrap(
       this.api.POST("/sandboxes/{sandboxId}/wake", {
-        params: { path: { sandboxId: this.id } },
+        params: {
+          path: { sandboxId: this.id },
+          query: options.acknowledgeLostState ? { acknowledgeLostState: "true" as const } : {},
+        },
         signal: requestSignal(options),
       }),
     );

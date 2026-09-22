@@ -1007,6 +1007,7 @@ export interface components {
             allocated_memory_gb: number;
             allocated_disk_gb: number;
             end_user_id: string | null;
+            vm_lost_at: string | null;
             created_at: string;
             updated_at: string;
         };
@@ -3122,7 +3123,9 @@ export interface operations {
     };
     wakeSandbox: {
         parameters: {
-            query?: never;
+            query?: {
+                acknowledgeLostState?: "true" | "false";
+            };
             header?: never;
             path: {
                 sandboxId: string;
@@ -3321,7 +3324,9 @@ export interface operations {
     };
     resumeSandbox: {
         parameters: {
-            query?: never;
+            query?: {
+                acknowledgeLostState?: "true" | "false";
+            };
             header?: never;
             path: {
                 sandboxId: string;
