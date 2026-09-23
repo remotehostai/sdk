@@ -908,7 +908,7 @@ export interface paths {
         head?: never;
         /**
          * Update an environment
-         * @description Fields left out are unchanged; null clears a nullable one. Moving to the none or full egress policy clears the allowlist. Changing egressPolicy or egressAllowlist requires environments.egress.manage; changing any other field requires environments.manage; a request that does both requires both.
+         * @description Fields left out are unchanged; null clears a nullable one. Moving to the none or full egress policy clears the allowlist. Changing egressPolicy or egressAllowlist requires environments.egress.manage; changing any other field requires environments.manage; a request that does both requires both. A change to egressPolicy or egressAllowlist, or to whether the project is enforced, is pushed to the running sandboxes it affects as it is saved; one the push cannot reach is stopped so it cannot keep the old rules, and the response's egressPropagation says which.
          */
         patch: operations["updateEnvironment"];
         trace?: never;
@@ -7652,6 +7652,32 @@ export interface operations {
                         error: {
                             message: string;
                         };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
@@ -7664,6 +7690,32 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
                         };
                     };
                 };
@@ -7678,6 +7730,32 @@ export interface operations {
                         error: {
                             message: string;
                         };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
@@ -7691,6 +7769,32 @@ export interface operations {
                         error: {
                             message: string;
                         };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
@@ -7703,6 +7807,32 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
                         };
                     };
                 };
@@ -7764,6 +7894,32 @@ export interface operations {
                 content: {
                     "application/json": {
                         environment: components["schemas"]["Environment"];
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
@@ -7776,6 +7932,32 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
                         };
                     };
                 };
@@ -7790,6 +7972,32 @@ export interface operations {
                         error: {
                             message: string;
                         };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
@@ -7802,6 +8010,32 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
                         };
                     };
                 };
@@ -7816,6 +8050,32 @@ export interface operations {
                         error: {
                             message: string;
                         };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
@@ -7828,6 +8088,32 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
                         };
                     };
                 };
@@ -7868,6 +8154,32 @@ export interface operations {
                         error: {
                             message: string;
                         };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
@@ -7880,6 +8192,32 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
                         };
                     };
                 };
@@ -7894,6 +8232,32 @@ export interface operations {
                         error: {
                             message: string;
                         };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
@@ -7907,6 +8271,32 @@ export interface operations {
                         error: {
                             message: string;
                         };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
@@ -7919,6 +8309,32 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
                         };
                     };
                 };
@@ -7946,6 +8362,32 @@ export interface operations {
                 content: {
                     "application/json": {
                         deleted: boolean;
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
@@ -7958,6 +8400,32 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
                         };
                     };
                 };
@@ -7972,6 +8440,32 @@ export interface operations {
                         error: {
                             message: string;
                         };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
@@ -7984,6 +8478,32 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
                         };
                     };
                 };
@@ -7998,6 +8518,32 @@ export interface operations {
                         error: {
                             message: string;
                         };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
@@ -8010,6 +8556,32 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
                         };
                     };
                 };
@@ -8072,6 +8644,32 @@ export interface operations {
                 content: {
                     "application/json": {
                         environment: components["schemas"]["Environment"];
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
@@ -8084,6 +8682,32 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
                         };
                     };
                 };
@@ -8098,6 +8722,32 @@ export interface operations {
                         error: {
                             message: string;
                         };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
@@ -8110,6 +8760,32 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
                         };
                     };
                 };
@@ -8124,6 +8800,32 @@ export interface operations {
                         error: {
                             message: string;
                         };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
@@ -8136,6 +8838,32 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
                         };
                     };
                 };
