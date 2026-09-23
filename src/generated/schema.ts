@@ -908,7 +908,7 @@ export interface paths {
         head?: never;
         /**
          * Update an environment
-         * @description Fields left out are unchanged; null clears a nullable one. Moving to the none or full egress policy clears the allowlist. Requires environments.manage.
+         * @description Fields left out are unchanged; null clears a nullable one. Moving to the none or full egress policy clears the allowlist. Changing egressPolicy or egressAllowlist requires environments.egress.manage; changing any other field requires environments.manage; a request that does both requires both.
          */
         patch: operations["updateEnvironment"];
         trace?: never;
