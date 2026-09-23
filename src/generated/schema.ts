@@ -1022,6 +1022,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orgs/{orgId}/projects/{projectId}/workspaces/{workspaceId}/fork": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fork a workspace from a durable checkpoint
+         * @description Creates a new workspace in the same project that starts as a copy of this one at a durable checkpoint: its disk and memory, uncommitted work included. checkpointId defaults to the workspace's head. The fork starts asleep with one stopped execution; the first attach wakes it. It gets its own git branch, remotehost/<name>; nothing is pushed. Needs sandbox.create and sandbox.destroy on the project, and only the workspace's owner may fork it (403 workspace_owner_only). A checkpoint that is not durable yet is refused with 409 checkpoint_not_durable, one of another workspace with 404 checkpoint_not_found, a checkpoint whose saved state is no longer in storage with 409 checkpoint_unavailable, a workspace that is not active or sleeping with 409 workspace_unavailable, and a workspace with no checkpoint at all with 409 nothing_to_fork. The fork keeps the source's lifetimePolicy and has no expiresAt. Off unless the server enables it; while off the route answers 404.
+         */
+        post: operations["forkWorkspace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -9038,7 +9058,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9063,7 +9084,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9129,7 +9151,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9154,7 +9177,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9179,7 +9203,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9204,7 +9229,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9255,7 +9281,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9280,7 +9307,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9339,7 +9367,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9364,7 +9393,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9431,7 +9461,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9456,7 +9487,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9481,7 +9513,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9506,7 +9539,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9591,7 +9625,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9616,7 +9651,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9641,7 +9677,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9666,7 +9703,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9691,7 +9729,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9716,7 +9755,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9741,7 +9781,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9795,7 +9836,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9820,7 +9862,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
@@ -9845,7 +9888,156 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
+                        };
+                    };
+                };
+            };
+        };
+    };
+    forkWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description The fork's name: 1-63 lowercase letters, digits, '.', '_' or '-'. Unique in the project. */
+                    name: string;
+                    /**
+                     * Format: uuid
+                     * @description A durable checkpoint of this workspace. Defaults to its head.
+                     */
+                    checkpointId?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The new workspace, asleep. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        workspace: components["schemas"]["Workspace"];
+                        forkedFrom: {
+                            /** Format: uuid */
+                            workspaceId: string;
+                            /** Format: uuid */
+                            checkpointId: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
                             /** @enum {string} */
