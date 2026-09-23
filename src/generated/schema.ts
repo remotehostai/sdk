@@ -561,9 +561,29 @@ export interface paths {
         put?: never;
         /**
          * Mint an organization-bound API key
-         * @description Requires a user session with api_keys.manage. API keys cannot mint keys. Scopes narrow the creator's permissions; omitted or null means unscoped, while [] grants no permissions. Store the returned token securely: it is shown only once.
+         * @description Requires a user session with api_keys.manage. API keys cannot mint keys. Both choices are required: what the key may do (`scopes`, a `template`, or `unscoped: true`) and when it stops (`expiresInDays` or `neverExpires: true`); a request missing either is refused with 400. Scopes narrow the creator's permissions, and [] grants none. Store the returned token securely: it is shown only once.
          */
         post: operations["createApiKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/api-keys/{keyId}/rotate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rotate an API key
+         * @description Mints a successor with the same name, scopes and lifetime, and ends the old key after `overlapHours` (default 24, at most 168; 0 ends it now). The old key's new expiry is stored on it and returned. Only the key's creator may rotate it; API keys cannot call this operation.
+         */
+        post: operations["rotateApiKey"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1336,6 +1356,7 @@ export interface components {
             revoked_at: string | null;
             expires_at: string | null;
             scopes: string[] | null;
+            created_by: string | null;
         };
         AgentSessionCommunication: {
             /** @enum {string} */
@@ -5377,9 +5398,20 @@ export interface operations {
             content: {
                 "application/json": {
                     name: string;
-                    expiresInDays?: number | null;
-                    scopes?: string[] | null;
-                };
+                } & ({
+                    scopes: string[];
+                } | {
+                    /** @enum {string} */
+                    template: "ci" | "read-only" | "platform" | "agent-watcher" | "claims";
+                } | {
+                    /** @enum {boolean} */
+                    unscoped: true;
+                }) & ({
+                    expiresInDays: number;
+                } | {
+                    /** @enum {boolean} */
+                    neverExpires: true;
+                });
             };
         };
         responses: {
@@ -5410,6 +5442,94 @@ export interface operations {
             };
             /** @description The request failed. Inspect error.message. */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    rotateApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                keyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    overlapHours?: number;
+                };
+            };
+        };
+        responses: {
+            /** @description The successor, its one-time token, and when the old key stops. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        apiKey: components["schemas"]["ApiKey"];
+                        token: string;
+                        previous: {
+                            id: string;
+                            expiresAt: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
