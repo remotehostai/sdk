@@ -1452,6 +1452,11 @@ export interface components {
             /** @description The remotehost/<name> branch this workspace pushes to. Fixed at creation; a rename does not move it. */
             gitBranch: string | null;
             cpuBaseline: string | null;
+            /**
+             * Format: uuid
+             * @description The workspace's head: its newest durable checkpoint. What a takeover restores.
+             */
+            currentCheckpointId: string | null;
             /** @enum {string} */
             status: "active" | "sleeping" | "moving" | "archived" | "deleted";
             lease: components["schemas"]["WorkspaceLease"];
@@ -1478,6 +1483,8 @@ export interface components {
             supersededSandboxId: string;
             /** @enum {string} */
             supersededHolderHealth: "gone" | "unreachable";
+            /** @enum {string} */
+            restoredFrom: "checkpoint" | "snapshot" | "none";
             restoredSnapshotAt: string | null;
             restoredSnapshotDurable: boolean | null;
             message: string;
