@@ -1169,7 +1169,7 @@ export interface components {
                 [key: string]: unknown;
             };
             templateId?: string;
-            /** @description An environment of this project to boot from. It supplies the template and machine size unless the request names them, and always its egress policy, environment variables and setup script; the egress policy is re-applied on every wake. Refused if the policy cannot reach one of the project's repositories (SSH deploy keys need the full policy). Optional: a sandbox created without one has unrestricted network access, whatever environments the project has. */
+            /** @description An environment of this project to boot from. It supplies the template and machine size unless the request names them, and always its egress policy, environment variables and setup script; the egress policy is re-applied on every wake. Refused if the policy cannot reach one of the project's repositories (SSH deploy keys need the full policy). Optional: a sandbox created without one has unrestricted network access, unless the project's default environment is enforced: then every sandbox boots from that default, whatever the caller's role, and naming another environment, or a templateId other than its own, is refused (403 `environment_enforced`). */
             environmentId?: string;
         };
         ResizeSandboxBody: {
@@ -1403,6 +1403,8 @@ export interface components {
             name: string;
             description: string | null;
             isDefault: boolean;
+            /** @description Whether, as the project's default, this environment is what every sandbox and workspace execution in the project boots from, whatever the caller's role: another environment or template is refused. Has no effect on an environment that is not the default. */
+            enforced: boolean;
             /** @description Null boots the platform's standard image. */
             template: {
                 /** Format: uuid */
@@ -7724,6 +7726,8 @@ export interface operations {
                     description?: string | null;
                     /** @description Make this the project's default environment. At most one per project. */
                     isDefault?: boolean;
+                    /** @description While this is the project's default, every sandbox and workspace execution in the project boots from it, including plain creates that name no environment and existing ones at their next wake: its egress policy, environment variables and setup script apply to all of them, and nobody can choose another environment or template for a new one. A sandbox that already exists keeps its own disk, and so its image. A PATCH that changes only egress posture -- this flag, egressPolicy, egressAllowlist -- needs environments.egress.manage, and a change that mixes posture with anything else needs both. Which environment is the default is authoring (environments.manage), and a default move, unset or delete that starts or ends enforcement -- including making a still-flagged environment the default again -- also needs environments.egress.manage; each is recorded on the audit log. */
+                    enforced?: boolean;
                     /** @description A template id or name, the org's own first, then the platform's. Null for the standard image. */
                     templateId?: string | null;
                     /** @enum {string|null} */
@@ -8030,6 +8034,8 @@ export interface operations {
                     description?: string | null;
                     /** @description Make this the project's default environment. At most one per project. */
                     isDefault?: boolean;
+                    /** @description While this is the project's default, every sandbox and workspace execution in the project boots from it, including plain creates that name no environment and existing ones at their next wake: its egress policy, environment variables and setup script apply to all of them, and nobody can choose another environment or template for a new one. A sandbox that already exists keeps its own disk, and so its image. A PATCH that changes only egress posture -- this flag, egressPolicy, egressAllowlist -- needs environments.egress.manage, and a change that mixes posture with anything else needs both. Which environment is the default is authoring (environments.manage), and a default move, unset or delete that starts or ends enforcement -- including making a still-flagged environment the default again -- also needs environments.egress.manage; each is recorded on the audit log. */
+                    enforced?: boolean;
                     /** @description A template id or name, the org's own first, then the platform's. Null for the standard image. */
                     templateId?: string | null;
                     /** @enum {string|null} */
@@ -8223,7 +8229,10 @@ export interface operations {
                     /** @description 1-63 lowercase letters, digits, '.', '_' or '-', starting with a letter or digit. Unique in the project. */
                     name: string;
                     title?: string | null;
-                    /** Format: uuid */
+                    /**
+                     * Format: uuid
+                     * @description The environment the workspace's executions boot from; null follows the project's default. When the project enforces its default environment, every execution boots from that default whatever this says, and naming or moving to another environment, or to null, is refused for every role (403 `environment_enforced`).
+                     */
                     environmentId?: string | null;
                     /** @enum {string} */
                     lifetimePolicy?: "ephemeral" | "session" | "persistent" | "archived";
@@ -8498,7 +8507,10 @@ export interface operations {
                     /** @description 1-63 lowercase letters, digits, '.', '_' or '-', starting with a letter or digit. Unique in the project. */
                     name?: string;
                     title?: string | null;
-                    /** Format: uuid */
+                    /**
+                     * Format: uuid
+                     * @description The environment the workspace's executions boot from; null follows the project's default. When the project enforces its default environment, every execution boots from that default whatever this says, and naming or moving to another environment, or to null, is refused for every role (403 `environment_enforced`).
+                     */
                     environmentId?: string | null;
                     /** @enum {string} */
                     lifetimePolicy?: "ephemeral" | "session" | "persistent" | "archived";
