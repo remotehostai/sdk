@@ -901,7 +901,7 @@ export interface paths {
         post?: never;
         /**
          * Delete an environment
-         * @description Refused with 409 while any workspace uses it. Requires environments.manage.
+         * @description Refused with 409 while any workspace or undeleted sandbox uses it. Requires environments.manage.
          */
         delete: operations["deleteEnvironment"];
         options?: never;
@@ -1080,6 +1080,8 @@ export interface components {
                 [key: string]: unknown;
             };
             templateId?: string;
+            /** @description An environment of this project to boot from. It supplies the template and machine size unless the request names them, and always its egress policy, environment variables and setup script; the egress policy is re-applied on every wake. Refused if the policy cannot reach one of the project's repositories (SSH deploy keys need the full policy). Optional: a sandbox created without one has unrestricted network access, whatever environments the project has. */
+            environmentId?: string;
         };
         ResizeSandboxBody: {
             vcpu?: number;
@@ -1317,7 +1319,9 @@ export interface components {
             /** @enum {string|null} */
             machineSize: "small" | "default" | "large" | "xlarge" | null;
             setupScript: string | null;
+            /** @description Recorded; not yet started at boot. */
             services: components["schemas"]["EnvironmentService"][];
+            /** @description Recorded; not yet exposed at boot. */
             ports: number[];
             /** @description Non-secret configuration only, stored and returned in plaintext. */
             envVars: {
@@ -1326,7 +1330,7 @@ export interface components {
             /** @enum {string} */
             egressPolicy: "none" | "trusted" | "full" | "custom";
             egressAllowlist: string[];
-            /** @description Whether machines boot from this environment yet. False until booting from environments ships; until then, nothing enforces this configuration. */
+            /** @description Whether sandboxes created with this environment's id boot from it: template, machine size, environment variables, setup script and egress policy, re-applied on every wake. Services and ports are recorded but not yet started. */
             applied: boolean;
             createdAt: string;
             updatedAt: string;
@@ -7550,7 +7554,7 @@ export interface operations {
                     templateId?: string | null;
                     /** @enum {string|null} */
                     machineSize?: "small" | "default" | "large" | "xlarge" | null;
-                    /** @description Runs once per fresh boot, after the checkout. At most 65536 bytes. Refused if it contains what looks like a credential. */
+                    /** @description Runs on every fresh or cold boot, as the sandbox user from /code, after the checkout and before the agent, for at most 30 minutes with no stdin; output goes to ~/.remotehost-setup.log. Must be idempotent: a cold boot re-runs it on the same disk. At most 65536 bytes. Refused if it contains what looks like a credential. */
                     setupScript?: string | null;
                     services?: {
                         name: string;
@@ -7856,7 +7860,7 @@ export interface operations {
                     templateId?: string | null;
                     /** @enum {string|null} */
                     machineSize?: "small" | "default" | "large" | "xlarge" | null;
-                    /** @description Runs once per fresh boot, after the checkout. At most 65536 bytes. Refused if it contains what looks like a credential. */
+                    /** @description Runs on every fresh or cold boot, as the sandbox user from /code, after the checkout and before the agent, for at most 30 minutes with no stdin; output goes to ~/.remotehost-setup.log. Must be idempotent: a cold boot re-runs it on the same disk. At most 65536 bytes. Refused if it contains what looks like a credential. */
                     setupScript?: string | null;
                     services?: {
                         name: string;
