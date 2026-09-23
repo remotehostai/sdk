@@ -1391,6 +1391,11 @@ export interface components {
             }[];
         };
         Environment: {
+            /** @description Workspaces and sandboxes, other than deleted ones, that boot from this environment. An edit reaches each at its next start; a delete is refused while either is non-zero. */
+            usage: {
+                workspaces: number;
+                sandboxes: number;
+            };
             /** Format: uuid */
             id: string;
             /** Format: uuid */
