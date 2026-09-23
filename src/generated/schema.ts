@@ -913,6 +913,95 @@ export interface paths {
         patch: operations["updateEnvironment"];
         trace?: never;
     };
+    "/orgs/{orgId}/projects/{projectId}/workspaces": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's workspaces
+         * @description Most recently active first. Deleted workspaces are not listed.
+         */
+        get: operations["listWorkspaces"];
+        put?: never;
+        /**
+         * Create a workspace
+         * @description Creates a workspace: durable work that outlives any one sandbox. It starts asleep with no execution; attach it to get a sandbox. Its name fixes its git branch, remotehost/<name>.
+         */
+        post: operations["createWorkspace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/projects/{projectId}/workspaces/{workspaceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read a workspace */
+        get: operations["getWorkspace"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete a workspace
+         * @description Deletes the workspace and destroys every execution of it. Uncommitted work is lost. The workspace is unattachable from the moment the call starts; an execution that cannot be destroyed yet (its host is not answering, or an operation on it is still settling) is listed in executionsPendingCleanup and destroyed automatically once it can be.
+         */
+        delete: operations["deleteWorkspace"];
+        options?: never;
+        head?: never;
+        /**
+         * Rename or reconfigure a workspace
+         * @description A rename does not move the workspace's git branch.
+         */
+        patch: operations["updateWorkspace"];
+        trace?: never;
+    };
+    "/orgs/{orgId}/projects/{projectId}/workspaces/{workspaceId}/attach": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Attach a workspace
+         * @description Returns a running sandbox for the workspace: the one already running, the sleeping one woken, or a new one. One execution at a time: while another is starting or stopping the call answers 409 workspace_leased. When the host running it has stopped answering, the call answers 409 lease_expired; retrying with takeover: true moves the workspace to a new execution restored from its last saved snapshot, reports what was lost in `recovery`, and never happens while the old execution's host still lists it. A takeover needs sandbox.destroy as well as sandbox.create, is refused with restore_unavailable when the last snapshot never left the unreachable host, and immediately cuts the old execution off: its keys are revoked, and its open terminals, tunnels and preview sockets are closed.
+         */
+        post: operations["attachWorkspace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/projects/{projectId}/workspaces/{workspaceId}/detach": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Detach a workspace
+         * @description Saves the workspace's execution and stops it. Answers once the stop is under way; the lease is released when the snapshot commits. Idempotent.
+         */
+        post: operations["detachWorkspace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1341,6 +1430,53 @@ export interface components {
             port: number | null;
             cwd: string | null;
         };
+        Workspace: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            orgId: string;
+            /** Format: uuid */
+            projectId: string;
+            name: string;
+            title: string | null;
+            /** Format: uuid */
+            environmentId: string | null;
+            /** @enum {string} */
+            lifetimePolicy: "ephemeral" | "session" | "persistent" | "archived";
+            expiresAt: string | null;
+            /** @description The remotehost/<name> branch this workspace pushes to. Fixed at creation; a rename does not move it. */
+            gitBranch: string | null;
+            cpuBaseline: string | null;
+            /** @enum {string} */
+            status: "active" | "sleeping" | "moving" | "archived" | "deleted";
+            lease: components["schemas"]["WorkspaceLease"];
+            /** Format: uuid */
+            createdBy: string | null;
+            createdAt: string;
+            updatedAt: string;
+            lastActivityAt: string;
+        };
+        WorkspaceLease: {
+            /**
+             * Format: uuid
+             * @description The workspace's current execution: running while the lease is live, asleep while it is not.
+             */
+            sandboxId: string | null;
+            /** @description Fence token, a 64-bit integer as a decimal string. Increases on every grant. */
+            epoch: string;
+            expiresAt: string | null;
+            live: boolean;
+        };
+        /** @description Present after a takeover: what was restored and what was lost. */
+        WorkspaceRecovery: {
+            /** Format: uuid */
+            supersededSandboxId: string;
+            /** @enum {string} */
+            supersededHolderHealth: "gone" | "unreachable";
+            restoredSnapshotAt: string | null;
+            restoredSnapshotDurable: boolean | null;
+            message: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -1380,7 +1516,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1429,7 +1565,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1454,7 +1590,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1507,7 +1643,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1532,7 +1668,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1557,7 +1693,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1611,7 +1747,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1636,7 +1772,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1661,7 +1797,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1686,7 +1822,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1736,7 +1872,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1761,7 +1897,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1786,7 +1922,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1836,7 +1972,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1861,7 +1997,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1886,7 +2022,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1936,7 +2072,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1961,7 +2097,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1986,7 +2122,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2037,7 +2173,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2062,7 +2198,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2087,7 +2223,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2136,7 +2272,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2161,7 +2297,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2213,7 +2349,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2238,7 +2374,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2291,7 +2427,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2316,7 +2452,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2341,7 +2477,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2366,7 +2502,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2391,7 +2527,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2416,7 +2552,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2441,7 +2577,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2490,7 +2626,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2515,7 +2651,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2540,7 +2676,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2565,7 +2701,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2614,7 +2750,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2639,7 +2775,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2664,7 +2800,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2689,7 +2825,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2738,7 +2874,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2763,7 +2899,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2788,7 +2924,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2813,7 +2949,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2838,7 +2974,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2887,7 +3023,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2912,7 +3048,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2937,7 +3073,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2962,7 +3098,32 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The sandbox is a workspace execution that has been superseded (workspace_fenced). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2987,7 +3148,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3012,7 +3173,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3073,7 +3234,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3098,7 +3259,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3123,7 +3284,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3148,7 +3309,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3173,7 +3334,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3198,7 +3359,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3249,7 +3410,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3274,7 +3435,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3299,7 +3460,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3324,7 +3485,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3349,7 +3510,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3374,7 +3535,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3399,7 +3560,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3450,7 +3611,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3475,7 +3636,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3500,7 +3661,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3525,7 +3686,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3550,7 +3711,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3575,7 +3736,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3600,7 +3761,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3649,7 +3810,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3674,7 +3835,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3699,7 +3860,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3750,7 +3911,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3775,7 +3936,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3800,7 +3961,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3825,7 +3986,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3878,7 +4039,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3903,7 +4064,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3928,7 +4089,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3953,7 +4114,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4008,7 +4169,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4033,7 +4194,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4058,7 +4219,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4083,7 +4244,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4137,7 +4298,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4162,7 +4323,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4187,7 +4348,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4212,7 +4373,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4237,7 +4398,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4286,7 +4447,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4311,7 +4472,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4336,7 +4497,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4400,7 +4561,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4425,7 +4586,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4450,7 +4611,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4475,7 +4636,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4526,7 +4687,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4551,7 +4712,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4576,7 +4737,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4623,7 +4784,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4648,7 +4809,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4673,7 +4834,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4698,7 +4859,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4745,7 +4906,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4770,7 +4931,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4795,7 +4956,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4820,7 +4981,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4876,7 +5037,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4901,7 +5062,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4926,7 +5087,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4951,7 +5112,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -7956,6 +8117,787 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listWorkspaces: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The workspaces. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        workspaces: components["schemas"]["Workspace"][];
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    createWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description 1-63 lowercase letters, digits, '.', '_' or '-', starting with a letter or digit. Unique in the project. */
+                    name: string;
+                    title?: string | null;
+                    /** Format: uuid */
+                    environmentId?: string | null;
+                    /** @enum {string} */
+                    lifetimePolicy?: "ephemeral" | "session" | "persistent" | "archived";
+                    expiresAt?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The new workspace. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        workspace: components["schemas"]["Workspace"];
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The workspace and its lease. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        workspace: components["schemas"]["Workspace"];
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    deleteWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {boolean} */
+                        deleted: true;
+                        /** Format: uuid */
+                        workspaceId: string;
+                        executionsPendingCleanup: {
+                            /** Format: uuid */
+                            sandboxId: string;
+                            message: string;
+                        }[];
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    updateWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description 1-63 lowercase letters, digits, '.', '_' or '-', starting with a letter or digit. Unique in the project. */
+                    name?: string;
+                    title?: string | null;
+                    /** Format: uuid */
+                    environmentId?: string | null;
+                    /** @enum {string} */
+                    lifetimePolicy?: "ephemeral" | "session" | "persistent" | "archived";
+                    expiresAt?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated workspace. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        workspace: components["schemas"]["Workspace"];
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    attachWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    takeover?: boolean;
+                    acknowledgeLostState?: boolean;
+                    /** @enum {string} */
+                    agent?: "claude" | "codex";
+                    profile?: string;
+                    machineSize?: string;
+                    region?: string;
+                    templateId?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description An existing execution, running. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        workspace: components["schemas"]["Workspace"];
+                        sandbox: components["schemas"]["Sandbox"];
+                        /** @enum {string} */
+                        attached: "created" | "resumed" | "existing" | "takeover";
+                        leaseRenewed?: boolean;
+                        recovery?: components["schemas"]["WorkspaceRecovery"];
+                    };
+                };
+            };
+            /** @description A new execution. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        workspace: components["schemas"]["Workspace"];
+                        sandbox: components["schemas"]["Sandbox"];
+                        /** @enum {string} */
+                        attached: "created" | "resumed" | "existing" | "takeover";
+                        leaseRenewed?: boolean;
+                        recovery?: components["schemas"]["WorkspaceRecovery"];
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    detachWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Stopping, or already stopped. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        workspace: components["schemas"]["Workspace"];
+                        sandbox: components["schemas"]["Sandbox"] & unknown;
+                        /** @enum {string} */
+                        detached: "stopping" | "already";
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed";
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
                         };
                     };
                 };
