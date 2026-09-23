@@ -1169,9 +1169,18 @@ export interface components {
             allocated_disk_gb: number;
             end_user_id: string | null;
             vm_lost_at: string | null;
+            disk: components["schemas"]["SandboxDisk"];
             created_at: string;
             updated_at: string;
         };
+        SandboxDisk: {
+            usedBytes: number;
+            totalBytes: number;
+            availableBytes: number;
+            /** @enum {number|null} */
+            warning: 80 | 95 | null;
+            sampledAt: string | null;
+        } | null;
         CreateSandboxBody: {
             agent?: string;
             projectId?: string;
@@ -1284,6 +1293,8 @@ export interface components {
             memoryUsedGb: number;
             diskTotalGb: number;
             diskUsedGb: number;
+            diskUsedBytes: number | null;
+            diskAvailableBytes: number | null;
             swapTotalGb: number;
             swapUsedGb: number;
             memoryPressure: {
@@ -1309,6 +1320,8 @@ export interface components {
             memoryUsedGb: number;
             diskTotalGb: number;
             diskUsedGb: number;
+            diskUsedBytes: number | null;
+            diskAvailableBytes: number | null;
             swapTotalGb: number;
             swapUsedGb: number;
             memoryPressure: {
