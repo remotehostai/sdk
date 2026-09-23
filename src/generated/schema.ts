@@ -977,7 +977,7 @@ export interface paths {
         head?: never;
         /**
          * Rename or reconfigure a workspace
-         * @description A rename does not move the workspace's git branch.
+         * @description A rename does not move the workspace's git branch. Moving it to another environment pushes that environment's network rules to its running execution as it is saved; one the push cannot reach is stopped so it cannot keep the old rules, and the response's egressPropagation says which.
          */
         patch: operations["updateWorkspace"];
         trace?: never;
@@ -9448,6 +9448,32 @@ export interface operations {
                 content: {
                     "application/json": {
                         workspace: components["schemas"]["Workspace"];
+                        /** @description Present when the request named an environment: what its running execution was held to. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
                     };
                 };
             };
