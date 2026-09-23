@@ -2164,6 +2164,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         canManageMembers: boolean;
+                        grantableRoles: ("project_admin" | "developer" | "operator" | "viewer")[];
                         members: components["schemas"]["ProjectMember"][];
                     };
                 };
