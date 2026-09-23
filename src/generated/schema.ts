@@ -1479,7 +1479,7 @@ export interface components {
             expiresAt: string | null;
             live: boolean;
         };
-        /** @description Present after a takeover: what was restored and what was lost. */
+        /** @description With takeoverCommitted: what the takeover restored and what was lost. */
         WorkspaceRecovery: {
             /** Format: uuid */
             supersededSandboxId: string;
@@ -8913,6 +8913,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -8935,6 +8938,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -8998,6 +9004,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9020,6 +9029,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9042,6 +9054,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9064,6 +9079,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9112,6 +9130,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9134,6 +9155,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9190,6 +9214,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9212,6 +9239,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9276,6 +9306,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9298,6 +9331,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9320,6 +9356,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9342,6 +9381,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9386,7 +9428,7 @@ export interface operations {
                         /** @enum {string} */
                         attached: "created" | "resumed" | "existing" | "takeover";
                         leaseRenewed?: boolean;
-                        recovery?: components["schemas"]["WorkspaceRecovery"];
+                        recovery?: components["schemas"]["WorkspaceRecovery"] & unknown;
                     };
                 };
             };
@@ -9402,7 +9444,7 @@ export interface operations {
                         /** @enum {string} */
                         attached: "created" | "resumed" | "existing" | "takeover";
                         leaseRenewed?: boolean;
-                        recovery?: components["schemas"]["WorkspaceRecovery"];
+                        recovery?: components["schemas"]["WorkspaceRecovery"] & unknown;
                     };
                 };
             };
@@ -9424,6 +9466,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9446,6 +9491,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9468,6 +9516,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9490,6 +9541,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9512,6 +9566,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9534,6 +9591,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9556,6 +9616,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9607,6 +9670,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9629,6 +9695,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
@@ -9651,6 +9720,9 @@ export interface operations {
                             leaseExpiresAt?: string | null;
                             leaseExpiredAt?: string | null;
                             lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
                         };
                     };
                 };
