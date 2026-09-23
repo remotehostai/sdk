@@ -347,6 +347,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/sandboxes/{sandboxId}/services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Status of a sandbox's environment services
+         * @description The services its environment declares, as this boot started them (where services are enabled; rolling out, and empty until then): after the setup script on a create or a cold boot, as the sandbox user, from /code or the service's cwd. A resume from memory keeps them running. A service that exits is not restarted. Empty when none were started this boot. The sandbox must be running or ready.
+         */
+        get: operations["listSandboxServices"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/sandboxes/{sandboxId}/files": {
         parameters: {
             query?: never;
@@ -1237,6 +1257,21 @@ export interface components {
             command: string;
             timeoutSeconds?: number;
         };
+        SandboxServiceStatus: {
+            name: string;
+            port: number | null;
+            /**
+             * @description running: its process is alive. exited: it stopped; see exitCode and its log. not_started: declared this boot but never launched.
+             * @enum {string}
+             */
+            state: "running" | "exited" | "not_started";
+            /** @description Set when it exited on its own; null while running, or when it was killed. */
+            exitCode: number | null;
+            /** @description Whether anything in the sandbox accepts connections on its port. Null for a service that declares no port. */
+            listening: boolean | null;
+            /** @description Its standard output and error, readable through the files API. */
+            logPath: string;
+        };
         FilesystemEntry: {
             label: string;
             path: string;
@@ -1469,7 +1504,7 @@ export interface components {
             /** @enum {string|null} */
             machineSize: "small" | "default" | "large" | "xlarge" | null;
             setupScript: string | null;
-            /** @description Recorded; not yet started at boot. */
+            /** @description Started after the setup script on every create and cold boot where services are enabled (rolling out; until then recorded only); see GET /sandboxes/{sandboxId}/services. */
             services: components["schemas"]["EnvironmentService"][];
             /** @description Recorded; not yet exposed at boot. */
             ports: number[];
@@ -1480,7 +1515,7 @@ export interface components {
             /** @enum {string} */
             egressPolicy: "none" | "trusted" | "full" | "custom";
             egressAllowlist: string[];
-            /** @description Whether sandboxes created with this environment's id boot from it: template, machine size, environment variables, setup script and egress policy, re-applied on every wake. Services and ports are recorded but not yet started. */
+            /** @description Whether sandboxes created with this environment's id boot from it: template, machine size, environment variables, setup script, services (where enabled) and egress policy, re-applied on every wake. Ports are recorded but not yet exposed. */
             applied: boolean;
             createdAt: string;
             updatedAt: string;
@@ -4046,6 +4081,155 @@ export interface operations {
                 };
             };
             /** @description The command could not be run through the sandbox agent. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listSandboxServices: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sandboxId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Each service's status. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        services: components["schemas"]["SandboxServiceStatus"][];
+                    };
+                };
+            };
+            /** @description Not a Firecracker sandbox. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Permission sandbox.read is required; on a workspace's execution, only the workspace's owner may read it, since the answer comes from inside its machine. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Sandbox not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The sandbox is not running. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The status could not be read from the sandbox. */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -8017,6 +8201,7 @@ export interface operations {
                     machineSize?: "small" | "default" | "large" | "xlarge" | null;
                     /** @description Runs on every fresh or cold boot, as the sandbox user from /code, after the checkout and before the agent, for at most 30 minutes with no stdin; output goes to ~/.remotehost-setup.log. Must be idempotent: a cold boot re-runs it on the same disk. At most 65536 bytes. Refused if it contains what looks like a credential. */
                     setupScript?: string | null;
+                    /** @description Long-running commands, each started (where services are enabled; rolling out) after the setup script on every create and cold boot, as the sandbox user from cwd (default /code), with the environment variables and no stdin; output goes to ~/.remotehost/services/<name>.log. A resume from memory keeps them running; one that exits is not restarted. A command must stay in the foreground: one that daemonizes (pg_ctl start, docker compose up -d) reports as exited. Commands that look like they contain a credential are refused. */
                     services?: {
                         name: string;
                         command: string;
@@ -8767,6 +8952,7 @@ export interface operations {
                     machineSize?: "small" | "default" | "large" | "xlarge" | null;
                     /** @description Runs on every fresh or cold boot, as the sandbox user from /code, after the checkout and before the agent, for at most 30 minutes with no stdin; output goes to ~/.remotehost-setup.log. Must be idempotent: a cold boot re-runs it on the same disk. At most 65536 bytes. Refused if it contains what looks like a credential. */
                     setupScript?: string | null;
+                    /** @description Long-running commands, each started (where services are enabled; rolling out) after the setup script on every create and cold boot, as the sandbox user from cwd (default /code), with the environment variables and no stdin; output goes to ~/.remotehost/services/<name>.log. A resume from memory keeps them running; one that exits is not restarted. A command must stay in the foreground: one that daemonizes (pg_ctl start, docker compose up -d) reports as exited. Commands that look like they contain a credential are refused. */
                     services?: {
                         name: string;
                         command: string;
