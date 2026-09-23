@@ -861,6 +861,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orgs/{orgId}/projects/{projectId}/environments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's environments
+         * @description Requires environments.read.
+         */
+        get: operations["listEnvironments"];
+        put?: never;
+        /**
+         * Create an environment
+         * @description A named, reusable machine configuration that workspaces reference. Requires environments.manage. Secrets are not accepted yet.
+         */
+        post: operations["createEnvironment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/projects/{projectId}/environments/{environmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get an environment
+         * @description Requires environments.read.
+         */
+        get: operations["getEnvironment"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete an environment
+         * @description Refused with 409 while any workspace uses it. Requires environments.manage.
+         */
+        delete: operations["deleteEnvironment"];
+        options?: never;
+        head?: never;
+        /**
+         * Update an environment
+         * @description Fields left out are unchanged; null clears a nullable one. Moving to the none or full egress policy clears the allowlist. Requires environments.manage.
+         */
+        patch: operations["updateEnvironment"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1246,6 +1298,44 @@ export interface components {
                 event: string;
                 reason: string;
             }[];
+        };
+        Environment: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            projectId: string;
+            name: string;
+            description: string | null;
+            isDefault: boolean;
+            /** @description Null boots the platform's standard image. */
+            template: {
+                /** Format: uuid */
+                id: string;
+                name: string | null;
+                platform: boolean;
+            } | null;
+            /** @enum {string|null} */
+            machineSize: "small" | "default" | "large" | "xlarge" | null;
+            setupScript: string | null;
+            services: components["schemas"]["EnvironmentService"][];
+            ports: number[];
+            /** @description Non-secret configuration only, stored and returned in plaintext. */
+            envVars: {
+                [key: string]: string;
+            };
+            /** @enum {string} */
+            egressPolicy: "none" | "trusted" | "full" | "custom";
+            egressAllowlist: string[];
+            /** @description Whether machines boot from this environment yet. False until booting from environments ships; until then, nothing enforces this configuration. */
+            applied: boolean;
+            createdAt: string;
+            updatedAt: string;
+        };
+        EnvironmentService: {
+            name: string;
+            command: string;
+            port: number | null;
+            cwd: string | null;
         };
     };
     responses: never;
@@ -7343,6 +7433,525 @@ export interface operations {
                             code?: string;
                             turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listEnvironments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The project's environments, by name. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        environments: components["schemas"]["Environment"][];
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    createEnvironment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                    description?: string | null;
+                    /** @description Make this the project's default environment. At most one per project. */
+                    isDefault?: boolean;
+                    /** @description A template id or name, the org's own first, then the platform's. Null for the standard image. */
+                    templateId?: string | null;
+                    /** @enum {string|null} */
+                    machineSize?: "small" | "default" | "large" | "xlarge" | null;
+                    /** @description Runs once per fresh boot, after the checkout. At most 65536 bytes. Refused if it contains what looks like a credential. */
+                    setupScript?: string | null;
+                    services?: {
+                        name: string;
+                        command: string;
+                        port?: number | null;
+                        cwd?: string | null;
+                    }[];
+                    ports?: number[];
+                    /** @description Non-secret configuration. Names and values that look like credentials are refused; secrets will be stored in the credential vault. */
+                    envVars?: {
+                        [key: string]: string;
+                    };
+                    /**
+                     * @description none: no network. trusted (default): package registries, git providers and model APIs, plus egressAllowlist. full: the open internet. custom: egressAllowlist only.
+                     * @enum {string}
+                     */
+                    egressPolicy?: "none" | "trusted" | "full" | "custom";
+                    /** @description Domains, like registry.npmjs.org or *.example.com. Only with trusted or custom. */
+                    egressAllowlist?: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description Created. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        environment: components["schemas"]["Environment"];
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getEnvironment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+                environmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The environment. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        environment: components["schemas"]["Environment"];
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    deleteEnvironment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+                environmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        deleted: boolean;
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    updateEnvironment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+                environmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name?: string;
+                    description?: string | null;
+                    /** @description Make this the project's default environment. At most one per project. */
+                    isDefault?: boolean;
+                    /** @description A template id or name, the org's own first, then the platform's. Null for the standard image. */
+                    templateId?: string | null;
+                    /** @enum {string|null} */
+                    machineSize?: "small" | "default" | "large" | "xlarge" | null;
+                    /** @description Runs once per fresh boot, after the checkout. At most 65536 bytes. Refused if it contains what looks like a credential. */
+                    setupScript?: string | null;
+                    services?: {
+                        name: string;
+                        command: string;
+                        port?: number | null;
+                        cwd?: string | null;
+                    }[];
+                    ports?: number[];
+                    /** @description Non-secret configuration. Names and values that look like credentials are refused; secrets will be stored in the credential vault. */
+                    envVars?: {
+                        [key: string]: string;
+                    };
+                    /**
+                     * @description none: no network. trusted (default): package registries, git providers and model APIs, plus egressAllowlist. full: the open internet. custom: egressAllowlist only.
+                     * @enum {string}
+                     */
+                    egressPolicy?: "none" | "trusted" | "full" | "custom";
+                    /** @description Domains, like registry.npmjs.org or *.example.com. Only with trusted or custom. */
+                    egressAllowlist?: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description Updated. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        environment: components["schemas"]["Environment"];
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
                         };
                     };
                 };
