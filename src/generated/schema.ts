@@ -2518,6 +2518,8 @@ export interface operations {
                 content: {
                     "application/json": {
                         sandbox: components["schemas"]["Sandbox"];
+                        /** @description Repos that were not cloned because their Git connection belongs to another organization, one line each. Absent when every repo was cloned. */
+                        repoWarnings?: string[];
                     };
                 };
             };
@@ -3501,6 +3503,8 @@ export interface operations {
                 content: {
                     "application/json": {
                         sandbox: components["schemas"]["Sandbox"];
+                        /** @description Repos that were not cloned because their Git connection belongs to another organization, one line each. Absent when every repo was cloned. */
+                        repoWarnings?: string[];
                     };
                 };
             };
@@ -3702,6 +3706,8 @@ export interface operations {
                 content: {
                     "application/json": {
                         sandbox: components["schemas"]["Sandbox"];
+                        /** @description Repos that were not cloned because their Git connection belongs to another organization, one line each. Absent when every repo was cloned. */
+                        repoWarnings?: string[];
                     };
                 };
             };
