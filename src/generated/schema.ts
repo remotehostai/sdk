@@ -1619,7 +1619,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1668,7 +1669,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1693,7 +1695,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1746,7 +1749,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1771,7 +1775,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1796,7 +1801,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1850,7 +1856,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1875,7 +1882,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1900,7 +1908,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1925,7 +1934,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -1975,7 +1985,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2000,7 +2011,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2025,7 +2037,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2075,7 +2088,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2100,7 +2114,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2125,7 +2140,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2175,7 +2191,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2200,7 +2217,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2225,7 +2243,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2277,7 +2296,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2302,7 +2322,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2327,7 +2348,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2376,7 +2398,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2401,7 +2424,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2453,7 +2477,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2478,7 +2503,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2533,7 +2559,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2558,7 +2585,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2583,7 +2611,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2608,7 +2637,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2633,7 +2663,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2658,7 +2689,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2683,7 +2715,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No host started the sandbox within the create budget (error.code start_timeout, error.retryable true). The hosts were slow or hung; try again. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2732,7 +2791,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2757,7 +2817,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2782,7 +2843,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2807,7 +2869,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2856,7 +2919,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2881,7 +2945,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2906,7 +2971,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2931,7 +2997,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -2980,7 +3047,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3005,7 +3073,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3030,7 +3099,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3055,7 +3125,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3080,7 +3151,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3129,7 +3201,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3154,7 +3227,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3179,7 +3253,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3204,7 +3279,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3229,7 +3305,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3254,7 +3331,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3279,7 +3357,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3340,7 +3419,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3365,7 +3445,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3390,7 +3471,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3415,7 +3497,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3440,7 +3523,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3465,7 +3549,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3518,7 +3603,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3543,7 +3629,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3568,7 +3655,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3593,7 +3681,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3618,7 +3707,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3643,7 +3733,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3668,7 +3759,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No host started the sandbox within the create budget (error.code start_timeout, error.retryable true). The hosts were slow or hung. The wake's outcome is settled by billing reconciliation, so check the sandbox before trying again. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3721,7 +3839,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3746,7 +3865,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3771,7 +3891,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3796,7 +3917,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3821,7 +3943,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3846,7 +3969,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3871,7 +3995,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No host started the sandbox within the create budget (error.code start_timeout, error.retryable true). The hosts were slow or hung. The wake's outcome is settled by billing reconciliation, so check the sandbox before trying again. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3920,7 +4071,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3945,7 +4097,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -3970,7 +4123,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4021,7 +4175,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4046,7 +4201,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4071,7 +4227,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4096,7 +4253,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4145,7 +4303,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4170,7 +4329,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4195,7 +4355,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4220,7 +4381,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4245,7 +4407,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4298,7 +4461,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4323,7 +4487,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4348,7 +4513,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4373,7 +4539,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4428,7 +4595,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4453,7 +4621,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4478,7 +4647,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4503,7 +4673,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4557,7 +4728,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4582,7 +4754,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4607,7 +4780,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4632,7 +4806,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4657,7 +4832,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4706,7 +4882,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4731,7 +4908,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4756,7 +4934,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4820,7 +4999,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4845,7 +5025,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4870,7 +5051,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4895,7 +5077,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4946,7 +5129,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4971,7 +5155,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -4996,7 +5181,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -5043,7 +5229,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -5068,7 +5255,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -5093,7 +5281,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -5118,7 +5307,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -5165,7 +5355,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -5190,7 +5381,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -5215,7 +5407,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -5240,7 +5433,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -5296,7 +5490,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -5321,7 +5516,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -5346,7 +5542,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -5371,7 +5568,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
                             window?: "minute" | "hour" | "day";
@@ -9250,7 +9448,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9276,7 +9476,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9343,7 +9545,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9369,7 +9573,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9395,7 +9601,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9421,7 +9629,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9473,7 +9683,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9499,7 +9711,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9559,7 +9773,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9585,7 +9801,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9679,7 +9897,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9705,7 +9925,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9731,7 +9953,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9757,7 +9981,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9843,7 +10069,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9869,7 +10097,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9895,7 +10125,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9921,7 +10153,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9947,7 +10181,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9973,7 +10209,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -9999,7 +10237,37 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
+                            workspaceId?: string;
+                            holderSandboxId?: string | null;
+                            holderStatus?: string | null;
+                            /** @enum {string} */
+                            holderHealth?: "running" | "gone" | "unreachable";
+                            leaseExpiresAt?: string | null;
+                            leaseExpiredAt?: string | null;
+                            lastSnapshotAt?: string | null;
+                            /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
+                            takeoverCommitted?: boolean;
+                            recovery?: components["schemas"]["WorkspaceRecovery"];
+                        };
+                    };
+                };
+            };
+            /** @description The request failed; inspect error.message and error.code. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -10054,7 +10322,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -10080,7 +10350,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -10106,7 +10378,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -10176,7 +10450,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -10202,7 +10478,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -10228,7 +10506,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
@@ -10254,7 +10534,9 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only";
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
                             holderStatus?: string | null;
