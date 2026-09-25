@@ -467,6 +467,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/sandboxes/{sandboxId}/ports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The ports a sandbox's environment declares, ready to open
+         * @description The environment's declared ports, read from the environment the sandbox is held to now, each with a team preview minted for the caller, so none has to be requested. Nothing is public: a link for someone outside the org is still POST /sandboxes/{sandboxId}/previews with audience public. Empty for a sandbox with no environment.
+         */
+        get: operations["listSandboxPorts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/sandboxes/{sandboxId}/files": {
         parameters: {
             query?: never;
@@ -1385,6 +1405,15 @@ export interface components {
             /** @description Its standard output and error, readable through the files API. */
             logPath: string;
         };
+        SandboxDeclaredPort: {
+            port: number;
+            /** @description The environment's service that declares this port, if any. */
+            service: string | null;
+            /** @description Whether anything in the sandbox accepts connections on it. Null while the sandbox is not running, or when it could not be read. */
+            listening: boolean | null;
+            /** @description A team preview for the caller, as POST /sandboxes/{sandboxId}/previews with audience team returns: only members of the sandbox's org can open it. Null while the sandbox is not running. */
+            url: string | null;
+        };
         FilesystemEntry: {
             label: string;
             path: string;
@@ -1619,7 +1648,7 @@ export interface components {
             setupScript: string | null;
             /** @description Started after the setup script on every create and cold boot where services are enabled (rolling out; until then recorded only); see GET /sandboxes/{sandboxId}/services. */
             services: components["schemas"]["EnvironmentService"][];
-            /** @description Recorded; not yet exposed at boot. */
+            /** @description Listed on each sandbox with a team preview ready to open: GET /sandboxes/{sandboxId}/ports. Never public by default. */
             ports: number[];
             /** @description Non-secret configuration only, stored and returned in plaintext. */
             envVars: {
@@ -1628,7 +1657,7 @@ export interface components {
             /** @enum {string} */
             egressPolicy: "none" | "trusted" | "full" | "custom";
             egressAllowlist: string[];
-            /** @description Whether sandboxes created with this environment's id boot from it: template, machine size, environment variables, setup script, services (where enabled) and egress policy, re-applied on every wake. Ports are recorded but not yet exposed. */
+            /** @description Whether sandboxes created with this environment's id boot from it: template, machine size, environment variables, setup script, services (where enabled) and egress policy, re-applied on every wake. Its ports are listed on each sandbox with a team preview. */
             applied: boolean;
             createdAt: string;
             updatedAt: string;
@@ -5231,6 +5260,112 @@ export interface operations {
             };
             /** @description The status could not be read from the sandbox. */
             502: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listSandboxPorts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sandboxId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Each declared port. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        ports: components["schemas"]["SandboxDeclaredPort"][];
+                    };
+                };
+            };
+            /** @description Permission sandbox.files.read is required, as for a team preview; on a workspace's execution, only the workspace's owner. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Sandbox not found. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The environment the sandbox is held to could not be resolved. */
+            409: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
@@ -9468,6 +9603,7 @@ export interface operations {
                         port?: number | null;
                         cwd?: string | null;
                     }[];
+                    /** @description Ports to expose to the project's team: each sandbox lists them with a team preview ready to open (GET /sandboxes/{sandboxId}/ports). Nothing is made public. */
                     ports?: number[];
                     /** @description Non-secret configuration. Names and values that look like credentials are refused; secrets will be stored in the credential vault. */
                     envVars?: {
@@ -10239,6 +10375,7 @@ export interface operations {
                         port?: number | null;
                         cwd?: string | null;
                     }[];
+                    /** @description Ports to expose to the project's team: each sandbox lists them with a team preview ready to open (GET /sandboxes/{sandboxId}/ports). Nothing is made public. */
                     ports?: number[];
                     /** @description Non-secret configuration. Names and values that look like credentials are refused; secrets will be stored in the credential vault. */
                     envVars?: {
