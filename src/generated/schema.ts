@@ -1696,7 +1696,10 @@ export interface components {
     responses: never;
     parameters: never;
     requestBodies: never;
-    headers: never;
+    headers: {
+        /** @description Identifies this request. Quote it when asking about a response, a refusal especially. */
+        RequestId: string;
+    };
     pathItems: never;
 }
 export type $defs = Record<string, never>;
@@ -1713,6 +1716,7 @@ export interface operations {
             /** @description Orgs the signed-in user belongs to, and their role in each. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -1724,6 +1728,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -1769,6 +1774,7 @@ export interface operations {
             /** @description An org of the same name the caller already belongs to. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -1780,6 +1786,7 @@ export interface operations {
             /** @description The new organization. */
             201: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -1791,6 +1798,7 @@ export interface operations {
             /** @description Missing name, or a slug that breaks the rule (`slug_format`) or is reserved (`slug_reserved`). */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -1817,6 +1825,7 @@ export interface operations {
             /** @description Another organization holds the slug, as its slug or an old one (`slug_taken`). */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -1843,6 +1852,7 @@ export interface operations {
             /** @description Too many organizations created (`rate_limited`); see Retry-After. */
             429: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -1869,6 +1879,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -1916,6 +1927,7 @@ export interface operations {
             /** @description The updated organization. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -1927,6 +1939,7 @@ export interface operations {
             /** @description Neither a name nor a slug, or a slug that breaks the rule or is reserved. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -1953,6 +1966,7 @@ export interface operations {
             /** @description Permission org.update is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -1979,6 +1993,7 @@ export interface operations {
             /** @description Another organization holds the slug (`slug_taken`). */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2005,6 +2020,7 @@ export interface operations {
             /** @description Too many slug changes (`rate_limited`); see Retry-After. */
             429: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2031,6 +2047,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2070,6 +2087,7 @@ export interface operations {
             /** @description The organization and the caller's role in it. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2079,6 +2097,7 @@ export interface operations {
             /** @description Org not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2105,6 +2124,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2144,6 +2164,7 @@ export interface operations {
             /** @description The organization's old slugs. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2158,6 +2179,7 @@ export interface operations {
             /** @description Permission org.read is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2184,6 +2206,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2224,6 +2247,7 @@ export interface operations {
             /** @description Released. */
             204: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content?: never;
@@ -2231,6 +2255,7 @@ export interface operations {
             /** @description Permission org.update is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2257,6 +2282,7 @@ export interface operations {
             /** @description The organization has no such old slug. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2283,6 +2309,7 @@ export interface operations {
             /** @description That is the organization's current slug (`slug_current`); change it first. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2309,6 +2336,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2348,6 +2376,7 @@ export interface operations {
             /** @description Projects in the org visible to the signed-in user. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2359,6 +2388,7 @@ export interface operations {
             /** @description Not a member of this org. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2385,6 +2415,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2428,6 +2459,7 @@ export interface operations {
             /** @description The created project. */
             201: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2439,6 +2471,7 @@ export interface operations {
             /** @description Missing or invalid fields. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2465,6 +2498,7 @@ export interface operations {
             /** @description Permission project.create is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2491,6 +2525,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2535,6 +2570,7 @@ export interface operations {
             /** @description The updated project. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2546,6 +2582,7 @@ export interface operations {
             /** @description Missing or invalid fields. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2572,6 +2609,7 @@ export interface operations {
             /** @description Permission project.update is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2598,6 +2636,7 @@ export interface operations {
             /** @description Project not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2624,6 +2663,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2664,6 +2704,7 @@ export interface operations {
             /** @description Repositories connected to the project, newest first. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2675,6 +2716,7 @@ export interface operations {
             /** @description Permission repo.read is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2701,6 +2743,7 @@ export interface operations {
             /** @description Project not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2727,6 +2770,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2767,6 +2811,7 @@ export interface operations {
             /** @description MCP servers connected to the project, newest first. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2778,6 +2823,7 @@ export interface operations {
             /** @description Permission mcp.read is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2804,6 +2850,7 @@ export interface operations {
             /** @description Project not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2830,6 +2877,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2870,6 +2918,7 @@ export interface operations {
             /** @description Skills installed into the project, newest first. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2881,6 +2930,7 @@ export interface operations {
             /** @description Permission skills.read is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2907,6 +2957,7 @@ export interface operations {
             /** @description Project not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2933,6 +2984,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2973,6 +3025,7 @@ export interface operations {
             /** @description Everyone with access to the project -- direct members plus org roles that inherit it. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -2986,6 +3039,7 @@ export interface operations {
             /** @description Permission project.members.read is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3012,6 +3066,7 @@ export interface operations {
             /** @description Project not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3038,6 +3093,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3077,6 +3133,7 @@ export interface operations {
             /** @description The org's subscription, or null if it has never had one. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3088,6 +3145,7 @@ export interface operations {
             /** @description Not a member of this org. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3114,6 +3172,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3156,6 +3215,7 @@ export interface operations {
             /** @description Non-deleted sandboxes in the org visible to the signed-in user. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3167,6 +3227,7 @@ export interface operations {
             /** @description Not a member of this org. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3193,6 +3254,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3236,6 +3298,7 @@ export interface operations {
             /** @description The created (provisioning) sandbox. */
             201: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3249,6 +3312,7 @@ export interface operations {
             /** @description Missing or invalid fields. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3275,6 +3339,7 @@ export interface operations {
             /** @description The org has no active billing plan. */
             402: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3301,6 +3366,7 @@ export interface operations {
             /** @description Permission sandbox.create is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3327,6 +3393,7 @@ export interface operations {
             /** @description Project or template not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3353,6 +3420,7 @@ export interface operations {
             /** @description The requested template has no build to boot from yet. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3379,6 +3447,7 @@ export interface operations {
             /** @description A plan limit was reached: error.code is rate_limited (starts per minute / hour / day, Retry-After set) or limit_reached (concurrent sandboxes). */
             429: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3405,6 +3474,7 @@ export interface operations {
             /** @description Database or provisioning error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3431,6 +3501,7 @@ export interface operations {
             /** @description No host started the sandbox within the create budget (error.code start_timeout, error.retryable true). The hosts were slow or hung; try again. */
             504: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3470,6 +3541,7 @@ export interface operations {
             /** @description The sleeping sandbox. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3481,6 +3553,7 @@ export interface operations {
             /** @description Permission sandbox.stop is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3507,6 +3580,7 @@ export interface operations {
             /** @description Sandbox not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3533,6 +3607,7 @@ export interface operations {
             /** @description A sandbox operation is pending recovery, or its state changed during the request. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3559,6 +3634,7 @@ export interface operations {
             /** @description Database or provider error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3598,6 +3674,7 @@ export interface operations {
             /** @description The sleeping sandbox. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3609,6 +3686,7 @@ export interface operations {
             /** @description Permission sandbox.stop is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3635,6 +3713,7 @@ export interface operations {
             /** @description Sandbox not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3661,6 +3740,7 @@ export interface operations {
             /** @description A sandbox operation is pending recovery, or its state changed during the request. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3687,6 +3767,7 @@ export interface operations {
             /** @description Database or provider error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3726,6 +3807,7 @@ export interface operations {
             /** @description The destroyed (deleted) sandbox. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3737,6 +3819,7 @@ export interface operations {
             /** @description Sandbox is already deleted. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3763,6 +3846,7 @@ export interface operations {
             /** @description Permission sandbox.destroy is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3789,6 +3873,7 @@ export interface operations {
             /** @description Sandbox not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3815,6 +3900,7 @@ export interface operations {
             /** @description A sandbox operation is pending recovery, or its state changed during the request. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3841,6 +3927,7 @@ export interface operations {
             /** @description Database or provider error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3880,6 +3967,7 @@ export interface operations {
             /** @description The sandbox with its expiry extended. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3891,6 +3979,7 @@ export interface operations {
             /** @description Not an ephemeral sandbox, or not in a renewable status. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3917,6 +4006,7 @@ export interface operations {
             /** @description The org has no active billing plan. */
             402: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3943,6 +4033,7 @@ export interface operations {
             /** @description Permission sandbox.stop is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3969,6 +4060,7 @@ export interface operations {
             /** @description Sandbox not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -3995,6 +4087,7 @@ export interface operations {
             /** @description The sandbox is a workspace execution that has been superseded (workspace_fenced). */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4021,6 +4114,7 @@ export interface operations {
             /** @description Sandbox has exceeded its plan's session cap and can no longer be renewed. */
             410: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4047,6 +4141,7 @@ export interface operations {
             /** @description Database or provider error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4090,6 +4185,7 @@ export interface operations {
             /** @description The result of the resize -- applied now, live, or queued for next resume. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4109,6 +4205,7 @@ export interface operations {
             /** @description Invalid vcpu/memoryGb/diskGb, or the sandbox can't be resized in its current status. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4135,6 +4232,7 @@ export interface operations {
             /** @description The org has no active billing plan. */
             402: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4161,6 +4259,7 @@ export interface operations {
             /** @description Permission sandbox.resize is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4187,6 +4286,7 @@ export interface operations {
             /** @description Sandbox not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4213,6 +4313,7 @@ export interface operations {
             /** @description A sandbox operation is pending recovery, or its state changed during the request. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4239,6 +4340,7 @@ export interface operations {
             /** @description Database or provider error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4280,6 +4382,7 @@ export interface operations {
             /** @description The waking (booting) sandbox. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4293,6 +4396,7 @@ export interface operations {
             /** @description Sandbox is not asleep, or has no snapshot to wake from. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4319,6 +4423,7 @@ export interface operations {
             /** @description The org has no active billing plan. */
             402: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4345,6 +4450,7 @@ export interface operations {
             /** @description Permission sandbox.create is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4371,6 +4477,7 @@ export interface operations {
             /** @description Sandbox or project not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4397,6 +4504,7 @@ export interface operations {
             /** @description The snapshot is still being written (error.code is snapshot_in_progress), or a lifecycle operation is pending recovery or changed the sandbox state. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4423,6 +4531,7 @@ export interface operations {
             /** @description A plan limit was reached: error.code is rate_limited (starts per minute / hour / day, Retry-After set) or limit_reached (concurrent sandboxes). */
             429: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4449,6 +4558,7 @@ export interface operations {
             /** @description Database or provisioning error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4475,6 +4585,7 @@ export interface operations {
             /** @description No host started the sandbox within the create budget (error.code start_timeout, error.retryable true). The hosts were slow or hung. The wake's outcome is settled by billing reconciliation, so check the sandbox before trying again. */
             504: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4516,6 +4627,7 @@ export interface operations {
             /** @description The waking (booting) sandbox. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4529,6 +4641,7 @@ export interface operations {
             /** @description Sandbox is not asleep, or has no snapshot to wake from. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4555,6 +4668,7 @@ export interface operations {
             /** @description The org has no active billing plan. */
             402: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4581,6 +4695,7 @@ export interface operations {
             /** @description Permission sandbox.create is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4607,6 +4722,7 @@ export interface operations {
             /** @description Sandbox or project not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4633,6 +4749,7 @@ export interface operations {
             /** @description The snapshot is still being written (error.code is snapshot_in_progress), or a lifecycle operation is pending recovery or changed the sandbox state. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4659,6 +4776,7 @@ export interface operations {
             /** @description A plan limit was reached: error.code is rate_limited (starts per minute / hour / day, Retry-After set) or limit_reached (concurrent sandboxes). */
             429: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4685,6 +4803,7 @@ export interface operations {
             /** @description Database or provisioning error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4711,6 +4830,7 @@ export interface operations {
             /** @description No host started the sandbox within the create budget (error.code start_timeout, error.retryable true). The hosts were slow or hung. The wake's outcome is settled by billing reconciliation, so check the sandbox before trying again. */
             504: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4750,6 +4870,7 @@ export interface operations {
             /** @description The requested sandbox. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4761,6 +4882,7 @@ export interface operations {
             /** @description Permission sandbox.read is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4787,6 +4909,7 @@ export interface operations {
             /** @description Sandbox not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4813,6 +4936,7 @@ export interface operations {
             /** @description Database error. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4856,6 +4980,7 @@ export interface operations {
             /** @description The completed command and its captured output. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4865,6 +4990,7 @@ export interface operations {
             /** @description Invalid command, timeout, provider, or sandbox state. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4891,6 +5017,7 @@ export interface operations {
             /** @description Permission sandbox.terminal.connect is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4917,6 +5044,7 @@ export interface operations {
             /** @description Sandbox not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4943,6 +5071,7 @@ export interface operations {
             /** @description The command could not be run through the sandbox agent. */
             502: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4982,6 +5111,7 @@ export interface operations {
             /** @description Each service's status. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -4993,6 +5123,7 @@ export interface operations {
             /** @description Not a Firecracker sandbox. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5019,6 +5150,7 @@ export interface operations {
             /** @description Permission sandbox.read is required; on a workspace's execution, only the workspace's owner may read it, since the answer comes from inside its machine. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5045,6 +5177,7 @@ export interface operations {
             /** @description Sandbox not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5071,6 +5204,7 @@ export interface operations {
             /** @description The sandbox is not running. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5097,6 +5231,7 @@ export interface operations {
             /** @description The status could not be read from the sandbox. */
             502: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5138,6 +5273,7 @@ export interface operations {
             /** @description The directory entries. Large directories may be truncated. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5151,6 +5287,7 @@ export interface operations {
             /** @description Invalid path, provider, or sandbox state. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5177,6 +5314,7 @@ export interface operations {
             /** @description Permission sandbox.files.read is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5203,6 +5341,7 @@ export interface operations {
             /** @description Sandbox not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5229,6 +5368,7 @@ export interface operations {
             /** @description Filesystem operation failed. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5270,6 +5410,7 @@ export interface operations {
             /** @description The file content and its transport encoding. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5285,6 +5426,7 @@ export interface operations {
             /** @description Invalid path, provider, or sandbox state. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5311,6 +5453,7 @@ export interface operations {
             /** @description Permission sandbox.files.read is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5337,6 +5480,7 @@ export interface operations {
             /** @description Sandbox not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5363,6 +5507,7 @@ export interface operations {
             /** @description Filesystem operation failed. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5406,6 +5551,7 @@ export interface operations {
             /** @description The normalized path and number of bytes written. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5418,6 +5564,7 @@ export interface operations {
             /** @description Invalid body, provider, or sandbox state. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5444,6 +5591,7 @@ export interface operations {
             /** @description Permission sandbox.files.write is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5470,6 +5618,7 @@ export interface operations {
             /** @description Sandbox not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5496,6 +5645,7 @@ export interface operations {
             /** @description File content exceeds 2 MiB. */
             413: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5522,6 +5672,7 @@ export interface operations {
             /** @description Filesystem operation failed. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5561,6 +5712,7 @@ export interface operations {
             /** @description Public preview links, newest first. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5572,6 +5724,7 @@ export interface operations {
             /** @description The caller does not have the required preview permission. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5598,6 +5751,7 @@ export interface operations {
             /** @description Sandbox or preview link not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5624,6 +5778,7 @@ export interface operations {
             /** @description Preview operation failed. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5667,6 +5822,7 @@ export interface operations {
             /** @description A team or external preview. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5678,6 +5834,7 @@ export interface operations {
             /** @description A persistent public preview link. */
             201: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5689,6 +5846,7 @@ export interface operations {
             /** @description Invalid preview target or options. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5715,6 +5873,7 @@ export interface operations {
             /** @description The caller does not have the required preview permission. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5741,6 +5900,7 @@ export interface operations {
             /** @description Sandbox or preview link not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5767,6 +5927,7 @@ export interface operations {
             /** @description Preview operation failed. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5807,6 +5968,7 @@ export interface operations {
             /** @description The link was revoked. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5819,6 +5981,7 @@ export interface operations {
             /** @description The caller does not have the required preview permission. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5845,6 +6008,7 @@ export interface operations {
             /** @description Sandbox or preview link not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5871,6 +6035,7 @@ export interface operations {
             /** @description Preview operation failed. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5910,6 +6075,7 @@ export interface operations {
             /** @description The resource sample and autoscaling recommendation. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5919,6 +6085,7 @@ export interface operations {
             /** @description Invalid path, provider, or sandbox state. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5945,6 +6112,7 @@ export interface operations {
             /** @description Permission sandbox.resize is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5971,6 +6139,7 @@ export interface operations {
             /** @description Sandbox not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -5997,6 +6166,7 @@ export interface operations {
             /** @description Filesystem operation failed. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6036,6 +6206,7 @@ export interface operations {
             /** @description The current resource measurements and memory pressure assessment. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6045,6 +6216,7 @@ export interface operations {
             /** @description Invalid path, provider, or sandbox state. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6071,6 +6243,7 @@ export interface operations {
             /** @description Permission sandbox.files.read is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6097,6 +6270,7 @@ export interface operations {
             /** @description Sandbox not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6123,6 +6297,7 @@ export interface operations {
             /** @description Metrics could not be read from the sandbox agent. */
             502: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6165,6 +6340,7 @@ export interface operations {
             /** @description Directory tree. Large trees may be truncated. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6180,6 +6356,7 @@ export interface operations {
             /** @description Invalid path, provider, or sandbox state. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6206,6 +6383,7 @@ export interface operations {
             /** @description Permission sandbox.files.read is required. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6232,6 +6410,7 @@ export interface operations {
             /** @description Sandbox not found. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6258,6 +6437,7 @@ export interface operations {
             /** @description Filesystem operation failed. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6295,6 +6475,7 @@ export interface operations {
             /** @description For an API key, the identity of its creator. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6324,6 +6505,7 @@ export interface operations {
             /** @description Usage, caps, overage and alert state. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6333,6 +6515,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             402: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6346,6 +6529,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6359,6 +6543,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6372,6 +6557,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6398,6 +6584,7 @@ export interface operations {
             /** @description Current billing period and attributed usage. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6415,6 +6602,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             402: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6428,6 +6616,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6441,6 +6630,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6467,6 +6657,7 @@ export interface operations {
             /** @description Keys, including expired and revoked keys, newest first. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6478,6 +6669,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6491,6 +6683,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6536,6 +6729,7 @@ export interface operations {
             /** @description Created key and its one-time secret token. */
             201: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6548,6 +6742,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6561,6 +6756,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6574,6 +6770,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6607,6 +6804,7 @@ export interface operations {
             /** @description The successor, its one-time token, and when the old key stops. */
             201: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6623,6 +6821,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6636,6 +6835,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6649,6 +6849,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6662,6 +6863,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6689,6 +6891,7 @@ export interface operations {
             /** @description Key revoked. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6700,6 +6903,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6713,6 +6917,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6726,6 +6931,7 @@ export interface operations {
             /** @description The request failed. Inspect error.message. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6752,6 +6958,7 @@ export interface operations {
             /** @description Control released; resume in the same sandbox using the returned command, arguments and directory. Resume is null if no vendor conversation exists yet. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6767,6 +6974,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6783,6 +6991,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6799,6 +7008,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6815,6 +7025,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6831,6 +7042,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6847,6 +7059,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6874,6 +7087,7 @@ export interface operations {
             /** @description The signed-in user's tokens. No token hashes or secrets. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6894,6 +7108,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6910,6 +7125,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6926,6 +7142,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6942,6 +7159,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6958,6 +7176,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -6974,6 +7193,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7009,6 +7229,7 @@ export interface operations {
             /** @description Personal token created. */
             201: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7030,6 +7251,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7046,6 +7268,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7062,6 +7285,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7078,6 +7302,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7094,6 +7319,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7110,6 +7336,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7139,6 +7366,7 @@ export interface operations {
             /** @description Revoked. User sign-in required. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7150,6 +7378,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7166,6 +7395,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7182,6 +7412,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7198,6 +7429,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7214,6 +7446,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7230,6 +7463,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7263,6 +7497,7 @@ export interface operations {
             /** @description Permission-filtered page. Follow nextCursor with after while hasMore is true. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7294,6 +7529,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7310,6 +7546,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7326,6 +7563,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7342,6 +7580,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7358,6 +7597,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7374,6 +7614,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7403,6 +7644,7 @@ export interface operations {
             /** @description Bridge ready. */
             201: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7412,6 +7654,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7428,6 +7671,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7444,6 +7688,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7460,6 +7705,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7476,6 +7722,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7492,6 +7739,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7523,6 +7771,7 @@ export interface operations {
             /** @description Most recent session index records. Read a session for reconciled turn state. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7547,6 +7796,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7563,6 +7813,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7579,6 +7830,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7595,6 +7847,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7611,6 +7864,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7627,6 +7881,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7656,6 +7911,7 @@ export interface operations {
             /** @description Reconciled state, including the most recent completed turn or pending approval. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7665,6 +7921,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7681,6 +7938,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7697,6 +7955,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7713,6 +7972,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7729,6 +7989,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7745,6 +8006,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7777,6 +8039,7 @@ export interface operations {
             /** @description Replies read in the guest; each reader keeps its own nextCursor. Unavailable while asleep. Pages contain at most 128 Ki UTF-16 code units of text; a larger individual reply is explicitly marked truncated. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7796,6 +8059,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7812,6 +8076,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7828,6 +8093,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7844,6 +8110,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7860,6 +8127,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7876,6 +8144,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7911,6 +8180,7 @@ export interface operations {
             /** @description Server-sent events. `ready` ({cursor}) opens the stream; `state` carries the same body as getAgentSession whenever it changes (always once on connect); `output` carries one reply (with itemId when it was streamed) and its id is the output cursor; `conversation` carries one conversation event (user.message, agent.delta, agent.thought, tool.started, tool.output, tool.completed; bridge v9+) under the same cursor; `reconnect` ({cursor, reason}) closes a rotated stream; `unavailable` ({code, message}) closes when the sandbox cannot be followed; `error` ({code, message}) closes on lost access. Streams rotate within four minutes; reconnect with Last-Event-ID to continue without gaps or repeats. Requires agent_session.read. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7920,6 +8190,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7936,6 +8207,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7952,6 +8224,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7968,6 +8241,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7984,6 +8258,7 @@ export interface operations {
             /** @description Too many event streams are open for this credential. */
             429: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -7998,6 +8273,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8014,6 +8290,7 @@ export interface operations {
             /** @description Event streaming is not enabled on this API. */
             501: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8028,6 +8305,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8060,6 +8338,7 @@ export interface operations {
             /** @description The conversation in order, read in the guest: user.message (origin caller or terminal), agent.message, agent.thought, tool.started, tool.completed (kind command | file_change | mcp | web_search | tool; status completed | failed | declined; bounded output tail and diff), plus turn and approval markers. Streaming deltas are folded into their final item; `partial` holds text still streaming when the page reaches the end of the log. Follow getAgentSessionEvents from nextCursor afterwards. Requires bridge v9 (409 session_transcript_upgrade_required otherwise) and agent_session.read. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8088,6 +8367,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8104,6 +8384,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8120,6 +8401,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8136,6 +8418,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8152,6 +8435,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8168,6 +8452,7 @@ export interface operations {
             /** @description Transcripts are not enabled on this API. */
             501: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8182,6 +8467,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8214,6 +8500,7 @@ export interface operations {
             /** @description Long-poll for clients that cannot hold an event stream. Returns as soon as a reply, turn transition or approval request lands after `after`, or with changed: false at the timeout (default 25 s). `output` follows the same cursor and page bounds as getAgentOutput. Requires agent_session.read. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8237,6 +8524,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8253,6 +8541,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8269,6 +8558,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8285,6 +8575,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8301,6 +8592,7 @@ export interface operations {
             /** @description Too many waits or event streams are open for this credential. */
             429: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8315,6 +8607,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8331,6 +8624,7 @@ export interface operations {
             /** @description Waiting is not enabled on this API. */
             501: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8345,6 +8639,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8382,6 +8677,7 @@ export interface operations {
             /** @description Turn reserved and command enqueued. Poll getAgentSession and read replies with getAgentOutput. */
             202: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8396,6 +8692,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8412,6 +8709,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8428,6 +8726,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8444,6 +8743,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8460,6 +8760,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8476,6 +8777,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8513,6 +8815,7 @@ export interface operations {
             /** @description Decision enqueued for this exact prompt. Requires agent_session.approve. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8524,6 +8827,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8540,6 +8844,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8556,6 +8861,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8572,6 +8878,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8588,6 +8895,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8604,6 +8912,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8633,6 +8942,7 @@ export interface operations {
             /** @description Interrupt requested. Requires agent_session.send. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8644,6 +8954,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8660,6 +8971,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8676,6 +8988,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8692,6 +9005,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8708,6 +9022,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8724,6 +9039,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8753,6 +9069,7 @@ export interface operations {
             /** @description Saved conversation resumed. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8762,6 +9079,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8778,6 +9096,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8794,6 +9113,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8810,6 +9130,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8826,6 +9147,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8842,6 +9164,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message and error.code. */
             503: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8872,6 +9195,7 @@ export interface operations {
             /** @description The project's environments, by name. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8883,6 +9207,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8922,6 +9247,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -8961,6 +9287,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9000,6 +9327,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9039,6 +9367,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9128,6 +9457,7 @@ export interface operations {
             /** @description Created. */
             201: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9165,6 +9495,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9204,6 +9535,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9243,6 +9575,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9282,6 +9615,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9321,6 +9655,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9375,6 +9710,7 @@ export interface operations {
             /** @description The environment. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9386,6 +9722,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9425,6 +9762,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9464,6 +9802,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9503,6 +9842,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9542,6 +9882,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9596,6 +9937,7 @@ export interface operations {
             /** @description Deleted. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9633,6 +9975,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9672,6 +10015,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9711,6 +10055,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9750,6 +10095,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9789,6 +10135,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9879,6 +10226,7 @@ export interface operations {
             /** @description Updated. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9916,6 +10264,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9955,6 +10304,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -9994,6 +10344,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10033,6 +10384,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10072,6 +10424,7 @@ export interface operations {
             /** @description The operation could not be completed; inspect error.message. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10127,6 +10480,7 @@ export interface operations {
             /** @description The workspaces. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10138,6 +10492,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10166,6 +10521,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10224,6 +10580,7 @@ export interface operations {
             /** @description The new workspace. */
             201: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10235,6 +10592,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10263,6 +10621,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10291,6 +10650,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10319,6 +10679,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10362,6 +10723,7 @@ export interface operations {
             /** @description The workspace and its lease. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10373,6 +10735,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10401,6 +10764,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10444,6 +10808,7 @@ export interface operations {
             /** @description Deleted. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10463,6 +10828,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10491,6 +10857,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10550,6 +10917,7 @@ export interface operations {
             /** @description The updated workspace. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10587,6 +10955,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10615,6 +10984,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10643,6 +11013,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10671,6 +11042,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10727,6 +11099,7 @@ export interface operations {
             /** @description An existing execution, running. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10743,6 +11116,7 @@ export interface operations {
             /** @description A new execution. */
             201: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10759,6 +11133,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10787,6 +11162,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             402: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10815,6 +11191,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10843,6 +11220,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10871,6 +11249,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10899,6 +11278,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             429: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10927,6 +11307,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             500: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10955,6 +11336,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             504: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -10998,6 +11380,7 @@ export interface operations {
             /** @description Stopping, or already stopped. */
             200: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -11012,6 +11395,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -11040,6 +11424,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -11068,6 +11453,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -11123,6 +11509,7 @@ export interface operations {
             /** @description The new workspace, asleep. */
             201: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -11140,6 +11527,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             400: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -11168,6 +11556,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             403: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -11196,6 +11585,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             404: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
@@ -11224,6 +11614,7 @@ export interface operations {
             /** @description The request failed; inspect error.message and error.code. */
             409: {
                 headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
