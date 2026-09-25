@@ -2415,7 +2415,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description Not a member of this org. */
+            /** @description Not a member of this org, or the API key lacks project.read or is pinned to another org. */
             403: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
@@ -3172,7 +3172,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description Not a member of this org. */
+            /** @description Not a member of this org, or lacks billing.read. */
             403: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
@@ -3254,7 +3254,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description Not a member of this org. */
+            /** @description Not a member of this org, or the API key lacks sandbox.read or is pinned to another org. */
             403: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
