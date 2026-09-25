@@ -27,6 +27,7 @@ const sandbox: SandboxData = {
   allocated_disk_gb: 40,
   end_user_id: null,
   vm_lost_at: null,
+  environment_id: null,
   disk: null,
   created_at: "2026-09-13T00:00:00.000Z",
   updated_at: "2026-09-13T00:00:00.000Z",

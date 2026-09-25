@@ -1041,7 +1041,7 @@ export interface paths {
         post?: never;
         /**
          * Delete an environment
-         * @description Refused with 409 while any workspace or undeleted sandbox uses it. Requires environments.manage.
+         * @description Refused with 409 while any workspace names it, or, for the project's default, while workspaces that name no environment follow it: move them first. Sandboxes do not hold it: if any still boot from it, it is deleted for everything else (no longer listed, readable, editable, the default or usable for anything new) and kept only for them, so each keeps waking under its last egress policy, environment variables and setup script; it is released when the last of them is deleted. Requires environments.manage.
          */
         delete: operations["deleteEnvironment"];
         options?: never;
@@ -1320,6 +1320,8 @@ export interface components {
             allocated_disk_gb: number;
             end_user_id: string | null;
             vm_lost_at: string | null;
+            /** @description The environment this sandbox was created with and boots from; its egress policy, environment variables and setup script are re-applied on every wake. Null when it was created without one, which means unrestricted network access, unless the project's default environment is enforced: an enforced default applies to every sandbox in the project at every wake. */
+            environment_id: string | null;
             disk: components["schemas"]["SandboxDisk"];
             created_at: string;
             updated_at: string;
@@ -9944,6 +9946,8 @@ export interface operations {
                 content: {
                     "application/json": {
                         deleted: boolean;
+                        /** @description Present and true when sandboxes still boot from it: it is kept for them until the last one is deleted. */
+                        keptForSandboxes?: boolean;
                         /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
                         egressPropagation?: {
                             /** @description Running sandboxes that now enforce the rules they are held to. */
@@ -10501,8 +10505,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -10530,8 +10534,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -10601,8 +10605,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -10630,8 +10634,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -10659,8 +10663,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -10688,8 +10692,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -10744,8 +10748,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -10773,8 +10777,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -10837,8 +10841,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -10866,8 +10870,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -10964,8 +10968,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -10993,8 +10997,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11022,8 +11026,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11051,8 +11055,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11142,8 +11146,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11171,8 +11175,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11200,8 +11204,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11229,8 +11233,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11258,8 +11262,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11287,8 +11291,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11316,8 +11320,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11345,8 +11349,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11404,8 +11408,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11433,8 +11437,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11462,8 +11466,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11536,8 +11540,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11565,8 +11569,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11594,8 +11598,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
@@ -11623,8 +11627,8 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
-                            /** @description True when the same request may succeed if sent again (start_timeout). */
+                            code?: "workspace_name_taken" | "environment_invalid" | "workspace_unavailable" | "workspace_leased" | "lease_expired" | "holder_operation_pending" | "workspace_environment_unavailable" | "takeover_conflict" | "environment_not_found" | "restore_unavailable" | "holder_check_failed" | "checkpoint_not_found" | "checkpoint_not_durable" | "checkpoint_unavailable" | "nothing_to_fork" | "workspace_not_found" | "workspace_owner_only" | "start_timeout";
+                            /** @description True when the same request may succeed if sent again (start_timeout, takeover_conflict, workspace_environment_unavailable). */
                             retryable?: boolean;
                             workspaceId?: string;
                             holderSandboxId?: string | null;
