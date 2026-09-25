@@ -1536,6 +1536,7 @@ export interface components {
             expires_at: string | null;
             scopes: string[] | null;
             created_by: string | null;
+            legacy_format: boolean;
         };
         AgentSessionCommunication: {
             /** @enum {string} */

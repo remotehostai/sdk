@@ -31,6 +31,8 @@ export class RemoteHostAPIError extends RemoteHostError {
   /**
    * Machine-readable reason when the API sets one, for example `rate_limited`,
    * `limit_reached`, `plan_required`, or `snapshot_in_progress`. Null otherwise.
+   * A refused credential is always 401 `invalid_credential`, with the same
+   * message whatever the reason.
    */
   readonly code: string | null;
   readonly requestId: string | null;
