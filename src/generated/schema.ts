@@ -21,6 +21,106 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orgs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create an organization
+         * @description Creates an organization with the caller as its owner. Without a slug, one is derived from the name (`Acme` becomes `acme`, then `acme-2`). Sending the name of an org the caller already belongs to returns that org instead. Rate limited per user. API keys cannot create organizations.
+         */
+        post: operations["createOrg"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Rename an organization or change its slug
+         * @description Changes the name, the slug, or both; needs `org.update` (owners and admins). A changed slug leaves the old one as an alias: it keeps reaching the org's members, and no other org can take it until the org releases it. Moving back to one of the org's own old slugs is allowed. Slug changes are rate limited per user.
+         */
+        patch: operations["updateOrg"];
+        trace?: never;
+    };
+    "/me/orgs/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Find one of your organizations by slug
+         * @description Resolves a slug, current or old, among the organizations the caller belongs to. Anything else, including an organization that exists but the caller is not in, is the same 404, so the answer never says whether an organization exists. An API key resolves its own organization only. Address the organization by `org.id` from here on.
+         */
+        get: operations["getMyOrgBySlug"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/slug-aliases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List an organization's old slugs
+         * @description The slugs a rename left behind, newest first. Each still reaches the organization's members, and no other organization can take it. Needs `org.read`.
+         */
+        get: operations["listOrgSlugAliases"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/slug-aliases/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Release an old slug
+         * @description Frees one of the organization's old slugs: links to it stop reaching the organization, and any organization may then take it. Nothing else frees an old slug. Needs `org.update` (owners and admins).
+         */
+        delete: operations["releaseOrgSlugAlias"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/orgs/{orgId}/projects": {
         parameters: {
             query?: never;
@@ -1074,7 +1174,11 @@ export interface components {
         Org: {
             id: string;
             name: string;
-            slug: string | null;
+            /**
+             * @description The org's URL handle, as in console.remotehost.ai/<slug>. Unique; owners and admins can change it. Ids stay the canonical way to address an org.
+             * @example acme
+             */
+            slug: string;
             /** @enum {string} */
             plan: "none" | "individual" | "pro" | "max" | "team" | "enterprise";
             metronome_customer_id: string | null;
@@ -1083,6 +1187,13 @@ export interface components {
             onboarded_at: string | null;
             created_at: string;
             updated_at: string;
+        };
+        OrgBySlug: {
+            /** @enum {string} */
+            role: "owner" | "admin" | "billing_admin" | "security_admin" | "member";
+            org: components["schemas"]["Org"];
+            /** @description True when the slug asked for is an old one; `org.slug` is the current slug to move to. */
+            viaAlias: boolean;
         };
         Project: {
             id: string;
@@ -1619,7 +1730,592 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    createOrg: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    name: string;
+                    /** @description 3 to 39 lower-case letters, digits and single hyphens, starting and ending with a letter or digit, not shaped like an id (a UUID), and not a reserved word such as a console path. Letters are lower-cased. */
+                    slug?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description An org of the same name the caller already belongs to. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        org: components["schemas"]["Org"];
+                    };
+                };
+            };
+            /** @description The new organization. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        org: components["schemas"]["Org"];
+                    };
+                };
+            };
+            /** @description Missing name, or a slug that breaks the rule (`slug_format`) or is reserved (`slug_reserved`). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Another organization holds the slug, as its slug or an old one (`slug_taken`). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Too many organizations created (`rate_limited`); see Retry-After. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    updateOrg: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    name?: string;
+                    /** @description 3 to 39 lower-case letters, digits and single hyphens, starting and ending with a letter or digit, not shaped like an id (a UUID), and not a reserved word such as a console path. Letters are lower-cased. */
+                    slug?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated organization. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        org: components["schemas"]["Org"];
+                    };
+                };
+            };
+            /** @description Neither a name nor a slug, or a slug that breaks the rule or is reserved. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Permission org.update is required. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Another organization holds the slug (`slug_taken`). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Too many slug changes (`rate_limited`); see Retry-After. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getMyOrgBySlug: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The organization and the caller's role in it. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgBySlug"];
+                };
+            };
+            /** @description Org not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listOrgSlugAliases: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The organization's old slugs. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        aliases: {
+                            slug: string;
+                            createdAt: string;
+                        }[];
+                    };
+                };
+            };
+            /** @description Permission org.read is required. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    releaseOrgSlugAlias: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Released. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission org.update is required. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The organization has no such old slug. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description That is the organization's current slug (`slug_current`); change it first. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1669,7 +2365,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1695,7 +2391,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1749,7 +2445,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1775,7 +2471,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1801,7 +2497,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1856,7 +2552,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1882,7 +2578,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1908,7 +2604,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1934,7 +2630,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1985,7 +2681,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2011,7 +2707,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2037,7 +2733,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2088,7 +2784,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2114,7 +2810,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2140,7 +2836,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2191,7 +2887,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2217,7 +2913,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2243,7 +2939,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2296,7 +2992,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2322,7 +3018,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2348,7 +3044,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2398,7 +3094,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2424,7 +3120,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2477,7 +3173,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2503,7 +3199,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2559,7 +3255,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2585,7 +3281,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2611,7 +3307,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2637,7 +3333,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2663,7 +3359,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2689,7 +3385,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2715,7 +3411,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2741,7 +3437,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2791,7 +3487,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2817,7 +3513,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2843,7 +3539,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2869,7 +3565,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2919,7 +3615,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2945,7 +3641,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2971,7 +3667,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2997,7 +3693,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3047,7 +3743,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3073,7 +3769,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3099,7 +3795,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3125,7 +3821,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3151,7 +3847,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3201,7 +3897,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3227,7 +3923,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3253,7 +3949,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3279,7 +3975,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3305,7 +4001,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3331,7 +4027,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3357,7 +4053,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3419,7 +4115,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3445,7 +4141,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3471,7 +4167,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3497,7 +4193,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3523,7 +4219,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3549,7 +4245,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3603,7 +4299,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3629,7 +4325,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3655,7 +4351,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3681,7 +4377,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3707,7 +4403,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3733,7 +4429,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3759,7 +4455,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3785,7 +4481,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3839,7 +4535,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3865,7 +4561,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3891,7 +4587,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3917,7 +4613,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3943,7 +4639,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3969,7 +4665,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3995,7 +4691,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4021,7 +4717,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4071,7 +4767,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4097,7 +4793,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4123,7 +4819,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4175,7 +4871,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4201,7 +4897,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4227,7 +4923,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4253,7 +4949,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4303,7 +4999,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4329,7 +5025,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4355,7 +5051,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4381,7 +5077,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4407,7 +5103,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4461,7 +5157,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4487,7 +5183,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4513,7 +5209,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4539,7 +5235,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4595,7 +5291,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4621,7 +5317,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4647,7 +5343,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4673,7 +5369,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4728,7 +5424,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4754,7 +5450,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4780,7 +5476,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4806,7 +5502,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4832,7 +5528,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4882,7 +5578,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4908,7 +5604,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4934,7 +5630,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4999,7 +5695,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5025,7 +5721,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5051,7 +5747,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5077,7 +5773,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5129,7 +5825,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5155,7 +5851,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5181,7 +5877,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5229,7 +5925,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5255,7 +5951,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5281,7 +5977,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5307,7 +6003,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5355,7 +6051,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5381,7 +6077,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5407,7 +6103,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5433,7 +6129,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5490,7 +6186,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5516,7 +6212,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5542,7 +6238,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5568,7 +6264,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
