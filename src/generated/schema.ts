@@ -701,7 +701,7 @@ export interface paths {
         put?: never;
         /**
          * Rotate an API key
-         * @description Mints a successor with the same name, scopes and lifetime, and ends the old key after `overlapHours` (default 24, at most 168; 0 ends it now). The old key's new expiry is stored on it and returned. Only the key's creator may rotate it; API keys cannot call this operation.
+         * @description Mints a successor with the same name, scopes and lifetime, and ends the old key after `overlapHours` (default 24, at most 168; 0 ends it now). The old key's new expiry is stored on it and returned. Only the key's creator may rotate it; API keys cannot call this operation. A sandbox's own Claims key (`rh_sb_`) is managed by RemoteHost and answers 409 with `code: "sandbox_key_managed"`.
          */
         post: operations["rotateApiKey"];
         delete?: never;
@@ -722,7 +722,7 @@ export interface paths {
         post?: never;
         /**
          * Revoke an API key
-         * @description Requires a user session with api_keys.manage. API keys cannot call this operation.
+         * @description Requires a user session with api_keys.manage. API keys cannot call this operation. A sandbox's own Claims key (`rh_sb_`) cannot be revoked by hand: it answers 409 with `code: "sandbox_key_managed"`. To stop a sandbox using Claims, delete the sandbox or revoke the key it was issued from.
          */
         delete: operations["revokeApiKey"];
         options?: never;
@@ -1538,7 +1538,6 @@ export interface components {
             expires_at: string | null;
             scopes: string[] | null;
             created_by: string | null;
-            legacy_format: boolean;
         };
         AgentSessionCommunication: {
             /** @enum {string} */
@@ -6657,7 +6656,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Keys, including expired and revoked keys, newest first. */
+            /** @description Keys, including expired and revoked keys, newest first. A sandbox's own Claims key (`rh_sb_`) is managed by RemoteHost and is not listed. */
             200: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
@@ -6864,6 +6863,20 @@ export interface operations {
                 };
             };
             /** @description The request failed. Inspect error.message. */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
             500: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
@@ -6919,6 +6932,20 @@ export interface operations {
             };
             /** @description The request failed. Inspect error.message. */
             404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request failed. Inspect error.message. */
+            409: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
