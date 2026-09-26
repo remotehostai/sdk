@@ -1201,9 +1201,6 @@ export interface components {
             slug: string;
             /** @enum {string} */
             plan: "none" | "individual" | "pro" | "max" | "team" | "enterprise";
-            metronome_customer_id: string | null;
-            metronome_contract_id: string | null;
-            metronome_contract_plan: string | null;
             onboarded_at: string | null;
             created_at: string;
             updated_at: string;
