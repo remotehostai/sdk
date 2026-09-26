@@ -1763,7 +1763,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1833,7 +1833,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1860,7 +1887,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1887,7 +1941,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1914,7 +1968,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1974,7 +2028,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2001,7 +2055,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2028,7 +2109,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2055,7 +2163,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2082,7 +2190,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2132,7 +2240,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2159,7 +2267,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2214,7 +2322,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2241,7 +2349,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2290,7 +2398,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2317,7 +2425,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2344,7 +2479,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2371,7 +2533,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2423,7 +2585,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2450,7 +2612,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2506,7 +2668,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2533,7 +2695,61 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2560,7 +2776,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2617,7 +2833,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2644,7 +2860,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2671,7 +2887,61 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2698,7 +2968,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2751,7 +3021,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2778,7 +3048,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2805,7 +3075,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2858,7 +3128,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2885,7 +3155,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2912,7 +3182,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2965,7 +3235,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2992,7 +3262,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3019,7 +3289,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3074,7 +3344,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3101,7 +3371,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3128,7 +3398,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3180,7 +3450,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3207,7 +3477,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3262,7 +3532,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3289,7 +3559,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3347,7 +3617,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3374,7 +3644,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3401,7 +3671,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3428,7 +3698,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3455,7 +3752,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3482,7 +3806,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3509,7 +3833,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3536,7 +3860,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3588,7 +3912,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3615,7 +3939,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3642,7 +3993,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3669,7 +4047,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3721,7 +4099,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3748,7 +4126,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3775,7 +4180,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3802,7 +4234,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3854,7 +4286,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3881,7 +4313,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3908,7 +4340,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3935,7 +4394,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3962,7 +4448,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4014,7 +4500,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4041,7 +4527,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4068,7 +4554,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4095,7 +4581,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4122,7 +4635,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4149,7 +4662,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4176,7 +4716,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4240,7 +4780,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4267,7 +4807,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4294,7 +4834,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4321,7 +4861,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4348,7 +4915,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4375,7 +4969,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4431,7 +5025,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4458,7 +5052,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4485,7 +5079,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4512,7 +5106,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4539,7 +5160,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4566,7 +5214,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4593,7 +5241,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4620,7 +5268,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4676,7 +5324,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4703,7 +5351,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4730,7 +5378,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4757,7 +5405,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4784,7 +5459,34 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4811,7 +5513,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4838,7 +5540,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4865,7 +5567,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4917,7 +5619,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4944,7 +5646,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4971,7 +5673,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5025,7 +5727,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5052,7 +5754,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5079,7 +5781,61 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5106,7 +5862,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5158,7 +5914,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5185,7 +5941,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5212,7 +5968,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5239,7 +5995,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5266,7 +6022,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5318,7 +6074,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5345,7 +6101,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5372,7 +6128,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5428,7 +6184,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5455,7 +6211,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5482,7 +6238,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5509,7 +6265,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5567,7 +6323,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5594,7 +6350,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5621,7 +6377,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5648,7 +6404,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5705,7 +6461,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5732,7 +6488,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5759,7 +6515,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5775,7 +6531,34 @@ export interface operations {
                     };
                 };
             };
-            /** @description File content exceeds 2 MiB. */
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description File content exceeds 2 MiB, or the request body exceeds 5 MiB. */
             413: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
@@ -5786,7 +6569,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5813,7 +6596,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5865,7 +6648,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5892,7 +6675,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5919,7 +6702,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5987,7 +6770,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6014,7 +6797,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6041,7 +6824,61 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6068,7 +6905,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6122,7 +6959,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6149,7 +6986,61 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6176,7 +7067,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6226,7 +7117,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6253,7 +7144,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6280,7 +7171,61 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6307,7 +7252,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6357,7 +7302,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6384,7 +7329,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6411,7 +7356,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6438,7 +7383,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6497,7 +7442,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6524,7 +7469,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6551,7 +7496,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6578,7 +7523,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6901,6 +7846,60 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The request failed. Inspect error.message. */
             500: {
                 headers: {
@@ -6994,6 +7993,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The request failed. Inspect error.message. */
             409: {
                 headers: {
@@ -7004,6 +8030,33 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -7076,6 +8129,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The request failed. Inspect error.message. */
             409: {
                 headers: {
@@ -7086,6 +8166,33 @@ export interface operations {
                     "application/json": {
                         error: {
                             message: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -7184,6 +8291,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
@@ -7197,6 +8331,33 @@ export interface operations {
                             code?: string;
                             turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -7461,6 +8622,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
@@ -7474,6 +8662,33 @@ export interface operations {
                             code?: string;
                             turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -7588,6 +8803,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
@@ -7601,6 +8843,33 @@ export interface operations {
                             code?: string;
                             turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -7864,6 +9133,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
@@ -7877,6 +9173,33 @@ export interface operations {
                             code?: string;
                             turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -8902,6 +10225,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
@@ -8915,6 +10265,33 @@ export interface operations {
                             code?: string;
                             turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -9037,6 +10414,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
@@ -9050,6 +10454,33 @@ export interface operations {
                             code?: string;
                             turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -9164,6 +10595,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
@@ -9177,6 +10635,33 @@ export interface operations {
                             code?: string;
                             turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -9289,6 +10774,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The operation could not be completed; inspect error.message and error.code. */
             409: {
                 headers: {
@@ -9302,6 +10814,33 @@ export interface operations {
                             code?: string;
                             turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -9775,6 +11314,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The operation could not be completed; inspect error.message. */
             409: {
                 headers: {
@@ -9811,6 +11377,33 @@ export interface operations {
                             }[];
                             /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
                             listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -10257,6 +11850,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The operation could not be completed; inspect error.message. */
             409: {
                 headers: {
@@ -10293,6 +11913,33 @@ export interface operations {
                             }[];
                             /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
                             listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -10547,6 +12194,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The operation could not be completed; inspect error.message. */
             409: {
                 headers: {
@@ -10583,6 +12257,33 @@ export interface operations {
                             }[];
                             /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
                             listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -10842,6 +12543,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The request failed; inspect error.message and error.code. */
             409: {
                 headers: {
@@ -10867,6 +12595,33 @@ export interface operations {
                             /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
                             takeoverCommitted?: boolean;
                             recovery?: components["schemas"]["WorkspaceRecovery"];
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -11049,6 +12804,60 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
         };
     };
     updateWorkspace: {
@@ -11205,6 +13014,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The request failed; inspect error.message and error.code. */
             409: {
                 headers: {
@@ -11230,6 +13066,33 @@ export interface operations {
                             /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
                             takeoverCommitted?: boolean;
                             recovery?: components["schemas"]["WorkspaceRecovery"];
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -11412,6 +13275,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The request failed; inspect error.message and error.code. */
             409: {
                 headers: {
@@ -11437,6 +13327,33 @@ export interface operations {
                             /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
                             takeoverCommitted?: boolean;
                             recovery?: components["schemas"]["WorkspaceRecovery"];
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -11616,6 +13533,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The request failed; inspect error.message and error.code. */
             409: {
                 headers: {
@@ -11641,6 +13585,33 @@ export interface operations {
                             /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
                             takeoverCommitted?: boolean;
                             recovery?: components["schemas"]["WorkspaceRecovery"];
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
@@ -11777,6 +13748,33 @@ export interface operations {
                     };
                 };
             };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
             /** @description The request failed; inspect error.message and error.code. */
             409: {
                 headers: {
@@ -11802,6 +13800,33 @@ export interface operations {
                             /** @description True when a takeover committed but its new execution could not be started: the old execution is already cut off. Attach again once the cause is fixed. */
                             takeoverCommitted?: boolean;
                             recovery?: components["schemas"]["WorkspaceRecovery"];
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
                         };
                     };
                 };
