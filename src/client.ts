@@ -2,6 +2,7 @@ import createClient from "openapi-fetch";
 
 import { RemoteHostConfigurationError } from "./errors.js";
 import type { paths } from "./generated/schema.js";
+import { HOST_GATEWAY_ENV, HostGateway, hostGatewayEnabled, useHostGateway } from "./host-gateway.js";
 import type { APIClient } from "./internal.js";
 import { Sandboxes } from "./sandboxes.js";
 import { VERSION } from "./version.js";
@@ -9,6 +10,7 @@ import { VERSION } from "./version.js";
 const DEFAULT_BASE_URL = "https://api.remotehost.ai/v1";
 const DEFAULT_TIMEOUT_MS = 10 * 60 * 1000;
 const DEFAULT_MAX_RETRIES = 2;
+const DEFAULT_HOST_UNAVAILABLE_RETRY_MS = 60_000;
 
 export type RemoteHostOptions = {
   /** Secret API key. Defaults to REMOTEHOST_API_KEY outside browsers. */
@@ -23,10 +25,26 @@ export type RemoteHostOptions = {
   headers?: HeadersInit;
   /** Maximum automatic retries for safe GET and HEAD requests. Defaults to 2. */
   maxRetries?: number;
+  /**
+   * How long, in milliseconds, any request the API refused with 503
+   * `host_unavailable` and `retryable: true` is sent again while the
+   * sandbox's host restarts. The API only says so when nothing was changed,
+   * so this includes creates and wakes. Honors Retry-After. Defaults to
+   * 60 seconds; 0 turns it off.
+   */
+  hostUnavailableRetryMs?: number;
   /** Default deadline for one HTTP request. Defaults to 10 minutes. */
   timeoutMs?: number;
   /** Allow secret-key use in a browser. This can expose the key to users. */
   dangerouslyAllowBrowser?: boolean;
+  /**
+   * Experimental: run commands and read and write files through the
+   * sandbox's own host rather than through the API, with a single-use ticket
+   * the API issues for each call. Falls back to the API wherever the
+   * sandbox's host has no gateway. Defaults to REMOTEHOST_HOST_GATEWAY
+   * (1, true, yes or on), else off.
+   */
+  hostGateway?: boolean;
 };
 
 /** Server-side client for the RemoteHost API. */
@@ -66,11 +84,26 @@ export class RemoteHost {
       throw new RemoteHostConfigurationError("timeoutMs must be a positive number.");
     }
 
+    const hostUnavailableRetryMs = options.hostUnavailableRetryMs ?? DEFAULT_HOST_UNAVAILABLE_RETRY_MS;
+
+    if (!Number.isFinite(hostUnavailableRetryMs) || hostUnavailableRetryMs < 0) {
+      throw new RemoteHostConfigurationError("hostUnavailableRetryMs must be a non-negative number.");
+    }
+
+    const baseUrl = trimTrailingSlash(options.baseURL ?? DEFAULT_BASE_URL);
+    const reliableFetch = createReliableFetch(fetcher, { maxRetries, timeoutMs, hostUnavailableRetryMs });
     const api = createClient<paths>({
-      baseUrl: trimTrailingSlash(options.baseURL ?? DEFAULT_BASE_URL),
-      fetch: createReliableFetch(fetcher, { maxRetries, timeoutMs }),
+      baseUrl,
+      fetch: reliableFetch,
       headers,
     });
+
+    if (options.hostGateway ?? hostGatewayEnabled(readEnvironmentVariable(HOST_GATEWAY_ENV))) {
+      useHostGateway(
+        api,
+        new HostGateway({ baseUrl, headers, fetch: fetcher, apiFetch: reliableFetch, timeoutMs }),
+      );
+    }
 
     this.raw = api;
     this.sandboxes = new Sandboxes(api, options.orgId);
@@ -94,18 +127,35 @@ function trimTrailingSlash(url: string): string {
 
 function createReliableFetch(
   fetcher: (request: Request) => Promise<Response>,
-  options: { maxRetries: number; timeoutMs: number },
+  options: { maxRetries: number; timeoutMs: number; hostUnavailableRetryMs: number },
 ): (request: Request) => Promise<Response> {
   return async (request) => {
     const retryable = request.method === "GET" || request.method === "HEAD";
+    const startedAt = Date.now();
     let attempt = 0;
+    let hostAttempt = 0;
 
     while (true) {
       const timeout = AbortSignal.timeout(options.timeoutMs);
       const signal = AbortSignal.any([request.signal, timeout]);
 
       try {
-        const response = await fetcher(new Request(request, { signal }));
+        // A clone per attempt: a request with a body can only be sent once,
+        // and a create or wake may be sent again below.
+        const response = await fetcher(new Request(request.clone(), { signal }));
+
+        // The sandbox's host is restarting and the API changed nothing
+        // (REM-709): safe to send again, whatever the method, for a bounded
+        // time. Counted apart from maxRetries, which is about reads.
+        if (await isRetryableHostUnavailable(response)) {
+          const wait = retryDelayMs(response, hostAttempt);
+          if (Date.now() - startedAt + wait <= options.hostUnavailableRetryMs) {
+            await response.body?.cancel().catch(() => undefined);
+            await delay(wait, request.signal);
+            hostAttempt += 1;
+            continue;
+          }
+        }
 
         if (!retryable || attempt >= options.maxRetries || !isRetryableStatus(response.status)) {
           return response;
@@ -126,6 +176,19 @@ function createReliableFetch(
       attempt += 1;
     }
   };
+}
+
+async function isRetryableHostUnavailable(response: Response): Promise<boolean> {
+  if (response.status !== 503) return false;
+
+  try {
+    const body = (await response.clone().json()) as {
+      error?: { code?: unknown; retryable?: unknown };
+    };
+    return body.error?.code === "host_unavailable" && body.error.retryable === true;
+  } catch {
+    return false;
+  }
 }
 
 function isRetryableStatus(status: number): boolean {

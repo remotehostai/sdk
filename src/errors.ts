@@ -30,7 +30,10 @@ export class RemoteHostAPIError extends RemoteHostError {
   readonly status: number;
   /**
    * Machine-readable reason when the API sets one, for example `rate_limited`,
-   * `limit_reached`, `plan_required`, or `snapshot_in_progress`. Null otherwise.
+   * `limit_reached`, `plan_required`, `snapshot_in_progress`, or
+   * `host_unavailable` (503: the sandbox's host is restarting, draining or
+   * unreachable; retried automatically when the API marks it retryable).
+   * Null otherwise.
    * A refused credential is always 401 `invalid_credential`, with the same
    * message whatever the reason.
    */

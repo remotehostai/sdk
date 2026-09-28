@@ -1,4 +1,5 @@
 import type { components } from "./generated/schema.js";
+import { USE_API, hostGatewayFor } from "./host-gateway.js";
 import type { APIClient } from "./internal.js";
 import { unwrap } from "./internal.js";
 import type { RequestOptions } from "./request-options.js";
@@ -32,21 +33,48 @@ export class SandboxFiles {
   ) {}
 
   /** List direct children of a directory. Relative paths resolve beneath `/code`. */
-  list(path = "/code", options: RequestOptions = {}): Promise<ListFilesResult> {
+  async list(path = "/code", options: RequestOptions = {}): Promise<ListFilesResult> {
+    const signal = requestSignal(options);
+    // Through the sandbox's own host when the client is set to (REM-690).
+    const viaGateway = await hostGatewayFor(this.api)?.call<ListFilesResult>(this.sandboxId, {
+      permission: "sandbox.files.read",
+      method: "GET",
+      path: "/v1/files",
+      query: { path },
+      idempotent: true,
+      signal,
+    });
+    if (viaGateway !== undefined && viaGateway !== USE_API) {
+      return viaGateway;
+    }
+
     return unwrap(
       this.api.GET("/sandboxes/{sandboxId}/files", {
         params: { path: { sandboxId: this.sandboxId }, query: { path } },
-        signal: requestSignal(options),
+        signal,
       }),
     );
   }
 
   /** Read a file with its transport encoding preserved. */
-  read(path: string, options: RequestOptions = {}): Promise<ReadFileResult> {
+  async read(path: string, options: RequestOptions = {}): Promise<ReadFileResult> {
+    const signal = requestSignal(options);
+    const viaGateway = await hostGatewayFor(this.api)?.call<ReadFileResult>(this.sandboxId, {
+      permission: "sandbox.files.read",
+      method: "GET",
+      path: "/v1/file",
+      query: { path },
+      idempotent: true,
+      signal,
+    });
+    if (viaGateway !== undefined && viaGateway !== USE_API) {
+      return viaGateway;
+    }
+
     return unwrap(
       this.api.GET("/sandboxes/{sandboxId}/file", {
         params: { path: { sandboxId: this.sandboxId }, query: { path } },
-        signal: requestSignal(options),
+        signal,
       }),
     );
   }
@@ -68,7 +96,7 @@ export class SandboxFiles {
   }
 
   /** Write UTF-8 text or binary bytes. Individual writes are limited to 2 MiB. */
-  write(
+  async write(
     path: string,
     content: string | Uint8Array,
     options: RequestOptions = {},
@@ -77,12 +105,25 @@ export class SandboxFiles {
       typeof content === "string"
         ? { path, content, encoding: "utf8" as const }
         : { path, content: bytesToBase64(content), encoding: "base64" as const };
+    const signal = requestSignal(options);
+
+    const viaGateway = await hostGatewayFor(this.api)?.call<WriteFileResult>(this.sandboxId, {
+      permission: "sandbox.files.write",
+      method: "PUT",
+      path: "/v1/file",
+      body,
+      idempotent: false,
+      signal,
+    });
+    if (viaGateway !== undefined && viaGateway !== USE_API) {
+      return viaGateway;
+    }
 
     return unwrap(
       this.api.PUT("/sandboxes/{sandboxId}/file", {
         params: { path: { sandboxId: this.sandboxId } },
         body,
-        signal: requestSignal(options),
+        signal,
       }),
     );
   }

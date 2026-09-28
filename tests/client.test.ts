@@ -332,6 +332,114 @@ test("turns transport deadlines into typed timeout errors", async () => {
   await assert.rejects(client.sandboxes.list(), RemoteHostTimeoutError);
 });
 
+// REM-709: a wake or create during the host's orchestrator restart.
+function hostUnavailable(retryable = true, headers: HeadersInit = { "retry-after": "0" }): Response {
+  return jsonResponse(
+    {
+      error: {
+        message: "The host for this sandbox is restarting or unreachable. Nothing was changed; try again in a few seconds.",
+        code: "host_unavailable",
+        retryable,
+        ...(retryable ? { retryAfterSeconds: 0 } : {}),
+      },
+    },
+    503,
+    headers,
+  );
+}
+
+test("retries a wake the API refused because the host was restarting", async () => {
+  const paths: string[] = [];
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    fetch: async (request) => {
+      const path = new URL(request.url).pathname;
+      paths.push(`${request.method} ${path}`);
+      if (request.method === "GET") return jsonResponse({ sandbox: { ...sandbox, status: "stopped" } });
+      return paths.filter((entry) => entry.startsWith("POST")).length < 3
+        ? hostUnavailable()
+        : jsonResponse({ sandbox: { ...sandbox, status: "running" } });
+    },
+  });
+
+  const instance = await client.sandboxes.retrieve("sandbox_123");
+  await instance.wake();
+
+  assert.equal(instance.status, "running");
+  assert.deepEqual(
+    paths.filter((entry) => entry.startsWith("POST")),
+    Array(3).fill("POST /v1/sandboxes/sandbox_123/wake"),
+  );
+});
+
+test("retries a create with the same body when the host was restarting", async () => {
+  const bodies: string[] = [];
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    fetch: async (request) => {
+      bodies.push(await request.text());
+      return bodies.length === 1 ? hostUnavailable() : jsonResponse({ sandbox }, 201);
+    },
+  });
+
+  await client.sandboxes.create({ projectId: "project_123", agent: "codex", waitForReady: false });
+
+  assert.equal(bodies.length, 2);
+  assert.equal(bodies[1], bodies[0]);
+  assert.match(bodies[0]!, /project_123/);
+});
+
+test("does not retry a host_unavailable the API did not call retryable", async () => {
+  let calls = 0;
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    fetch: async () => {
+      calls += 1;
+      return hostUnavailable(false, {});
+    },
+  });
+
+  await assert.rejects(
+    client.sandboxes.create({ projectId: "project_123", agent: "codex", waitForReady: false }),
+    (error: unknown) => {
+      assert.ok(error instanceof RemoteHostAPIError);
+      assert.equal(error.status, 503);
+      assert.equal(error.code, "host_unavailable");
+      return true;
+    },
+  );
+  assert.equal(calls, 1);
+});
+
+test("stops retrying a restarting host after hostUnavailableRetryMs", async () => {
+  let calls = 0;
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    hostUnavailableRetryMs: 50,
+    fetch: async () => {
+      calls += 1;
+      return hostUnavailable(true, { "retry-after": "1" });
+    },
+  });
+
+  const started = Date.now();
+  await assert.rejects(
+    client.sandboxes.create({ projectId: "project_123", agent: "codex", waitForReady: false }),
+    (error: unknown) => error instanceof RemoteHostAPIError && error.code === "host_unavailable",
+  );
+  assert.equal(calls, 1);
+  assert.ok(Date.now() - started < 500);
+
+  assert.throws(
+    () => new RemoteHost({ apiKey: "rh_test", hostUnavailableRetryMs: -1 }),
+    RemoteHostConfigurationError,
+  );
+});
+
 async function unexpectedFetch(): Promise<Response> {
   throw new Error("Fetch should not have been called");
 }
