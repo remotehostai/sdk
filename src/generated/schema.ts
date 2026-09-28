@@ -1740,7 +1740,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Orgs the signed-in user belongs to, and their role in each. */
+            /** @description Orgs the signed-in user belongs to, and their role in each. An org API key sees only the org it belongs to. */
             200: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
