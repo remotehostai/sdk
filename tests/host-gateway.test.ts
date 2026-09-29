@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import RemoteHost, { RemoteHostAPIError, RemoteHostConnectionError } from "../src/index.js";
-import { isSafeGatewayUrl } from "../src/host-gateway.js";
+import { ROUTE_OFF_MS, isSafeGatewayUrl } from "../src/host-gateway.js";
 import type { SandboxData } from "../src/sandboxes.js";
 
 // Commands and files through the sandbox's own host (REM-690): off by
@@ -12,6 +12,8 @@ import type { SandboxData } from "../src/sandboxes.js";
 
 const SANDBOX = "0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
 const GATEWAY = "https://gw-eu-3-staging.remotehost.ai";
+// A sandbox the fake API answers "Sandbox not found." for (REM-715).
+const GONE = "0f0f0f0f-0000-4000-8000-000000000000";
 
 const sandboxData: SandboxData = {
   id: SANDBOX,
@@ -58,6 +60,13 @@ function world(options: {
       seen.push({ method: request.method, url: request.url, authorization: request.headers.get("authorization"), body });
       const url = new URL(request.url);
 
+      // A sandbox the API no longer has: retrievable from an earlier read,
+      // and every call on it the API's own 404, with no code.
+      if (url.pathname.includes(`/sandboxes/${GONE}`)) {
+        if (url.pathname.endsWith(`/sandboxes/${GONE}`)) return Response.json({ sandbox: { ...sandboxData, id: GONE } });
+        return Response.json({ error: { message: "Sandbox not found." } }, { status: 404 });
+      }
+
       if (url.origin === GATEWAY || url.hostname === "gw.example.com" || url.hostname === "127.0.0.1") {
         return options.gateway
           ? options.gateway(new Request(request.url, { method: request.method, headers: request.headers, body: text || undefined }))
@@ -65,17 +74,21 @@ function world(options: {
       }
       if (url.pathname.endsWith("/gateway-ticket")) {
         tickets += 1;
+        // The live metrics' own route takes no body (REM-715).
+        const metrics = url.pathname.endsWith("/metrics/gateway-ticket");
+        const permission = metrics ? "sandbox.files.read" : body.permission;
         return (
-          options.ticket?.(body.permission) ??
+          options.ticket?.(metrics ? "metrics" : permission) ??
           Response.json({
             ticket: `rh_hgt_ticket-${tickets}`,
             gatewayUrl: GATEWAY,
             expiresAt: new Date(Date.now() + 30_000).toISOString(),
             sandboxId: SANDBOX.replace(/-/g, ""),
-            permission: body.permission,
+            permission,
           })
         );
       }
+      if (url.pathname.endsWith("/metrics/live")) return Response.json({ ...liveMetrics, cpuPercent: 1 });
       if (url.pathname.endsWith(`/sandboxes/${SANDBOX}`)) return Response.json({ sandbox: sandboxData });
       if (url.pathname.endsWith("/exec")) {
         return Response.json({ exitCode: 0, stdout: "from the api\n", stderr: "", truncated: false, timedOut: false });
@@ -95,6 +108,150 @@ function world(options: {
 }
 
 const execResult = { exitCode: 7, stdout: "from the gateway\n", stderr: "", truncated: false, timedOut: false };
+
+const liveMetrics = {
+  cpuPercent: 12.5,
+  memoryTotalGb: 8,
+  memoryUsedGb: 2,
+  diskTotalGb: 40,
+  diskUsedGb: 4,
+  diskUsedBytes: 4294967296,
+  diskAvailableBytes: 38654705664,
+  swapTotalGb: 0,
+  swapUsedGb: 0,
+  memoryPressure: null,
+  cpuPressure: null,
+  memoryWarning: { level: "none", reason: "", suggestedShape: null },
+};
+
+// REM-715: live metrics through the gateway, in /metrics/live's own shape.
+test("reads live metrics on the sandbox's host with a ticket from the metrics' own route", async () => {
+  const { client, seen, apiCalls } = world({
+    hostGateway: true,
+    gateway: (request) => {
+      assert.equal(request.method, "GET");
+      assert.equal(new URL(request.url).pathname, "/v1/metrics");
+      assert.equal(request.headers.get("authorization"), "Bearer rh_hgt_ticket-1");
+      return Response.json(liveMetrics);
+    },
+  });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  assert.deepEqual(await sandbox.metrics.get(), liveMetrics);
+  const ticketCalls = apiCalls("/metrics/gateway-ticket");
+  assert.equal(ticketCalls.length, 1);
+  assert.equal(ticketCalls[0]!.body, null, "the route takes no body");
+  assert.equal(apiCalls("/metrics/live").length, 0, "nothing through the API");
+  assert.ok(!seen.some((s) => s.url.startsWith(GATEWAY) && s.authorization?.includes("rh_secret_key")));
+});
+
+test("reads live metrics through the API while the streams are off, and keeps the gateway for the rest", async () => {
+  const { client, apiCalls } = world({
+    hostGateway: true,
+    ticket: (permission) =>
+      permission === "metrics" ? Response.json({ error: { message: "Not found.", code: "not_found" } }, { status: 404 }) : (undefined as never),
+    gateway: () => Response.json(execResult),
+  });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  assert.equal((await sandbox.metrics.get()).cpuPercent, 1);
+  assert.equal(apiCalls("/metrics/live").length, 1);
+  // Exec and files still go to the gateway: one route being off says
+  // nothing about the others.
+  assert.equal((await sandbox.commands.run("true")).stdout, "from the gateway\n");
+  assert.equal(apiCalls("/exec").length, 0);
+});
+
+test("remembers that live metrics tickets are off, so a dark API costs one extra request, not one per call", async () => {
+  const { client, apiCalls } = world({
+    hostGateway: true,
+    ticket: (permission) =>
+      permission === "metrics" ? Response.json({ error: { message: "Not found.", code: "not_found" } }, { status: 404 }) : (undefined as never),
+  });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  const other = await client.sandboxes.retrieve(SANDBOX);
+  for (let i = 0; i < 3; i += 1) {
+    assert.equal((await sandbox.metrics.get()).cpuPercent, 1);
+  }
+  assert.equal((await other.metrics.get()).cpuPercent, 1);
+  assert.equal(apiCalls("/metrics/gateway-ticket").length, 1, "one ticket request for the whole client");
+  assert.equal(apiCalls("/metrics/live").length, 4);
+});
+
+test("remembers the API's streams switch being off", async () => {
+  const { client, apiCalls } = world({
+    hostGateway: true,
+    ticket: (permission) =>
+      permission === "metrics"
+        ? Response.json({ error: { message: "Not found.", code: "host_gateway_streams_off" } }, { status: 404 })
+        : (undefined as never),
+  });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  await sandbox.metrics.get();
+  await sandbox.metrics.get();
+  assert.equal(apiCalls("/metrics/gateway-ticket").length, 1);
+});
+
+test("a sandbox that isn't there is its own answer, never the route being off for every sandbox", async () => {
+  const { client, apiCalls } = world({
+    hostGateway: true,
+    gateway: () => Response.json(liveMetrics),
+  });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  // The same client, a sandbox the API no longer has: its ticket and its
+  // /metrics/live both answer the sandbox's own 404.
+  const gone = await client.sandboxes.retrieve(GONE);
+  await assert.rejects(gone.metrics.get(), (error: unknown) => error instanceof RemoteHostAPIError && error.status === 404);
+  // Every other sandbox still reads through the gateway.
+  assert.equal((await sandbox.metrics.get()).cpuPercent, 12.5);
+  assert.equal(apiCalls("/metrics/live").filter((c) => c.url.includes(SANDBOX)).length, 0);
+  assert.equal(apiCalls("/metrics/gateway-ticket").filter((c) => c.url.includes(SANDBOX)).length, 1);
+});
+
+test("asks again once the remembered off has run out", async () => {
+  const realNow = Date.now;
+  let now = realNow();
+  Date.now = () => now;
+  try {
+    let off = true;
+    const { client, apiCalls } = world({
+      hostGateway: true,
+      ticket: (permission) =>
+        permission === "metrics" && off
+          ? Response.json({ error: { message: "Not found.", code: "not_found" } }, { status: 404 })
+          : (undefined as never),
+      gateway: () => Response.json(liveMetrics),
+    });
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    assert.equal((await sandbox.metrics.get()).cpuPercent, 1);
+    off = false;
+    now += ROUTE_OFF_MS - 1;
+    assert.equal((await sandbox.metrics.get()).cpuPercent, 1, "still remembered off");
+    now += 2;
+    assert.equal((await sandbox.metrics.get()).cpuPercent, 12.5, "the flip is picked up");
+    assert.equal(apiCalls("/metrics/gateway-ticket").length, 2);
+  } finally {
+    Date.now = realNow;
+  }
+});
+
+test("reads live metrics through the API when the gateway does not serve them", async () => {
+  for (const unserved of [
+    () => Response.json({ error: { message: "Not found.", code: "not_found" } }, { status: 404 }),
+    () => new Response("404 page not found\n", { status: 404, headers: { "content-type": "text/plain" } }),
+    () => Response.json({ error: { message: "revocation policy unavailable", code: "policy_unavailable" } }, { status: 503 }),
+  ]) {
+    const { client, apiCalls } = world({ hostGateway: true, gateway: unserved });
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    assert.equal((await sandbox.metrics.get()).cpuPercent, 1);
+    assert.equal(apiCalls("/metrics/live").length, 1);
+  }
+});
+
+test("is off by default for live metrics too", async () => {
+  const { client, seen } = world({ hostGateway: false });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  assert.equal((await sandbox.metrics.get()).cpuPercent, 1);
+  assert.ok(!seen.some((s) => s.url.includes("gateway-ticket")));
+});
 
 test("is off by default: nothing asks for a ticket", async () => {
   const saved = process.env.REMOTEHOST_HOST_GATEWAY;

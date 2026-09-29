@@ -1,4 +1,5 @@
 import type { components, operations } from "./generated/schema.js";
+import { USE_API, hostGatewayFor } from "./host-gateway.js";
 import type { APIClient } from "./internal.js";
 import { unwrap } from "./internal.js";
 import type { RequestOptions } from "./request-options.js";
@@ -15,7 +16,23 @@ export class SandboxMetricsResource {
   ) {}
 
   /** Read current resource utilization without persisting a recommendation. */
-  get(options: RequestOptions = {}): Promise<LiveSandboxMetrics> {
+  async get(options: RequestOptions = {}): Promise<LiveSandboxMetrics> {
+    // Through the sandbox's host when the client uses the host gateway
+    // (REM-715): the same answer, the sample read on the host and the memory
+    // warning from the API's allocation. A read, so any gateway failure
+    // falls back to the API.
+    const viaGateway = await hostGatewayFor(this.api)?.call<LiveSandboxMetrics>(this.sandboxId, {
+      permission: "sandbox.files.read",
+      method: "GET",
+      path: "/v1/metrics",
+      ticketRoute: "metrics/gateway-ticket",
+      idempotent: true,
+      signal: requestSignal(options),
+    });
+    if (viaGateway !== undefined && viaGateway !== USE_API) {
+      return viaGateway;
+    }
+
     return unwrap(
       this.api.GET("/sandboxes/{sandboxId}/metrics/live", {
         params: { path: { sandboxId: this.sandboxId } },

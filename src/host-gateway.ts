@@ -1,7 +1,8 @@
 import { RemoteHostAPIError, RemoteHostConnectionError, RemoteHostTimeoutError } from "./errors.js";
 import type { APIClient } from "./internal.js";
 
-// Commands and files through the sandbox's own host (REM-690). Off unless
+// Commands, files (REM-690) and live metrics (REM-715) through the
+// sandbox's own host. Off unless
 // the client is created with `hostGateway: true`, or REMOTEHOST_HOST_GATEWAY
 // is 1, true, yes or on, while the gateways are proven on staging.
 //
@@ -45,7 +46,11 @@ type TicketAnswer = {
 export type GatewayCall = {
   permission: GatewayPermission;
   method: "GET" | "POST" | "PUT";
-  path: "/v1/exec" | "/v1/files" | "/v1/file";
+  path: "/v1/exec" | "/v1/files" | "/v1/file" | "/v1/metrics";
+  // The API route that issues this call's ticket, under the sandbox, when it
+  // is not the generic gateway-ticket: live metrics have their own
+  // (metrics/gateway-ticket), on only while the gateway's streams are.
+  ticketRoute?: "metrics/gateway-ticket";
   query?: Record<string, string | undefined>;
   body?: unknown;
   // A GET is safe to send to the API after any gateway failure; a command
@@ -65,9 +70,22 @@ export type HostGatewayConfig = {
   timeoutMs: number;
 };
 
+// How long a ticket route of its own that answered 404 (its group off on the
+// API, e.g. the live streams while they are dark) is taken as off, for every
+// sandbox: the API's switch is API-wide. Short enough that a flip is picked
+// up within minutes by a long-lived client.
+export const ROUTE_OFF_MS = 5 * 60_000;
+
+// The 404s that mean the route itself is off: the API's switch
+// (`host_gateway_streams_off`), or an API without the route at all
+// (`not_found`, its unmatched-route answer).
+const ROUTE_OFF_CODES = new Set(["host_gateway_streams_off", "not_found"]);
+
 export class HostGateway {
   // Sandboxes whose gateway path failed in this client, with why.
   private readonly fellBack = new Map<string, string>();
+  // Ticket routes of their own found off, until when (ROUTE_OFF_MS).
+  private readonly routesOff = new Map<string, number>();
 
   constructor(private readonly config: HostGatewayConfig) {}
 
@@ -79,6 +97,13 @@ export class HostGateway {
   async call<T>(sandboxId: string, call: GatewayCall): Promise<T | typeof USE_API> {
     if (this.fellBack.has(sandboxId)) {
       return USE_API;
+    }
+
+    // A route of its own that was off a moment ago: no ticket request.
+    const offUntil = call.ticketRoute ? this.routesOff.get(call.ticketRoute) : undefined;
+    if (offUntil !== undefined) {
+      if (Date.now() < offUntil) return USE_API;
+      this.routesOff.delete(call.ticketRoute!);
     }
 
     const issued = await this.ticket(sandboxId, call);
@@ -126,6 +151,14 @@ export class HostGateway {
 
     if (!response.ok) {
       const code = errorCode(body);
+      // A read the gateway does not serve (its group is off: `not_found`; or
+      // it predates the route: a plain-text 404): this call goes to the API,
+      // and nothing else changes. A 404 in the API's own words (a file not
+      // found) is the answer.
+      const unserved = code === "not_found" || !(body && typeof body === "object" && "error" in body);
+      if (call.idempotent && response.status === 404 && unserved) {
+        return USE_API;
+      }
       if (code && REFUSED_BEFORE_RUNNING.has(code)) {
         // A stale policy passes; a refused ticket or a missing credential
         // says the gateway path does not work for this sandbox.
@@ -142,17 +175,21 @@ export class HostGateway {
 
   private async ticket(sandboxId: string, call: GatewayCall): Promise<TicketAnswer | typeof USE_API> {
     const headers = new Headers(this.config.headers);
-    headers.set("content-type", "application/json");
+    if (!call.ticketRoute) headers.set("content-type", "application/json");
 
     let response: Response;
     try {
       response = await this.config.apiFetch(
-        new Request(`${this.config.baseUrl}/sandboxes/${encodeURIComponent(sandboxId)}/gateway-ticket`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ permission: call.permission }),
-          signal: call.signal,
-        }),
+        new Request(
+          `${this.config.baseUrl}/sandboxes/${encodeURIComponent(sandboxId)}/${call.ticketRoute ?? "gateway-ticket"}`,
+          {
+            method: "POST",
+            headers,
+            // A route of its own takes no body: the route names the permission.
+            body: call.ticketRoute ? undefined : JSON.stringify({ permission: call.permission }),
+            signal: call.signal,
+          },
+        ),
       );
     } catch (error) {
       if (call.signal?.aborted) throw error;
@@ -164,7 +201,14 @@ export class HostGateway {
     if (!response.ok) {
       // Tickets are off, or this sandbox's host has no gateway yet: the
       // API's route, for this sandbox from now on.
-      if (response.status === 404 || errorCode(body) === "host_gateway_unavailable") {
+      // A route of its own that is off says nothing about the others; it is
+      // off for every sandbox for a while. Only the API's switch says so
+      // (ROUTE_OFF_CODES): a sandbox's own 404 ("Sandbox not found.") must
+      // not send every other sandbox's calls to the API.
+      if (response.status === 404 && call.ticketRoute && ROUTE_OFF_CODES.has(errorCode(body) ?? "")) {
+        this.routesOff.set(call.ticketRoute, Date.now() + ROUTE_OFF_MS);
+      }
+      if ((response.status === 404 && !call.ticketRoute) || errorCode(body) === "host_gateway_unavailable") {
         this.fellBack.set(sandboxId, `ticket refused: ${response.status}${errorCode(body) ? ` ${errorCode(body)}` : ""}`);
       }
       // Anything else (no permission, a sleeping sandbox) the API's own
