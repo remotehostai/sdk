@@ -15,10 +15,32 @@ import type { APIClient } from "./internal.js";
 //
 // Where the gateway path is not available (the API issues no tickets, the
 // sandbox's host has no gateway yet) the call goes to the API as before, and
-// so does every later call for that sandbox. A command or a write falls back
-// only when nothing can have run: the gateway refused the ticket before
-// touching the sandbox. A connection lost mid-command is an error, never a
-// second run.
+// so does every later call for that sandbox.
+//
+// When the gateway fails a call, whether it goes to the API depends on the
+// call (REM-906):
+// - Any call, when the gateway refused it before touching the sandbox
+//   (REFUSED_BEFORE_RUNNING, a 429, or a route it does not serve): nothing
+//   ran.
+// - A read (`idempotent`), also on any other failure of the gateway or the
+//   path to it: a 5xx, an answer not in the API's shape (Cloudflare's own
+//   error pages), a 2xx cut off, a lost connection or a timeout. Reading
+//   twice is harmless.
+// - Never an answer in the API's own words that the API would give too: a
+//   file not in the workspace, a body it refuses, a revoked access.
+// - A command or a write never after it may have run: a 5xx, `policy_lost`,
+//   a 2xx cut off, a timeout or a connection lost mid-command is an error,
+//   never a second run.
+//
+// Each fallback is for that one call. A sandbox's later calls go straight to
+// the API for the life of the client only when its gateway path cannot work:
+// the gateway would not take the API's ticket (GATEWAY_BROKEN_FOR_SANDBOX),
+// the API issues it no tickets (a 404 from gateway-ticket, or
+// host_gateway_unavailable), or the gateway URL is not https.
+//
+// A gateway built before `policy_lost` answers a policy lost mid-command
+// with `policy_unavailable`, which reads as "nothing ran": until the
+// gateways run a build with it, a command can still be sent twice then.
 
 export const HOST_GATEWAY_ENV = "REMOTEHOST_HOST_GATEWAY";
 
@@ -28,9 +50,29 @@ export type GatewayPermission = "sandbox.terminal.connect" | "sandbox.files.read
 export const USE_API: unique symbol = Symbol("use the API");
 
 // The gateway's refusals before it touches a sandbox (internal/gateway
-// api.go): a ticket it would not take, or a revocation policy it cannot
-// vouch for. Nothing ran, so the API's route is safe to use instead.
-const REFUSED_BEFORE_RUNNING = new Set(["missing_ticket", "invalid_ticket", "policy_unavailable", "credential_unavailable"]);
+// api.go and streams.go): a ticket it would not take, a revocation policy it
+// cannot vouch for, no envd credential from the API, a group of routes that
+// is off, or a stream cap. Nothing ran, so the API's route is safe to use
+// instead. Not `policy_lost`: the policy went stale while the call ran.
+const REFUSED_BEFORE_RUNNING = new Set([
+  "missing_ticket",
+  "invalid_ticket",
+  "policy_unavailable",
+  "credential_unavailable",
+  "no_credential",
+  "not_found",
+  "too_many_streams",
+]);
+
+// Of those, the ones that say the gateway path does not work for this
+// sandbox, so its later calls go straight to the API: the gateway would not
+// take the API's own ticket. The rest pass: a policy catching up, the
+// gateway briefly unable to get a credential from the API (its route's
+// 429, 401 or 503), a sandbox moving or waking, a cap, a route off.
+export const GATEWAY_BROKEN_FOR_SANDBOX = new Set(["missing_ticket", "invalid_ticket"]);
+
+// The code-less 404 gateways sent for `no_credential` before it had a code.
+const NO_CREDENTIAL_MESSAGE = "No envd credential for this sandbox.";
 
 export function hostGatewayEnabled(value: string | undefined): boolean {
   return ["1", "true", "yes", "on"].includes((value ?? "").trim().toLowerCase());
@@ -53,8 +95,9 @@ export type GatewayCall = {
   ticketRoute?: "metrics/gateway-ticket";
   query?: Record<string, string | undefined>;
   body?: unknown;
-  // A GET is safe to send to the API after any gateway failure; a command
-  // or a write only when the gateway refused it outright.
+  // A read is sent to the API after a failure of the gateway or the path to
+  // it, but not after an answer in the API's own words; a command or a
+  // write only when the gateway refused it before touching the sandbox.
   idempotent: boolean;
   signal?: AbortSignal;
 };
@@ -135,12 +178,11 @@ export class HostGateway {
       );
     } catch (error) {
       if (call.signal?.aborted) throw error;
+      // A read goes to the API, a timeout included, for this call only: a
+      // connection lost once says nothing about the next one (REM-906).
+      if (call.idempotent) return USE_API;
       if (timeout.aborted) {
         throw new RemoteHostTimeoutError("The sandbox's host gateway timed out.", { cause: error });
-      }
-      if (call.idempotent) {
-        this.fellBack.set(sandboxId, `gateway unreachable: ${errorMessage(error)}`);
-        return USE_API;
       }
       throw new RemoteHostConnectionError("Lost the connection to the sandbox's host gateway.", {
         cause: error,
@@ -149,20 +191,22 @@ export class HostGateway {
 
     const body = await readJson(response);
 
+    // A 2xx cut off, or not the JSON object every gateway route answers: a
+    // read goes to the API; a command or a write may have run, so it is an
+    // error, never a second run.
+    if (response.ok && !(body && typeof body === "object")) {
+      if (call.idempotent) return USE_API;
+      // An answer cut off by the caller's abort or the SDK's timeout says
+      // so, as a request cut off before its answer does.
+      if (call.signal?.aborted) throw call.signal.reason;
+      if (timeout.aborted) throw new RemoteHostTimeoutError("The sandbox's host gateway timed out.");
+      throw new RemoteHostConnectionError("The sandbox's host gateway sent an incomplete answer.");
+    }
+
     if (!response.ok) {
-      const code = errorCode(body);
-      // A read the gateway does not serve (its group is off: `not_found`; or
-      // it predates the route: a plain-text 404): this call goes to the API,
-      // and nothing else changes. A 404 in the API's own words (a file not
-      // found) is the answer.
-      const unserved = code === "not_found" || !(body && typeof body === "object" && "error" in body);
-      if (call.idempotent && response.status === 404 && unserved) {
-        return USE_API;
-      }
-      if (code && REFUSED_BEFORE_RUNNING.has(code)) {
-        // A stale policy passes; a refused ticket or a missing credential
-        // says the gateway path does not work for this sandbox.
-        if (code !== "policy_unavailable") {
+      if (fallsBack(call, response.status, body)) {
+        const code = errorCode(body);
+        if (code && GATEWAY_BROKEN_FOR_SANDBOX.has(code)) {
           this.fellBack.set(sandboxId, `gateway refused: ${response.status} ${code}`);
         }
         return USE_API;
@@ -249,6 +293,37 @@ export function isSafeGatewayUrl(value: string): boolean {
   );
 }
 
+// Whether a gateway's failed answer sends this call to the API: the policy
+// at the top of this file.
+export function fallsBack(call: Pick<GatewayCall, "idempotent">, status: number, body: unknown): boolean {
+  const code = errorCode(body);
+  const apiShaped = apiErrorMessage(body) !== null;
+
+  // Refused before the sandbox: a code that says so; the code-less
+  // no-credential 404 of gateways before `no_credential`; a route the
+  // gateway does not have (a plain-text 404); a rate limit, the gateway's
+  // or Cloudflare's, which is answered before anything runs.
+  if (code && REFUSED_BEFORE_RUNNING.has(code)) return true;
+  if (status === 404 && !code && (apiErrorMessage(body) === NO_CREDENTIAL_MESSAGE || !apiShaped)) return true;
+  if (status === 429) return true;
+
+  // A read, after any other failure of the gateway or the path to it.
+  // An answer in the API's own words below 500 is the API's answer too.
+  if (call.idempotent) return status >= 500 || !apiShaped;
+
+  return false;
+}
+
+function apiErrorMessage(body: unknown): string | null {
+  if (body && typeof body === "object" && "error" in body) {
+    const error = (body as { error: unknown }).error;
+    if (error && typeof error === "object" && "message" in error && typeof error.message === "string") {
+      return error.message;
+    }
+  }
+  return null;
+}
+
 async function readJson(response: Response): Promise<unknown> {
   const text = await response.text().catch(() => "");
   if (!text) return null;
@@ -267,10 +342,6 @@ function errorCode(body: unknown): string | null {
     }
   }
   return null;
-}
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
 }
 
 // Which gateway, if any, each API client uses. Internal: the resources find

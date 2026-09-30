@@ -19,8 +19,9 @@ export class SandboxMetricsResource {
   async get(options: RequestOptions = {}): Promise<LiveSandboxMetrics> {
     // Through the sandbox's host when the client uses the host gateway
     // (REM-715): the same answer, the sample read on the host and the memory
-    // warning from the API's allocation. A read, so any gateway failure
-    // falls back to the API.
+    // warning from the API's allocation. A read, so it goes to the API after
+    // any failure of the gateway or the path to it (REM-906), though not
+    // after an answer the API would give too, such as a revocation.
     const viaGateway = await hostGatewayFor(this.api)?.call<LiveSandboxMetrics>(this.sandboxId, {
       permission: "sandbox.files.read",
       method: "GET",

@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import RemoteHost, { RemoteHostAPIError, RemoteHostConnectionError } from "../src/index.js";
-import { ROUTE_OFF_MS, isSafeGatewayUrl } from "../src/host-gateway.js";
+import RemoteHost, { RemoteHostAPIError, RemoteHostConnectionError, RemoteHostTimeoutError } from "../src/index.js";
+import { GATEWAY_BROKEN_FOR_SANDBOX, ROUTE_OFF_MS, fallsBack, isSafeGatewayUrl } from "../src/host-gateway.js";
 import type { SandboxData } from "../src/sandboxes.js";
 
 // Commands and files through the sandbox's own host (REM-690): off by
@@ -46,14 +46,17 @@ function world(options: {
   hostGateway?: boolean;
   ticket?: (permission: string) => Response;
   gateway?: (request: Request) => Promise<Response> | Response;
+  timeoutMs?: number;
 }) {
   const seen: Seen[] = [];
+  const inFlight = new Set<Request>();
   let tickets = 0;
   const client = new RemoteHost({
     apiKey: "rh_secret_key",
     orgId: "org_123",
     maxRetries: 0,
     ...(options.hostGateway === undefined ? {} : { hostGateway: options.hostGateway }),
+    ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
     fetch: async (request) => {
       const text = request.body ? await request.text() : "";
       const body = text ? JSON.parse(text) : null;
@@ -68,9 +71,20 @@ function world(options: {
       }
 
       if (url.origin === GATEWAY || url.hostname === "gw.example.com" || url.hostname === "127.0.0.1") {
-        return options.gateway
-          ? options.gateway(new Request(request.url, { method: request.method, headers: request.headers, body: text || undefined }))
-          : Response.json({ unexpected: true }, { status: 500 });
+        if (!options.gateway) return Response.json({ unexpected: true }, { status: 500 });
+        const answer = Promise.resolve(
+          options.gateway(new Request(request.url, { method: request.method, headers: request.headers, body: text || undefined })),
+        );
+        // Aborted as a real fetch is, so a gateway that never answers times out.
+        // Held until the answer, as a real fetch holds its request: Node
+        // keeps a signal's followers only weakly, so an unheld request's
+        // signal can be collected before it aborts.
+        inFlight.add(request);
+        answer.finally(() => inFlight.delete(request)).catch(() => {});
+        return new Promise<Response>((resolve, reject) => {
+          request.signal.addEventListener("abort", () => reject(request.signal.reason), { once: true });
+          answer.then(resolve, reject);
+        });
       }
       if (url.pathname.endsWith("/gateway-ticket")) {
         tickets += 1;
@@ -402,6 +416,233 @@ test("a revocation is the caller's error, not a fallback", async () => {
     assert.equal(error.code, "access_revoked");
     return true;
   });
+  assert.equal(apiCalls("/exec").length, 0);
+});
+
+// REM-906: which gateway failures send a call to the API.
+const cloudflare502 = () =>
+  new Response("<html><body>502 Bad Gateway</body></html>", { status: 502, headers: { "content-type": "text/html" } });
+
+test("a transient gateway failure on a read falls back to the API, and the next read tries the gateway again", async () => {
+  for (const [label, answer] of [
+    ["502 sandbox_unavailable", () => Response.json({ error: { message: "sandbox unreachable", code: "sandbox_unavailable" } }, { status: 502 })],
+    ["code-less 502 from envd", () => Response.json({ error: { message: "envd: connection reset" } }, { status: 502 })],
+    ["500", () => Response.json({ error: { message: "boom" } }, { status: 500 })],
+    ["503 policy_lost", () => Response.json({ error: { message: "lost", code: "policy_lost" } }, { status: 503 })],
+    ["Cloudflare's own 502 page", cloudflare502],
+    ["Cloudflare 530, no body", () => new Response(null, { status: 530 })],
+  ] as const) {
+    let calls = 0;
+    const { client, apiCalls } = world({
+      hostGateway: true,
+      gateway: () => (++calls === 1 ? answer() : Response.json(liveMetrics)),
+    });
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    assert.equal((await sandbox.metrics.get()).cpuPercent, 1, `${label}: from the API`);
+    assert.equal(apiCalls("/metrics/live").length, 1, label);
+    assert.equal((await sandbox.metrics.get()).cpuPercent, 12.5, `${label}: the gateway again`);
+    assert.equal(calls, 2, label);
+  }
+
+  // File reads, the same.
+  const { client, apiCalls } = world({ hostGateway: true, gateway: cloudflare502 });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  assert.equal(await sandbox.files.readText("a"), "api");
+  assert.deepEqual((await sandbox.files.list()).entries, []);
+  assert.equal(apiCalls("/file").length, 1);
+  assert.equal(apiCalls("/files").length, 1);
+});
+
+test("a command or a write is never sent twice once it may have run", async () => {
+  for (const [label, answer] of [
+    ["502 from envd", () => Response.json({ error: { message: "envd: stream cut" } }, { status: 502 })],
+    ["500", () => Response.json({ error: { message: "boom" } }, { status: 500 })],
+    ["503 policy_lost", () => Response.json({ error: { message: "lost", code: "policy_lost" } }, { status: 503 })],
+    ["Cloudflare's own 502 page", cloudflare502],
+    ["Cloudflare 524 timeout", () => new Response("timeout", { status: 524 })],
+  ] as const) {
+    const { client, apiCalls } = world({ hostGateway: true, gateway: answer });
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    await assert.rejects(sandbox.commands.run("make deploy"), RemoteHostAPIError, label);
+    await assert.rejects(sandbox.files.write("a", "x"), RemoteHostAPIError, label);
+    assert.equal(apiCalls("/exec").length, 0, label);
+    assert.equal(apiCalls("/file").length, 0, label);
+  }
+});
+
+test("a command or a write falls back when the gateway refused it before touching the sandbox", async () => {
+  for (const [label, answer] of [
+    ["404 no_credential", () => Response.json({ error: { message: "No envd credential for this sandbox.", code: "no_credential" } }, { status: 404 })],
+    ["the code-less no-credential 404 of older gateways", () => Response.json({ error: { message: "No envd credential for this sandbox.", code: "" } }, { status: 404 })],
+    ["404 not_found, the group off", () => Response.json({ error: { message: "Not found.", code: "not_found" } }, { status: 404 })],
+    ["a plain-text 404, the route not there", () => new Response("404 page not found\n", { status: 404 })],
+    ["429 too_many_streams", () => Response.json({ error: { message: "At most 16", code: "too_many_streams" } }, { status: 429 })],
+    ["Cloudflare's 429", () => new Response("rate limited", { status: 429 })],
+  ] as const) {
+    const { client, apiCalls } = world({ hostGateway: true, gateway: answer });
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    assert.equal((await sandbox.commands.run("true")).stdout, "from the api\n", label);
+    assert.equal((await sandbox.files.write("a", "x")).size, 1, label);
+    assert.equal(apiCalls("/exec").length, 1, label);
+    assert.equal(apiCalls("/file").length, 1, label);
+  }
+});
+
+test("an answer in the API's own words is the answer, not a fallback, even for a read", async () => {
+  for (const [status, message] of [
+    [404, "/code/a was not found in the workspace."],
+    [400, "path is required."],
+    [413, "The file is too large."],
+  ] as const) {
+    const { client, apiCalls } = world({
+      hostGateway: true,
+      gateway: () => Response.json({ error: { message, code: "" } }, { status }),
+    });
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    await assert.rejects(sandbox.files.readText("a"), (error: unknown) => {
+      assert.ok(error instanceof RemoteHostAPIError);
+      assert.equal(error.status, status);
+      return true;
+    });
+    assert.equal(apiCalls("/file").length, 0, message);
+  }
+});
+
+test("the fallback policy, answer by answer", () => {
+  const read = { idempotent: true };
+  const run = { idempotent: false };
+  const coded = (code: string, message = "m") => ({ error: { message, code } });
+  const cases: [string, number, unknown, boolean, boolean][] = [
+    // label, status, body, read falls back, command falls back
+    ["missing_ticket", 401, coded("missing_ticket"), true, true],
+    ["invalid_ticket", 403, coded("invalid_ticket"), true, true],
+    ["policy_unavailable", 503, coded("policy_unavailable"), true, true],
+    ["credential_unavailable", 503, coded("credential_unavailable"), true, true],
+    ["no_credential", 404, coded("no_credential"), true, true],
+    ["not_found", 404, coded("not_found"), true, true],
+    ["too_many_streams", 429, coded("too_many_streams"), true, true],
+    ["old no-credential 404", 404, coded("", "No envd credential for this sandbox."), true, true],
+    ["plain 404", 404, "404 page not found", true, true],
+    ["empty 429", 429, null, true, true],
+    ["policy_lost", 503, coded("policy_lost"), true, false],
+    ["sandbox_unavailable", 502, coded("sandbox_unavailable"), true, false],
+    ["code-less 500", 500, coded(""), true, false],
+    ["HTML 502", 502, "<html>", true, false],
+    ["non-JSON 403 from the edge", 403, "<html>blocked</html>", true, false],
+    ["access_revoked", 403, coded("access_revoked"), false, false],
+    ["file not in the workspace", 404, coded("", "/code/a was not found in the workspace."), false, false],
+    ["bad body", 400, coded("invalid_body"), false, false],
+  ];
+  for (const [label, status, body, readFallsBack, runFallsBack] of cases) {
+    assert.equal(fallsBack(read, status, body), readFallsBack, `read: ${label}`);
+    assert.equal(fallsBack(run, status, body), runFallsBack, `command: ${label}`);
+  }
+});
+
+// Which failures send a sandbox's later calls to the API for good (REM-906):
+// only a gateway that would not take the API's own ticket.
+test("only a refused ticket keeps a sandbox on the API; every other failure is for that call", async () => {
+  const pinned = [
+    [401, "missing_ticket"],
+    [403, "invalid_ticket"],
+  ] as const;
+  const passing = [
+    [503, "credential_unavailable"],
+    [404, "no_credential"],
+    [404, "not_found"],
+    [503, "policy_unavailable"],
+    [429, "too_many_streams"],
+    [502, "sandbox_unavailable"],
+  ] as const;
+  assert.deepEqual([...GATEWAY_BROKEN_FOR_SANDBOX].sort(), pinned.map(([, code]) => code).sort());
+
+  for (const [status, code] of [...pinned, ...passing]) {
+    let calls = 0;
+    const { client, seen } = world({
+      hostGateway: true,
+      gateway: () =>
+        ++calls === 1 ? Response.json({ error: { message: "no", code } }, { status }) : Response.json(liveMetrics),
+    });
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    assert.equal((await sandbox.metrics.get()).cpuPercent, 1, `${code}: the API`);
+    const second = await sandbox.metrics.get();
+    const tickets = seen.filter((s) => s.url.includes("gateway-ticket")).length;
+    if (pinned.some(([, pinnedCode]) => pinnedCode === code)) {
+      assert.equal(second.cpuPercent, 1, `${code}: still the API`);
+      assert.equal(tickets, 1, `${code}: no second ticket`);
+    } else {
+      assert.equal(second.cpuPercent, 12.5, `${code}: the gateway again`);
+      assert.equal(tickets, 2, `${code}: a second ticket`);
+    }
+  }
+});
+
+test("a lost connection on a read falls back for that call, and later calls use the gateway", async () => {
+  let calls = 0;
+  const { client, apiCalls } = world({
+    hostGateway: true,
+    gateway: () => {
+      if (++calls === 1) throw new TypeError("fetch failed: ECONNRESET");
+      return Response.json(execResult);
+    },
+  });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  assert.equal((await sandbox.metrics.get()).cpuPercent, 1);
+  assert.equal((await sandbox.commands.run("true")).stdout, "from the gateway\n");
+  assert.equal(apiCalls("/exec").length, 0);
+});
+
+test("a 2xx cut off: a read falls back, a command or a write is an error and never sent twice", async () => {
+  for (const [label, answer] of [
+    ["an empty body", () => new Response(null, { status: 200 })],
+    ["JSON cut off", () => new Response('{"exitCode":0,"std', { status: 200, headers: { "content-type": "application/json" } })],
+    ["not JSON", () => new Response("<html>ok</html>", { status: 200 })],
+  ] as const) {
+    const { client, apiCalls } = world({ hostGateway: true, gateway: answer });
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    assert.equal((await sandbox.metrics.get()).cpuPercent, 1, `${label}: metrics from the API`);
+    assert.equal(await sandbox.files.readText("a"), "api", `${label}: read from the API`);
+    await assert.rejects(sandbox.commands.run("make deploy"), RemoteHostConnectionError, label);
+    await assert.rejects(sandbox.files.write("a", "x"), RemoteHostConnectionError, label);
+    assert.equal(apiCalls("/exec").length, 0, label);
+    assert.equal(apiCalls("/file").filter((s) => s.method === "PUT").length, 0, label);
+  }
+});
+
+test("a read that times out on the gateway falls back; a command that times out is an error", async () => {
+  // A gateway that answers long after the client's 50 ms. Its timer is what
+  // keeps the loop alive, as a real open socket would: AbortSignal.timeout's
+  // own timer does not.
+  const timers: ReturnType<typeof setTimeout>[] = [];
+  const late = () => new Promise<Response>((resolve) => timers.push(setTimeout(() => resolve(Response.json(liveMetrics)), 5_000)));
+  const { client, apiCalls } = world({ hostGateway: true, timeoutMs: 50, gateway: late });
+  try {
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    assert.equal((await sandbox.metrics.get()).cpuPercent, 1);
+    assert.equal(await sandbox.files.readText("a"), "api");
+    await assert.rejects(sandbox.commands.run("sleep 600"), RemoteHostTimeoutError);
+    assert.equal(apiCalls("/exec").length, 0);
+  } finally {
+    for (const timer of timers) clearTimeout(timer);
+  }
+});
+
+test("a command whose answer the timeout cuts off is a timeout, not an incomplete answer", async () => {
+  // Headers at once, then half a body, then the connection drops well after
+  // the client's 50 ms.
+  const cutOff = () =>
+    new Response(
+      new ReadableStream({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode('{"exitCode":0,'));
+          setTimeout(() => controller.error(new Error("connection reset")), 200);
+        },
+      }),
+      { status: 200, headers: { "content-type": "application/json" } },
+    );
+  const { client, apiCalls } = world({ hostGateway: true, timeoutMs: 50, gateway: cutOff });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  await assert.rejects(sandbox.commands.run("make deploy"), RemoteHostTimeoutError);
   assert.equal(apiCalls("/exec").length, 0);
 });
 
