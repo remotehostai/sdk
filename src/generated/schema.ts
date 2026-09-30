@@ -1182,6 +1182,170 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/addons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Browse RemoteHost's add-ons
+         * @description RemoteHost's own and reviewed add-ons (provenance `first_party` or `verified`) that are listed: what a signed-out store shows. Needs no credential and reads none, so the answer is the same for everyone and carries nothing about any org. Cacheable (`Cache-Control: public`, an ETag); rate limited per address.
+         */
+        get: operations["listPublicAddons"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/addons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Browse an organization's add-on catalog
+         * @description The catalog as the org sees it: each entry says whether the org holds it and why, and the org's policy for it. Needs `org.read` (every member). Each kind is shown to whoever could add it somewhere: MCP servers to `mcp.read`, skills to `skills.read` and plugins to `plugins.read` on the org or any project in it, apps to every member, resources and every paid listing to `billing.read`. A member who holds none of those sees apps only. Browsing shows listed entries; `slug` finds one entry whatever its status but draft.
+         */
+        get: operations["listAddons"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/addons/attached": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the add-ons installed in an organization
+         * @description Every install on the API side, newest first: a project's skills and MCP servers, from the catalog or custom, with whether the org holds each one's listing and its policy. Needs `org.read`; each install is shown on the projects where the caller may read its kind (`skills.read`, `mcp.read`). Apps installed in Atlas workspaces are listed by Atlas.
+         */
+        get: operations["listAttachedAddons"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/addons/{listingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get one add-on, with its details
+         * @description One catalog entry, as the list shows it, and its kind's details: an MCP server's transport and tools, or a skill's package and requirements. Apps, plugins and resources have none. A listing the caller could not see in the list is a 404 here too.
+         */
+        get: operations["getAddon"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/addons/{listingId}/policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Allow or forbid an add-on in an organization
+         * @description `allowed: false` forbids the listing: nothing installs it, and existing installs stop being delivered. `allowed: true` allows it, even a community listing while community add-ons are off. Needs `integrations.manage` (owners and admins). Audited.
+         */
+        put: operations["setAddonPolicy"];
+        post?: never;
+        /**
+         * Return an add-on to the organization's default
+         * @description Removes the org's allow or forbid: the listing is then allowed, unless it is a community listing and the org has not opted in. Needs `integrations.manage`. Audited.
+         */
+        delete: operations["clearAddonPolicy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/addons/community": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Opt an organization in to community add-ons, or out
+         * @description Community add-ons are unreviewed third-party code and servers that run beside the org's secrets, so they are off until an owner or admin opts in. Needs `integrations.manage`. Audited.
+         */
+        put: operations["setCommunityAddons"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/addons/{listingId}/installs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Install an add-on
+         * @description Installs a catalog add-on at a scope: `org`, `project`, `sandbox` or `atlas_workspace`. Every install passes the same checks, in this order, each refusal with its code. The listing exists and the caller can see it in the org's catalog (`addon_not_found` otherwise), and the caller holds the kind's `.manage` at the scope (`skills.manage`, `mcp.manage`: at the org, on the project, or on the sandbox's project). Only then: the listing is not `blocked` or `retired`; the scope is one of its `attachLevels`; the org's policy allows it (community add-ons need the org's opt-in or an explicit allow); the org holds it (free, included in its plan, or bought: installing never buys); and nothing above the scope has switched it off. Today skills and MCP servers install on a project, one install of a listing per project. Plugins and resources are not installable yet (501), every install is audited, and apps are added to an Atlas workspace from Atlas.
+         */
+        post: operations["installAddon"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/addons/{listingId}/installs/{installId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove an installed add-on
+         * @description Removes one install of the listing. Needs the same permission as installing it; removing is allowed whatever the listing's state, the org's policy or holding. A caller who cannot read the kind on the install's project gets the same 404 whether or not it exists. Audited.
+         */
+        delete: operations["uninstallAddon"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1719,6 +1883,103 @@ export interface components {
             restoredSnapshotDurable: boolean | null;
             message: string;
         };
+        PublicAddon: {
+            id: string;
+            slug: string;
+            /** @enum {string} */
+            kind: "app" | "plugin" | "skill" | "mcp_server" | "resource";
+            name: string;
+            summary: string;
+            iconUrl: string | null;
+            publisher: string;
+            /** @enum {string} */
+            provenance: "first_party" | "verified";
+            /**
+             * @description Whether it is free, included in a plan, or bought. Never a price.
+             * @enum {string}
+             */
+            pricing: "free" | "included" | "paid";
+        };
+        Addon: {
+            /** @description UUIDv5 of the slug: any client can compute it. */
+            id: string;
+            /** @example skill/code-review */
+            slug: string;
+            /** @enum {string} */
+            kind: "app" | "plugin" | "skill" | "mcp_server" | "resource";
+            name: string;
+            summary: string;
+            publisher: string;
+            /**
+             * @description Who vouches for it: RemoteHost's own (`first_party`), reviewed by RemoteHost (`verified`), or unreviewed (`community`). Always shown.
+             * @enum {string}
+             */
+            provenance: "first_party" | "verified" | "community";
+            /**
+             * @description Browsing shows `listed` only. `delisted` is hidden from browsing, `retired` takes no new installs, `blocked` is off everywhere.
+             * @enum {string}
+             */
+            status: "listed" | "delisted" | "retired" | "blocked";
+            attachLevels: ("org" | "project" | "sandbox" | "atlas_workspace")[];
+            /**
+             * @description Whether it is free, included in a plan, or bought. Never a price.
+             * @enum {string}
+             */
+            pricing: "free" | "included" | "paid";
+            iconUrl: string | null;
+            held: boolean;
+            /**
+             * @description Why the org holds it (`held_*`) or does not. `blocked` is RemoteHost's takedown; `forbidden_by_policy` and `community_not_allowed` are the org's policy.
+             * @enum {string}
+             */
+            holding: "held_free" | "held_included" | "held_entitlement" | "blocked" | "forbidden_by_policy" | "community_not_allowed" | "not_held" | "unknown_listing" | "unknown_org";
+            policy: components["schemas"]["AddonPolicy"];
+        };
+        AddonPolicy: {
+            /**
+             * @description The org's own setting for this listing, or null for the default.
+             * @enum {string|null}
+             */
+            setting: "allow" | "forbid" | null;
+            /** @description Whether the org's policy allows it: its setting when there is one; otherwise yes, unless it is a community listing and the org has not opted in. */
+            allowed: boolean;
+        };
+        AddonInstall: {
+            id: string;
+            /** @enum {string} */
+            kind: "skill" | "mcp_server";
+            scope: {
+                /** @enum {string} */
+                type: "project";
+                id: string;
+            };
+            /** @description Null for a custom install, which has no listing and is always delivered. */
+            listingId: string | null;
+            listing: {
+                id: string;
+                slug: string | null;
+                name: string | null;
+                /**
+                 * @description Who vouches for it: RemoteHost's own (`first_party`), reviewed by RemoteHost (`verified`), or unreviewed (`community`). Always shown.
+                 * @enum {string|null}
+                 */
+                provenance: "first_party" | "verified" | "community" | null;
+                status: string | null;
+            } | null;
+            name: string;
+            enabled: boolean;
+            /** @description A skill's install status, or an MCP server's authorization status. */
+            status: string;
+            held: boolean | null;
+            /**
+             * @description Why the org holds it (`held_*`) or does not. `blocked` is RemoteHost's takedown; `forbidden_by_policy` and `community_not_allowed` are the org's policy.
+             * @enum {string|null}
+             */
+            holding: "held_free" | "held_included" | "held_entitlement" | "blocked" | "forbidden_by_policy" | "community_not_allowed" | "not_held" | "unknown_listing" | "unknown_org" | null;
+            policy: components["schemas"]["AddonPolicy"] & unknown;
+            createdAt: string;
+            updatedAt: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -1763,7 +2024,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1833,7 +2094,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1860,7 +2121,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1887,7 +2148,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1914,7 +2175,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1941,7 +2202,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -1968,7 +2229,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2028,7 +2289,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2055,7 +2316,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2082,7 +2343,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2109,7 +2370,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2136,7 +2397,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2163,7 +2424,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2190,7 +2451,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2240,7 +2501,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2267,7 +2528,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2322,7 +2583,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2349,7 +2610,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2398,7 +2659,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2425,7 +2686,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2452,7 +2713,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2479,7 +2740,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2506,7 +2767,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2533,7 +2794,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2585,7 +2846,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2612,7 +2873,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2668,7 +2929,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2695,7 +2956,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2722,7 +2983,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2749,7 +3010,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2776,7 +3037,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2833,7 +3094,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2860,7 +3121,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2887,7 +3148,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2914,7 +3175,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2941,7 +3202,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -2968,7 +3229,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3021,7 +3282,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3048,7 +3309,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3075,7 +3336,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3128,7 +3389,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3155,7 +3416,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3182,7 +3443,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3235,7 +3496,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3262,7 +3523,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3289,7 +3550,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3344,7 +3605,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3371,7 +3632,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3398,7 +3659,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3450,7 +3711,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3477,7 +3738,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3532,7 +3793,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3559,7 +3820,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3617,7 +3878,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3644,7 +3905,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3671,7 +3932,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3698,7 +3959,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3725,7 +3986,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3752,7 +4013,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3779,7 +4040,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3806,7 +4067,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3833,7 +4094,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3860,7 +4121,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3887,7 +4148,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3939,7 +4200,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3966,7 +4227,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -3993,7 +4254,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4020,7 +4281,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4047,7 +4308,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4074,7 +4335,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4101,7 +4362,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4128,7 +4389,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4180,7 +4441,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4207,7 +4468,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4234,7 +4495,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4261,7 +4522,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4288,7 +4549,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4315,7 +4576,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4342,7 +4603,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4369,7 +4630,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4421,7 +4682,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4448,7 +4709,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4475,7 +4736,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4502,7 +4763,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4529,7 +4790,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4556,7 +4817,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4583,7 +4844,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4610,7 +4871,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4637,7 +4898,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4689,7 +4950,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4716,7 +4977,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4743,7 +5004,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4770,7 +5031,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4797,7 +5058,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4824,7 +5085,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4851,7 +5112,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4878,7 +5139,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4905,7 +5166,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4969,7 +5230,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -4996,7 +5257,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5023,7 +5284,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5050,7 +5311,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5077,7 +5338,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5104,7 +5365,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5131,7 +5392,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5158,7 +5419,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5214,7 +5475,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5241,7 +5502,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5268,7 +5529,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5295,7 +5556,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5322,7 +5583,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5349,7 +5610,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5376,7 +5637,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5403,7 +5664,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5430,7 +5691,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5457,7 +5718,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5484,7 +5745,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5540,7 +5801,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5567,7 +5828,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5594,7 +5855,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5621,7 +5882,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5648,7 +5909,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5675,7 +5936,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5702,7 +5963,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5729,7 +5990,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5756,7 +6017,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5783,7 +6044,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5810,7 +6071,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5862,7 +6123,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5889,7 +6150,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5916,7 +6177,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5970,7 +6231,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -5997,7 +6258,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6024,7 +6285,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6051,7 +6312,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6078,7 +6339,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6105,7 +6366,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6157,7 +6418,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6184,7 +6445,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6211,7 +6472,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6238,7 +6499,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6265,7 +6526,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6317,7 +6578,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6344,7 +6605,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6371,7 +6632,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6427,7 +6688,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6454,7 +6715,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6481,7 +6742,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6508,7 +6769,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6566,7 +6827,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6593,7 +6854,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6620,7 +6881,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6647,7 +6908,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6704,7 +6965,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6731,7 +6992,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6758,7 +7019,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6785,7 +7046,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6812,7 +7073,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6839,7 +7100,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6891,7 +7152,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6918,7 +7179,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -6945,7 +7206,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7013,7 +7274,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7040,7 +7301,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7067,7 +7328,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7094,7 +7355,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7121,7 +7382,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7148,7 +7409,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7202,7 +7463,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7229,7 +7490,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7256,7 +7517,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7283,7 +7544,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7310,7 +7571,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7360,7 +7621,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7387,7 +7648,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7414,7 +7675,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7441,7 +7702,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7468,7 +7729,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7495,7 +7756,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7545,7 +7806,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7572,7 +7833,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7599,7 +7860,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7626,7 +7887,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7685,7 +7946,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7712,7 +7973,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7739,7 +8000,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -7766,7 +8027,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -8100,7 +8361,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -8127,7 +8388,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -8247,7 +8508,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -8288,7 +8549,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -8383,7 +8644,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -8424,7 +8685,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -8545,7 +8806,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -8589,7 +8850,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -8876,7 +9137,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -8920,7 +9181,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -9057,7 +9318,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -9101,7 +9362,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -9387,7 +9648,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -9431,7 +9692,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -10479,7 +10740,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -10523,7 +10784,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -10668,7 +10929,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -10712,7 +10973,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -10849,7 +11110,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -10893,7 +11154,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -11028,7 +11289,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -11072,7 +11333,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -11568,7 +11829,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -11635,7 +11896,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -12104,7 +12365,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -12171,7 +12432,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -12448,7 +12709,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -12515,7 +12776,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -12807,7 +13068,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -12865,7 +13126,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -13078,7 +13339,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -13105,7 +13366,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -13294,7 +13555,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -13352,7 +13613,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -13582,7 +13843,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -13640,7 +13901,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -13883,7 +14144,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -13941,7 +14202,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -14106,7 +14367,7 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
@@ -14164,7 +14425,1199 @@ export interface operations {
                         error: {
                             message: string;
                             /** @enum {string} */
-                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable";
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listPublicAddons: {
+        parameters: {
+            query?: {
+                kind?: "app" | "plugin" | "skill" | "mcp_server" | "resource";
+                /** @description The `nextCursor` of the previous page. */
+                cursor?: string;
+                /** @description Entries per page, 1 to 100; 50 by default. */
+                limit?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of listings. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        addons: components["schemas"]["PublicAddon"][];
+                        metadata: {
+                            count: number;
+                            nextCursor: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The page the caller holds (If-None-Match) is current. */
+            304: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description An unknown kind, a cursor this API did not give out, or a bad limit. */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Too many requests from this address (`rate_limited`); see Retry-After. */
+            429: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listAddons: {
+        parameters: {
+            query?: {
+                kind?: "app" | "plugin" | "skill" | "mcp_server" | "resource";
+                /** @description Who vouches for it: RemoteHost's own (`first_party`), reviewed by RemoteHost (`verified`), or unreviewed (`community`). Always shown. */
+                provenance?: "first_party" | "verified" | "community";
+                /** @description Matches the name, summary or slug. */
+                query?: string;
+                sort?: "rank" | "name" | "updated";
+                slug?: string;
+                /** @description The `nextCursor` of the previous page. */
+                cursor?: string;
+                /** @description Entries per page, 1 to 100; 50 by default. */
+                limit?: string;
+            };
+            header?: never;
+            path: {
+                orgId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of the catalog. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        addons: components["schemas"]["Addon"][];
+                        metadata: {
+                            count: number;
+                            nextCursor: string | null;
+                            /** @description Whether the org lets its members add community add-ons. */
+                            communityAddonsAllowed: boolean;
+                        };
+                    };
+                };
+            };
+            /** @description A filter, cursor or limit this route does not take. */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Not a member of the org. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listAttachedAddons: {
+        parameters: {
+            query?: {
+                /** @description The `nextCursor` of the previous page. */
+                cursor?: string;
+                /** @description Entries per page, 1 to 100; 50 by default. */
+                limit?: string;
+            };
+            header?: never;
+            path: {
+                orgId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of installs. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        installs: components["schemas"]["AddonInstall"][];
+                        metadata: {
+                            count: number;
+                            nextCursor: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description A cursor or limit this route does not take. */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Not a member of the org. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getAddon: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                listingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The entry and its details. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        addon: components["schemas"]["Addon"];
+                        detail: {
+                            [key: string]: unknown;
+                        } | null;
+                    };
+                };
+            };
+            /** @description Not a member of the org. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such listing, or not one the caller can see (`addon_not_found`). */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    setAddonPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                listingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    allowed: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description The entry, with its new policy. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        addon: components["schemas"]["Addon"];
+                    };
+                };
+            };
+            /** @description `allowed` is not true or false. */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Permission integrations.manage is required. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such listing (`addon_not_found`). */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    clearAddonPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                listingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The entry, with the default policy. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        addon: components["schemas"]["Addon"];
+                    };
+                };
+            };
+            /** @description Permission integrations.manage is required. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such listing (`addon_not_found`). */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    setCommunityAddons: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    allowed: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description The org's setting. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        communityAddonsAllowed: boolean;
+                    };
+                };
+            };
+            /** @description `allowed` is not true or false. */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Permission integrations.manage is required. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    installAddon: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                listingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    scope: {
+                        /** @enum {string} */
+                        type: "org" | "project" | "sandbox" | "atlas_workspace";
+                        id: string;
+                    };
+                    config?: {
+                        /** @description An MCP server's name in the project; its listing's by default. */
+                        name?: string;
+                        /** @description The MCP server's tools an agent may call; the listing's by default. */
+                        allowedTools?: string[];
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description The install, as the attached list shows it. */
+            201: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        install: components["schemas"]["AddonInstall"];
+                    };
+                };
+            };
+            /** @description A scope or config this route does not take, or a scope the listing does not attach to (`addon_scope_not_allowed`). */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Not a member, the org's policy forbids it (`addon_forbidden_by_org`, `addon_community_not_allowed`), the org does not hold it (`addon_not_held`), or the caller lacks the kind's `.manage` at the scope. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such listing (`addon_not_found`), or no such scope in the org (`addon_scope_not_found`). */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The listing is taken down (`addon_blocked`) or retired (`addon_retired`), switched off above the scope (`addon_off_above`), already installed there (`addon_already_installed`), its name is taken on the project (`addon_install_name_taken`, choose `config.name`), or the project is at its limit (`addon_install_limit`). */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Not installable here yet: a plugin or resource (`addon_kind_not_available`), an app (`addon_install_through_sync`), or a kind at a scope with no installs yet (`addon_scope_not_supported`). */
+            501: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    uninstallAddon: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                listingId: string;
+                installId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed. */
+            204: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a member, or the caller lacks the kind's `.manage` on the install's project. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such listing (`addon_not_found`) or install of it (`addon_install_not_found`). */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Plugins, resources and apps have no installs here (`addon_kind_not_available`, `addon_install_through_sync`). */
+            501: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
                             retryable?: boolean;
                             limit?: number;
                             /** @enum {string} */
