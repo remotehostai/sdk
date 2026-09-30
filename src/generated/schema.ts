@@ -1211,7 +1211,7 @@ export interface paths {
         };
         /**
          * Browse an organization's add-on catalog
-         * @description The catalog as the org sees it: each entry says whether the org holds it and why, and the org's policy for it. Needs `org.read` (every member). Each kind is shown to whoever could add it somewhere: MCP servers to `mcp.read`, skills to `skills.read` and plugins to `plugins.read` on the org or any project in it, apps to every member, resources and every paid listing to `billing.read`. A member who holds none of those sees apps only. Browsing shows listed entries; `slug` finds one entry whatever its status but draft.
+         * @description The catalog as the org sees it: each entry says whether the org holds it and why, and the org's policy for it. Needs `org.read` (every member). Each kind is shown to whoever could add it somewhere: MCP servers to `mcp.read`, skills to `skills.read` and plugins to `plugins.read` on the org or any project in it, apps to every member, resources to `resources.read` on the org or any project, and resources and every paid listing to `billing.read`. A member who holds none of those sees apps only. Browsing shows listed entries; `slug` finds one entry whatever its status but draft.
          */
         get: operations["listAddons"];
         put?: never;
@@ -1231,7 +1231,7 @@ export interface paths {
         };
         /**
          * List the add-ons installed in an organization
-         * @description Every install on the API side, newest first: a project's skills and MCP servers, from the catalog or custom, with whether the org holds each one's listing and its policy. Needs `org.read`; each install is shown on the projects where the caller may read its kind (`skills.read`, `mcp.read`). Apps installed in Atlas workspaces are listed by Atlas.
+         * @description Every install on the API side, newest first: a project's skills and MCP servers, from the catalog or custom, and the active resource allocations on a project or one of its sandboxes, with whether the org holds each one's listing and its policy. Needs `org.read`; each install is shown on the projects where the caller may read its kind (`skills.read`, `mcp.read`, `resources.read`). With `projectId`, it also says what that project's sandboxes are given (`effective`): the project's resource allocations, the default for every sandbox, and each sandbox that overrides one, with everything it gets (its own quantity, never above the project's). Resources the org does not hold give nothing. Apps installed in Atlas workspaces are listed by Atlas.
          */
         get: operations["listAttachedAddons"];
         put?: never;
@@ -1317,7 +1317,7 @@ export interface paths {
         put?: never;
         /**
          * Install an add-on
-         * @description Installs a catalog add-on at a scope: `org`, `project`, `sandbox` or `atlas_workspace`. Every install passes the same checks, in this order, each refusal with its code. The listing exists and the caller can see it in the org's catalog (`addon_not_found` otherwise), and the caller holds the kind's `.manage` at the scope (`skills.manage`, `mcp.manage`: at the org, on the project, or on the sandbox's project). Only then: the listing is not `blocked` or `retired`; the scope is one of its `attachLevels`; the org's policy allows it (community add-ons need the org's opt-in or an explicit allow); the org holds it (free, included in its plan, or bought: installing never buys); and nothing above the scope has switched it off. Today skills and MCP servers install on a project, one install of a listing per project. Plugins and resources are not installable yet (501), every install is audited, and apps are added to an Atlas workspace from Atlas.
+         * @description Installs a catalog add-on at a scope: `org`, `project`, `sandbox` or `atlas_workspace`. Every install passes the same checks, in this order, each refusal with its code. The listing exists and the caller can see it in the org's catalog (`addon_not_found` otherwise), and the caller holds the kind's `.manage` at the scope (`skills.manage`, `mcp.manage`: at the org, on the project, or on the sandbox's project). Only then: the listing is not `blocked` or `retired`; the scope is one of its `attachLevels`; the org's policy allows it (community add-ons need the org's opt-in or an explicit allow); the org holds it (free, included in its plan, or bought: installing never buys); and nothing above the scope has switched it off. Today skills and MCP servers install on a project, one install of a listing per project. A resource is allocated, on a project (the default for its sandboxes) or one sandbox, by `config.quantity`, under `resources.manage` on the project (a sandbox's own project); posting again for the same scope changes its quantity. After the checks above, an allocation also needs, in this order: a quantity; a sandbox no more than its project's default (`resource_exceeds_project`); the org's allocations of the resource within what it bought (`resource_quantity_exceeded`); the plan's cap for it, and a plan with none refuses (`resource_quota_not_set`, `resource_quota_exceeded`); for a resource billed on use, the org's own cap (`resource_org_cap_not_set`, `resource_org_cap_exceeded`); and room on a host (`addon_capacity_unavailable`, 503). Plugins are not installable yet (501), every install and allocation is audited, and apps are added to an Atlas workspace from Atlas.
          */
         post: operations["installAddon"];
         delete?: never;
@@ -1338,7 +1338,7 @@ export interface paths {
         post?: never;
         /**
          * Remove an installed add-on
-         * @description Removes one install of the listing. Needs the same permission as installing it; removing is allowed whatever the listing's state, the org's policy or holding. A caller who cannot read the kind on the install's project gets the same 404 whether or not it exists. Audited.
+         * @description Removes one install of the listing, or releases a resource's allocation (`installId` is its id). Needs the same permission as installing it; removing is allowed whatever the listing's state, the org's policy or holding. A caller who cannot read the kind on the install's project gets the same 404 whether or not it exists. Audited.
          */
         delete: operations["uninstallAddon"];
         options?: never;
@@ -1973,14 +1973,22 @@ export interface components {
             allowed: boolean;
         };
         AddonInstall: {
+            /** @description The install's id; for a resource, its allocation's. */
             id: string;
             /** @enum {string} */
-            kind: "skill" | "mcp_server";
+            kind: "skill" | "mcp_server" | "resource";
+            /** @description Where it is installed: a project, or (a resource's allocation) one sandbox, which overrides its project's for that sandbox. */
             scope: {
                 /** @enum {string} */
-                type: "project";
+                type: "project" | "sandbox";
                 id: string;
             };
+            /** @description The project, or the sandbox's project. */
+            projectId: string;
+            /** @description A resource's allocated quantity, in `unit`; null for other kinds. */
+            quantity: number | null;
+            /** @description What one of `quantity` is (`GB`, `GPU`, `vCPU`, `IP`); null for other kinds. */
+            unit: string | null;
             /** @description Null for a custom install, which has no listing and is always delivered. */
             listingId: string | null;
             listing: {
@@ -1996,7 +2004,7 @@ export interface components {
             } | null;
             name: string;
             enabled: boolean;
-            /** @description A skill's install status, or an MCP server's authorization status. */
+            /** @description A skill's install status, an MCP server's authorization status, or `active` for a resource's allocation. */
             status: string;
             held: boolean | null;
             /**
@@ -2007,6 +2015,29 @@ export interface components {
             policy: components["schemas"]["AddonPolicy"] & unknown;
             createdAt: string;
             updatedAt: string;
+        };
+        EffectiveAllocations: {
+            projectId: string;
+            /** @description What every sandbox in the project gets unless it overrides it. */
+            defaults: components["schemas"]["EffectiveResource"][];
+            /** @description Each sandbox with an override of its own: everything it gets. */
+            sandboxes: {
+                sandboxId: string;
+                resources: components["schemas"]["EffectiveResource"][];
+            }[];
+        };
+        EffectiveResource: {
+            listingId: string;
+            slug: string;
+            name: string;
+            quantity: number;
+            unit: string;
+            /**
+             * @description The project's default, or the sandbox's own allocation.
+             * @enum {string}
+             */
+            source: "project" | "sandbox";
+            allocationId: string;
         };
         AddonPurchase: {
             id: string;
@@ -14688,6 +14719,8 @@ export interface operations {
                 cursor?: string;
                 /** @description Entries per page, 1 to 100; 50 by default. */
                 limit?: string;
+                /** @description Also answer `effective` for this project; needs `resources.read` on it. */
+                projectId?: string;
             };
             header?: never;
             path: {
@@ -14697,7 +14730,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description A page of installs. */
+            /** @description A page of installs, and the project's effective resources when asked for. */
             200: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
@@ -14706,6 +14739,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         installs: components["schemas"]["AddonInstall"][];
+                        effective?: components["schemas"]["EffectiveAllocations"];
                         metadata: {
                             count: number;
                             nextCursor: string | null;
@@ -14742,6 +14776,33 @@ export interface operations {
             };
             /** @description Not a member of the org. */
             403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such project in the org, or not one where the caller may read resources (`addon_scope_not_found`). */
+            404: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
@@ -15315,12 +15376,26 @@ export interface operations {
                         name?: string;
                         /** @description The MCP server's tools an agent may call; the listing's by default. */
                         allowedTools?: string[];
+                        /** @description A resource's quantity to allocate at the scope, in its unit: a whole number from 1 to 1000. Required for a resource; taken by no other kind. */
+                        quantity?: number;
                     };
                 };
             };
         };
         responses: {
-            /** @description The install, as the attached list shows it. */
+            /** @description A resource's allocation at the scope, changed or already at that quantity. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        install: components["schemas"]["AddonInstall"];
+                    };
+                };
+            };
+            /** @description The install, or the new allocation, as the attached list shows it. */
             201: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
@@ -15332,7 +15407,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description A scope or config this route does not take, or a scope the listing does not attach to (`addon_scope_not_allowed`). */
+            /** @description A scope or config this route does not take, a scope the listing does not attach to (`addon_scope_not_allowed`), or a resource with no quantity (`resource_quantity_invalid`). */
             400: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
@@ -15440,7 +15515,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description The listing is taken down (`addon_blocked`) or retired (`addon_retired`), switched off above the scope (`addon_off_above`), already installed there (`addon_already_installed`), its name is taken on the project (`addon_install_name_taken`, choose `config.name`), or the project is at its limit (`addon_install_limit`). */
+            /** @description The listing is taken down (`addon_blocked`) or retired (`addon_retired`), switched off above the scope (`addon_off_above`), already installed there (`addon_already_installed`), its name is taken on the project (`addon_install_name_taken`, choose `config.name`), or the project is at its limit (`addon_install_limit`). A resource's allocation above its project's default (`resource_exceeds_project`), what the org bought (`resource_quantity_exceeded`), its plan's cap (`resource_quota_not_set`, `resource_quota_exceeded`) or the org's cap (`resource_org_cap_not_set`, `resource_org_cap_exceeded`), or it changed during the request (`resource_allocation_changed`, retry), or with no resource price (`resource_not_priced`). */
             409: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
@@ -15494,8 +15569,35 @@ export interface operations {
                     };
                 };
             };
-            /** @description Not installable here yet: a plugin or resource (`addon_kind_not_available`), an app (`addon_install_through_sync`), or a kind at a scope with no installs yet (`addon_scope_not_supported`). */
+            /** @description Not installable here yet: a plugin (`addon_kind_not_available`), an app (`addon_install_through_sync`), or a kind at a scope with no installs yet (`addon_scope_not_supported`). */
             501: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No room for a resource's allocation (`addon_capacity_unavailable`): a capacity problem, not a permission one. Today no resource has capacity. */
+            503: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
@@ -15652,7 +15754,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description Plugins, resources and apps have no installs here (`addon_kind_not_available`, `addon_install_through_sync`). */
+            /** @description Plugins and apps have no installs here (`addon_kind_not_available`, `addon_install_through_sync`). */
             501: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
