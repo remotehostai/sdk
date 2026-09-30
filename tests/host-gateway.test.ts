@@ -5,12 +5,14 @@ import RemoteHost, { RemoteHostAPIError, RemoteHostConnectionError, RemoteHostTi
 import { GATEWAY_BROKEN_FOR_SANDBOX, ROUTE_OFF_MS, fallsBack, isSafeGatewayUrl } from "../src/host-gateway.js";
 import type { SandboxData } from "../src/sandboxes.js";
 
-// Commands and files through the sandbox's own host (REM-690): off by
-// default; on, a single-use ticket from the API for each call and the call
-// itself to the host gateway; the API's own route wherever the gateway path
-// is not there, and never a command run twice.
+// Commands and files through the sandbox's own host (REM-690): on by
+// default under Node; a single-use ticket from the API for each call and the
+// call itself to the host gateway; the API's own route wherever the gateway
+// path is not there, and never a command run twice.
 
 const SANDBOX = "0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
+// A second sandbox on the same fake API, for what is remembered API-wide.
+const OTHER = "1b2c3d4e-5f60-4b7c-8d9e-0f1a2b3c4d5e";
 const GATEWAY = "https://gw-eu-3-staging.remotehost.ai";
 // A sandbox the fake API answers "Sandbox not found." for (REM-715).
 const GONE = "0f0f0f0f-0000-4000-8000-000000000000";
@@ -47,6 +49,7 @@ function world(options: {
   ticket?: (permission: string) => Response;
   gateway?: (request: Request) => Promise<Response> | Response;
   timeoutMs?: number;
+  dangerouslyAllowBrowser?: boolean;
 }) {
   const seen: Seen[] = [];
   const inFlight = new Set<Request>();
@@ -55,6 +58,7 @@ function world(options: {
     apiKey: "rh_secret_key",
     orgId: "org_123",
     maxRetries: 0,
+    ...(options.dangerouslyAllowBrowser ? { dangerouslyAllowBrowser: true } : {}),
     ...(options.hostGateway === undefined ? {} : { hostGateway: options.hostGateway }),
     ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
     fetch: async (request) => {
@@ -104,6 +108,7 @@ function world(options: {
       }
       if (url.pathname.endsWith("/metrics/live")) return Response.json({ ...liveMetrics, cpuPercent: 1 });
       if (url.pathname.endsWith(`/sandboxes/${SANDBOX}`)) return Response.json({ sandbox: sandboxData });
+      if (url.pathname.endsWith(`/sandboxes/${OTHER}`)) return Response.json({ sandbox: { ...sandboxData, id: OTHER } });
       if (url.pathname.endsWith("/exec")) {
         return Response.json({ exitCode: 0, stdout: "from the api\n", stderr: "", truncated: false, timedOut: false });
       }
@@ -260,41 +265,351 @@ test("reads live metrics through the API when the gateway does not serve them", 
   }
 });
 
-test("is off by default for live metrics too", async () => {
+test("hostGateway: false keeps live metrics on the API", async () => {
   const { client, seen } = world({ hostGateway: false });
   const sandbox = await client.sandboxes.retrieve(SANDBOX);
   assert.equal((await sandbox.metrics.get()).cpuPercent, 1);
   assert.ok(!seen.some((s) => s.url.includes("gateway-ticket")));
 });
 
-test("is off by default: nothing asks for a ticket", async () => {
+// REM-690: the gateway path is the default.
+async function withGatewayEnv(value: string | undefined, run: () => Promise<void>) {
   const saved = process.env.REMOTEHOST_HOST_GATEWAY;
-  delete process.env.REMOTEHOST_HOST_GATEWAY;
+  if (value === undefined) delete process.env.REMOTEHOST_HOST_GATEWAY;
+  else process.env.REMOTEHOST_HOST_GATEWAY = value;
   try {
-    const { client, seen } = world({});
-    const sandbox = await client.sandboxes.retrieve(SANDBOX);
-    assert.equal((await sandbox.commands.run("true")).stdout, "from the api\n");
-    assert.ok(!seen.some((s) => s.url.includes("gateway-ticket")));
-  } finally {
-    if (saved !== undefined) process.env.REMOTEHOST_HOST_GATEWAY = saved;
-  }
-});
-
-test("REMOTEHOST_HOST_GATEWAY turns it on, and the option overrides it", async () => {
-  const saved = process.env.REMOTEHOST_HOST_GATEWAY;
-  process.env.REMOTEHOST_HOST_GATEWAY = "1";
-  try {
-    const on = world({ gateway: () => Response.json(execResult) });
-    await (await on.client.sandboxes.retrieve(SANDBOX)).commands.run("true");
-    assert.ok(on.seen.some((s) => s.url.includes("gateway-ticket")));
-
-    const off = world({ hostGateway: false });
-    await (await off.client.sandboxes.retrieve(SANDBOX)).commands.run("true");
-    assert.ok(!off.seen.some((s) => s.url.includes("gateway-ticket")));
+    await run();
   } finally {
     if (saved === undefined) delete process.env.REMOTEHOST_HOST_GATEWAY;
     else process.env.REMOTEHOST_HOST_GATEWAY = saved;
   }
+}
+
+test("is on by default: a command goes through the gateway with no option or variable", async () => {
+  await withGatewayEnv(undefined, async () => {
+    const { client, seen, apiCalls } = world({ gateway: () => Response.json(execResult) });
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    assert.equal((await sandbox.commands.run("true")).stdout, "from the gateway\n");
+    assert.ok(seen.some((s) => s.url.includes("gateway-ticket")));
+    assert.equal(apiCalls("/exec").length, 0);
+  });
+});
+
+test("REMOTEHOST_HOST_GATEWAY set to 0, false, no or off turns it off; unset, empty or an on-value leaves it on", async () => {
+  const warn = console.warn;
+  const warnings: unknown[][] = [];
+  console.warn = (...args: unknown[]) => void warnings.push(args);
+  try {
+    for (const value of ["0", "false", "no", "off", " OFF ", "False"]) {
+      await withGatewayEnv(value, async () => {
+        const { client, seen } = world({});
+        const sandbox = await client.sandboxes.retrieve(SANDBOX);
+        assert.equal((await sandbox.commands.run("true")).stdout, "from the api\n", value);
+        assert.ok(!seen.some((s) => s.url.includes("gateway-ticket")), value);
+      });
+    }
+    for (const value of [undefined, "", " ", "1", "true", "yes", "on", " ON "]) {
+      await withGatewayEnv(value, async () => {
+        const { client, seen } = world({ gateway: () => Response.json(execResult) });
+        await (await client.sandboxes.retrieve(SANDBOX)).commands.run("true");
+        assert.ok(seen.some((s) => s.url.includes("gateway-ticket")), JSON.stringify(value));
+      });
+    }
+    assert.equal(warnings.length, 0, "a recognized value warns nothing");
+  } finally {
+    console.warn = warn;
+  }
+});
+
+test("any other REMOTEHOST_HOST_GATEWAY value follows the default, and warns once", async () => {
+  const warn = console.warn;
+  const warnings: unknown[][] = [];
+  console.warn = (...args: unknown[]) => void warnings.push(args);
+  try {
+    for (const value of ["disabled", "enable", "2", "of"]) {
+      await withGatewayEnv(value, async () => {
+        const { client, seen } = world({ gateway: () => Response.json(execResult) });
+        await (await client.sandboxes.retrieve(SANDBOX)).commands.run("true");
+        assert.ok(seen.some((s) => s.url.includes("gateway-ticket")), `${value}: the default, on under Node`);
+      });
+    }
+    // Where the default is off (a runtime without Node that passes the
+    // variable), an unrecognized value is off too, never a guess of on.
+    const edge = builtWith("process", { env: { REMOTEHOST_HOST_GATEWAY: "enabled" } }, () =>
+      world({ gateway: () => Response.json(execResult) }),
+    );
+    await (await edge.client.sandboxes.retrieve(SANDBOX)).commands.run("true");
+    assert.ok(!edge.seen.some((s) => s.url.includes("gateway-ticket")), "enabled: the default, off without Node");
+    assert.equal(warnings.length, 1, "one warning per process");
+    assert.match(String(warnings[0]![0]), /REMOTEHOST_HOST_GATEWAY="disabled".*using the default \(on\)/);
+  } finally {
+    console.warn = warn;
+  }
+});
+
+// A global replaced while the client is built, the only time the SDK reads
+// the runtime; restored before anything is awaited.
+function builtWith<T>(name: string, value: unknown, build: () => T): T {
+  const saved = Object.getOwnPropertyDescriptor(globalThis, name);
+  Object.defineProperty(globalThis, name, { value, configurable: true, writable: true });
+  try {
+    return build();
+  } finally {
+    if (saved) Object.defineProperty(globalThis, name, saved);
+    else delete (globalThis as Record<string, unknown>)[name];
+  }
+}
+
+test("off by default where there is no Node process (browsers, Workers, Deno without Node compatibility)", async () => {
+  const runtimes: Array<[string, () => ReturnType<typeof world>]> = [
+    ["no process", () => builtWith("process", undefined, () => world({ gateway: () => Response.json(execResult) }))],
+    [
+      "a process without Node (an edge runtime's shim)",
+      () => builtWith("process", { env: {} }, () => world({ gateway: () => Response.json(execResult) })),
+    ],
+    [
+      "a browser page",
+      () =>
+        builtWith("window", { document: {} }, () =>
+          world({ dangerouslyAllowBrowser: true, gateway: () => Response.json(execResult) }),
+        ),
+    ],
+  ];
+  for (const [runtime, build] of runtimes) {
+    const { client, seen, apiCalls } = build();
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    assert.equal((await sandbox.commands.run("true")).stdout, "from the api\n", runtime);
+    assert.equal(apiCalls("/exec").length, 1, runtime);
+    assert.ok(!seen.some((s) => s.url.includes("gateway-ticket")), `${runtime}: no ticket`);
+  }
+});
+
+test("hostGateway: true turns it on anywhere, and a variable an edge runtime passes does too", async () => {
+  const runtimes: Array<[string, () => ReturnType<typeof world>]> = [
+    [
+      "no process",
+      () => builtWith("process", undefined, () => world({ hostGateway: true, gateway: () => Response.json(execResult) })),
+    ],
+    [
+      "a browser page",
+      () =>
+        builtWith("window", { document: {} }, () =>
+          world({ hostGateway: true, dangerouslyAllowBrowser: true, gateway: () => Response.json(execResult) }),
+        ),
+    ],
+    [
+      "an edge runtime's process with REMOTEHOST_HOST_GATEWAY=1",
+      () =>
+        builtWith("process", { env: { REMOTEHOST_HOST_GATEWAY: "1" } }, () =>
+          world({ gateway: () => Response.json(execResult) }),
+        ),
+    ],
+  ];
+  for (const [runtime, build] of runtimes) {
+    const { client, apiCalls } = build();
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    assert.equal((await sandbox.commands.run("true")).stdout, "from the gateway\n", runtime);
+    assert.equal(apiCalls("/exec").length, 0, runtime);
+  }
+});
+
+test("the option overrides the variable, both ways", async () => {
+  await withGatewayEnv("0", async () => {
+    const on = world({ hostGateway: true, gateway: () => Response.json(execResult) });
+    await (await on.client.sandboxes.retrieve(SANDBOX)).commands.run("true");
+    assert.ok(on.seen.some((s) => s.url.includes("gateway-ticket")));
+  });
+  await withGatewayEnv("1", async () => {
+    const off = world({ hostGateway: false });
+    await (await off.client.sandboxes.retrieve(SANDBOX)).commands.run("true");
+    assert.ok(!off.seen.some((s) => s.url.includes("gateway-ticket")));
+  });
+});
+
+// Date.now under the test's control, for ROUTE_OFF_MS.
+async function withClock(run: (advance: (ms: number) => void) => Promise<void>) {
+  const realNow = Date.now;
+  let now = realNow();
+  Date.now = () => now;
+  try {
+    await run((ms) => {
+      now += ms;
+    });
+  } finally {
+    Date.now = realNow;
+  }
+}
+
+// Calls on both ticket routes, three of each kind, on two sandboxes, all
+// answered by the API.
+async function everyCallOnTheAPI(client: RemoteHost) {
+  for (const id of [SANDBOX, OTHER]) {
+    const sandbox = await client.sandboxes.retrieve(id);
+    for (let i = 0; i < 3; i += 1) {
+      assert.equal((await sandbox.commands.run("true")).stdout, "from the api\n");
+      assert.equal(await sandbox.files.readText("a"), "api");
+      assert.equal((await sandbox.metrics.get()).cpuPercent, 1);
+    }
+  }
+}
+
+function ticketRequests(seen: Seen[], route: "generic" | "metrics"): number {
+  return seen.filter((s) => {
+    const path = new URL(s.url).pathname;
+    const metrics = path.endsWith("/metrics/gateway-ticket");
+    return path.endsWith("/gateway-ticket") && (route === "metrics") === metrics;
+  }).length;
+}
+
+// Production's current release (71b306e3) has neither ticket route. An API
+// key is refused by the API-key allow-list first, 403 with no code; a
+// signed-in user gets the framework's plain-text 404.
+const PRODUCTION_TODAY: Array<[string, (route: string) => Response]> = [
+  [
+    "an API key",
+    (route) =>
+      Response.json({ error: { message: `API keys cannot call POST /v1/sandboxes/:id/${route}` } }, { status: 403 }),
+  ],
+  [
+    "a signed-in user",
+    () => new Response("404 Not Found", { status: 404, headers: { "content-type": "text/plain; charset=UTF-8" } }),
+  ],
+];
+
+test("an API without ticket routes (production today) costs one ticket request per route per 5 minutes, for every sandbox", async () => {
+  for (const [who, answer] of PRODUCTION_TODAY) {
+    await withClock(async (advance) => {
+      const { client, seen, apiCalls } = world({
+        ticket: (permission) => answer(permission === "metrics" ? "metrics/gateway-ticket" : "gateway-ticket"),
+      });
+      await everyCallOnTheAPI(client);
+      assert.equal(ticketRequests(seen, "generic"), 1, `${who}: one generic ticket request in all`);
+      assert.equal(ticketRequests(seen, "metrics"), 1, `${who}: one metrics ticket request in all`);
+      assert.equal(apiCalls("/exec").length, 6, who);
+      assert.equal(apiCalls("/metrics/live").length, 6, who);
+
+      advance(ROUTE_OFF_MS - 1);
+      await everyCallOnTheAPI(client);
+      assert.equal(ticketRequests(seen, "generic"), 1, `${who}: still remembered`);
+      assert.equal(ticketRequests(seen, "metrics"), 1, `${who}: still remembered`);
+
+      advance(2);
+      await everyCallOnTheAPI(client);
+      assert.equal(ticketRequests(seen, "generic"), 2, `${who}: asked again once it ran out`);
+      assert.equal(ticketRequests(seen, "metrics"), 2, `${who}: asked again once it ran out`);
+    });
+  }
+});
+
+test("a later flip on the API is picked up once the remembered off runs out", async () => {
+  await withClock(async (advance) => {
+    let production = true;
+    const { client, apiCalls } = world({
+      ticket: () => (production ? PRODUCTION_TODAY[0]![1]("gateway-ticket") : (undefined as never)),
+      gateway: () => Response.json(execResult),
+    });
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    assert.equal((await sandbox.commands.run("true")).stdout, "from the api\n");
+    production = false;
+    advance(ROUTE_OFF_MS);
+    assert.equal((await sandbox.commands.run("true")).stdout, "from the gateway\n");
+    assert.equal(apiCalls("/exec").length, 1);
+  });
+});
+
+test("the API's switch off (not_found) is remembered for every sandbox, not per sandbox", async () => {
+  const { client, seen } = world({
+    ticket: () => Response.json({ error: { message: "Not found.", code: "not_found" } }, { status: 404 }),
+  });
+  await everyCallOnTheAPI(client);
+  assert.equal(ticketRequests(seen, "generic"), 1);
+  assert.equal(ticketRequests(seen, "metrics"), 1);
+});
+
+test("a 2xx ticket answer without a ticket takes the route as off for every sandbox, for a while", async () => {
+  for (const answer of [
+    () => Response.json({ ok: true }),
+    () => new Response("", { status: 200 }),
+    () => new Response("<html>ok</html>", { status: 200, headers: { "content-type": "text/html" } }),
+  ]) {
+    await withClock(async (advance) => {
+      const { client, seen, apiCalls } = world({ ticket: answer });
+      await everyCallOnTheAPI(client);
+      assert.equal(ticketRequests(seen, "generic"), 1, "once for both sandboxes");
+      assert.equal(ticketRequests(seen, "metrics"), 1, "once for both sandboxes");
+      assert.equal(apiCalls("/exec").length, 6);
+      advance(ROUTE_OFF_MS);
+      await everyCallOnTheAPI(client);
+      assert.equal(ticketRequests(seen, "generic"), 2, "not pinned for life");
+    });
+  }
+});
+
+test("a sleeping sandbox, a rate limit, a refusal about this sandbox or permission, or a 5xx is for that call only", async () => {
+  for (const [what, refusal] of [
+    [
+      "a sleeping sandbox",
+      () =>
+        Response.json(
+          { error: { message: 'Cannot reach a sandbox with status "paused". Wake it first.', code: "sandbox_not_running" } },
+          { status: 409 },
+        ),
+    ],
+    ["a rate limit", () => Response.json({ error: { message: "Too many requests." } }, { status: 429 })],
+    ["the sandbox's own 404", () => Response.json({ error: { message: "Sandbox not found." } }, { status: 404 })],
+    [
+      "a permission this key lacks",
+      () => Response.json({ error: { message: "Permission sandbox.terminal.connect is required." } }, { status: 403 }),
+    ],
+    [
+      "a workspace only its owner reaches",
+      () =>
+        Response.json(
+          { error: { message: "Workspace w belongs to another user.", code: "workspace_owner_only" } },
+          { status: 403 },
+        ),
+    ],
+    ["a 5xx", () => Response.json({ error: { message: "Internal error." } }, { status: 500 })],
+  ] as const) {
+    let refused = false;
+    const { client, seen, apiCalls } = world({
+      ticket: () => {
+        if (refused) return undefined as never;
+        refused = true;
+        return refusal();
+      },
+      gateway: () => Response.json(execResult),
+    });
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    assert.equal((await sandbox.commands.run("true")).stdout, "from the api\n", what);
+    const other = await client.sandboxes.retrieve(OTHER);
+    assert.equal((await other.commands.run("true")).stdout, "from the gateway\n", `${what}: not every sandbox`);
+    assert.equal((await sandbox.commands.run("true")).stdout, "from the gateway\n", `${what}: not this sandbox for good`);
+    assert.equal(ticketRequests(seen, "generic"), 3, what);
+    assert.equal(apiCalls("/exec").length, 1, what);
+  }
+});
+
+test("a host without a gateway keeps that sandbox on the API, and no other", async () => {
+  let first = true;
+  const { client, seen, apiCalls } = world({
+    ticket: () => {
+      if (!first) return undefined as never;
+      first = false;
+      return Response.json(
+        { error: { message: "This sandbox's host has no gateway yet.", code: "host_gateway_unavailable" } },
+        { status: 409 },
+      );
+    },
+    gateway: () => Response.json(execResult),
+  });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  assert.equal((await sandbox.commands.run("true")).stdout, "from the api\n");
+  assert.equal((await sandbox.commands.run("true")).stdout, "from the api\n");
+  const other = await client.sandboxes.retrieve(OTHER);
+  assert.equal((await other.commands.run("true")).stdout, "from the gateway\n");
+  assert.equal(ticketRequests(seen, "generic"), 2, "none again for the pinned sandbox");
+  assert.equal(apiCalls("/exec").length, 2);
 });
 
 test("runs a command on the sandbox's host with a ticket, and the API key goes only to the API", async () => {

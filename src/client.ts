@@ -2,7 +2,7 @@ import createClient from "openapi-fetch";
 
 import { RemoteHostConfigurationError } from "./errors.js";
 import type { paths } from "./generated/schema.js";
-import { HOST_GATEWAY_ENV, HostGateway, hostGatewayEnabled, useHostGateway } from "./host-gateway.js";
+import { HOST_GATEWAY_ENV, HostGateway, hostGatewayFromEnv, useHostGateway } from "./host-gateway.js";
 import type { APIClient } from "./internal.js";
 import { Sandboxes } from "./sandboxes.js";
 import { VERSION } from "./version.js";
@@ -38,11 +38,19 @@ export type RemoteHostOptions = {
   /** Allow secret-key use in a browser. This can expose the key to users. */
   dangerouslyAllowBrowser?: boolean;
   /**
-   * Experimental: run commands and read and write files through the
+   * Run commands, read and write files, and read live metrics through the
    * sandbox's own host rather than through the API, with a single-use ticket
    * the API issues for each call. Falls back to the API wherever the
-   * sandbox's host has no gateway. Defaults to REMOTEHOST_HOST_GATEWAY
-   * (1, true, yes or on), else off.
+   * gateway path isn't there (the API issues no tickets, the sandbox's host
+   * has no gateway).
+   *
+   * On by default under Node. Off by default where there is no Node
+   * `process` (browsers, Workers, Deno without Node compatibility), since the
+   * gateway answers no CORS preflight; `true` turns it on there too.
+   * `false` turns it off anywhere. Without the option, REMOTEHOST_HOST_GATEWAY
+   * decides: unset or empty is the default, 1, true, yes or on is on, and 0,
+   * false, no or off is off. Any other value is the default, with a
+   * console.warn once per process.
    */
   hostGateway?: boolean;
 };
@@ -98,7 +106,7 @@ export class RemoteHost {
       headers,
     });
 
-    if (options.hostGateway ?? hostGatewayEnabled(readEnvironmentVariable(HOST_GATEWAY_ENV))) {
+    if (options.hostGateway ?? hostGatewayFromEnv(readEnvironmentVariable(HOST_GATEWAY_ENV), runsOnNode())) {
       useHostGateway(
         api,
         new HostGateway({ baseUrl, headers, fetch: fetcher, apiFetch: reliableFetch, timeoutMs }),
@@ -112,6 +120,15 @@ export class RemoteHost {
 
 function isBrowser(): boolean {
   return typeof window !== "undefined" && typeof window.document !== "undefined";
+}
+
+// Node (or a runtime that runs as Node: Bun, Deno with Node compatibility),
+// outside a browser page. Only there is the host gateway on by default: it
+// answers no CORS preflight, so a browser's fetch to it fails, and edge
+// runtimes may not reach it.
+function runsOnNode(): boolean {
+  const runtime = globalThis as typeof globalThis & { process?: { versions?: { node?: unknown } } };
+  return typeof runtime.process?.versions?.node === "string" && !isBrowser();
 }
 
 function readEnvironmentVariable(name: string): string | undefined {

@@ -146,6 +146,8 @@ test("exposes command, file, preview, and metrics resources on a sandbox", async
   const client = new RemoteHost({
     apiKey: "rh_test",
     orgId: "org_123",
+    // The API's own routes; the gateway path is tested in host-gateway.test.ts.
+    hostGateway: false,
     fetch: async (request) => {
       requests.push(request);
       const path = new URL(request.url).pathname;
@@ -214,6 +216,8 @@ test("waits for a provisioning sandbox to become ready and for its agent to answ
   const client = new RemoteHost({
     apiKey: "rh_test",
     orgId: "org_123",
+    // The API's own routes; the gateway path is tested in host-gateway.test.ts.
+    hostGateway: false,
     // The transport retry would otherwise absorb the 502 below.
     maxRetries: 0,
     fetch: async (request) => {

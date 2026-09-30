@@ -2,9 +2,11 @@ import { RemoteHostAPIError, RemoteHostConnectionError, RemoteHostTimeoutError }
 import type { APIClient } from "./internal.js";
 
 // Commands, files (REM-690) and live metrics (REM-715) through the
-// sandbox's own host. Off unless
-// the client is created with `hostGateway: true`, or REMOTEHOST_HOST_GATEWAY
-// is 1, true, yes or on, while the gateways are proven on staging.
+// sandbox's own host. On by default under Node since REM-690, and off by
+// default where there is no Node `process` (browsers, Workers, Deno without
+// Node compatibility), since the gateway answers no CORS preflight.
+// `hostGateway` sets it either way, anywhere; REMOTEHOST_HOST_GATEWAY set to
+// 0, false, no or off turns the default off (hostGatewayFromEnv).
 //
 // For each call the SDK asks the API for a single-use ticket for exactly the
 // permission the call needs, then sends the same request to the host
@@ -13,9 +15,10 @@ import type { APIClient } from "./internal.js";
 // sandbox's host, never through the API. The API key goes only to the API,
 // and the gateway sees only the ticket.
 //
-// Where the gateway path is not available (the API issues no tickets, the
-// sandbox's host has no gateway yet) the call goes to the API as before, and
-// so does every later call for that sandbox.
+// Where the gateway path is not available the call goes to the API as
+// before. An API that issues no tickets on a route (tickets off, or a
+// release without the route) is remembered for every sandbox for
+// ROUTE_OFF_MS; a sandbox whose host has no gateway yet, for that sandbox.
 //
 // When the gateway fails a call, whether it goes to the API depends on the
 // call (REM-906):
@@ -35,8 +38,8 @@ import type { APIClient } from "./internal.js";
 // Each fallback is for that one call. A sandbox's later calls go straight to
 // the API for the life of the client only when its gateway path cannot work:
 // the gateway would not take the API's ticket (GATEWAY_BROKEN_FOR_SANDBOX),
-// the API issues it no tickets (a 404 from gateway-ticket, or
-// host_gateway_unavailable), or the gateway URL is not https.
+// its host has no gateway (host_gateway_unavailable), or the gateway URL is
+// not https.
 //
 // A gateway built before `policy_lost` answers a policy lost mid-command
 // with `policy_unavailable`, which reads as "nothing ran": until the
@@ -74,8 +77,28 @@ export const GATEWAY_BROKEN_FOR_SANDBOX = new Set(["missing_ticket", "invalid_ti
 // The code-less 404 gateways sent for `no_credential` before it had a code.
 const NO_CREDENTIAL_MESSAGE = "No envd credential for this sandbox.";
 
-export function hostGatewayEnabled(value: string | undefined): boolean {
-  return ["1", "true", "yes", "on"].includes((value ?? "").trim().toLowerCase());
+const ON_VALUES = new Set(["1", "true", "yes", "on"]);
+const OFF_VALUES = new Set(["0", "false", "no", "off"]);
+let warnedUnrecognized = false;
+
+// Whether the gateway path is on, given REMOTEHOST_HOST_GATEWAY and the
+// runtime's default (on under Node): unset or empty is the default; 1, true,
+// yes or on is on; 0, false, no or off is off. Any other value (a typo,
+// "disabled") is the default too, with one console.warn per process saying
+// so, rather than a guess either way.
+export function hostGatewayFromEnv(value: string | undefined, runtimeDefault: boolean): boolean {
+  const setting = (value ?? "").trim().toLowerCase();
+  if (setting === "") return runtimeDefault;
+  if (ON_VALUES.has(setting)) return true;
+  if (OFF_VALUES.has(setting)) return false;
+  if (!warnedUnrecognized) {
+    warnedUnrecognized = true;
+    console.warn(
+      `@remotehost/sdk: ${HOST_GATEWAY_ENV}=${JSON.stringify(value)} is not one of 1, true, yes, on, 0, false, no or off; ` +
+        `using the default (${runtimeDefault ? "on" : "off"}).`,
+    );
+  }
+  return runtimeDefault;
 }
 
 type TicketAnswer = {
@@ -113,22 +136,40 @@ export type HostGatewayConfig = {
   timeoutMs: number;
 };
 
-// How long a ticket route of its own that answered 404 (its group off on the
-// API, e.g. the live streams while they are dark) is taken as off, for every
-// sandbox: the API's switch is API-wide. Short enough that a flip is picked
-// up within minutes by a long-lived client.
+// How long a ticket route found not issuing tickets is taken as off, for
+// every sandbox: an API without the route (a release before it, which
+// answers an API key a code-less 403 and a user a plain-text 404), the
+// API's switch for the route off (`not_found`, `host_gateway_streams_off`),
+// or a 2xx that carries no ticket. The switch is API-wide, so this costs one
+// ticket request per route per ROUTE_OFF_MS in all, however many sandboxes,
+// and a long-lived client still picks up a flip within minutes.
 export const ROUTE_OFF_MS = 5 * 60_000;
 
-// The 404s that mean the route itself is off: the API's switch
-// (`host_gateway_streams_off`), or an API without the route at all
-// (`not_found`, its unmatched-route answer).
-const ROUTE_OFF_CODES = new Set(["host_gateway_streams_off", "not_found"]);
+const GENERIC_TICKET_ROUTE = "gateway-ticket";
+
+// The API's own refusals of one ticket that are about that sandbox or that
+// permission, never the route, and that its own route gives too: the
+// sandbox's 404 (the API documents that a client must not remember it for
+// every sandbox), and authorize()'s 403, "Permission <p> is required." or
+// one with a code (a workspace only its owner reaches). A read-only key
+// refused a command's ticket still reads files through the gateway.
+const SANDBOX_NOT_FOUND_MESSAGE = "Sandbox not found.";
+const PERMISSION_REQUIRED = /^Permission \S+ is required\.$/;
+
+function refusedForThisCall(status: number, body: unknown): boolean {
+  const code = errorCode(body);
+  const message = apiErrorMessage(body);
+  if (status === 404) return !code && message === SANDBOX_NOT_FOUND_MESSAGE;
+  if (status === 403) return code !== null || PERMISSION_REQUIRED.test(message ?? "");
+  return false;
+}
 
 export class HostGateway {
   // Sandboxes whose gateway path failed in this client, with why.
   private readonly fellBack = new Map<string, string>();
-  // Ticket routes of their own found off, until when (ROUTE_OFF_MS).
-  private readonly routesOff = new Map<string, number>();
+  // Ticket routes found not issuing tickets, until when (ROUTE_OFF_MS), and
+  // why: one entry per route, for every sandbox.
+  private readonly routesOff = new Map<string, { until: number; reason: string }>();
 
   constructor(private readonly config: HostGatewayConfig) {}
 
@@ -137,16 +178,23 @@ export class HostGateway {
     return this.fellBack.get(sandboxId);
   }
 
+  /** Why a ticket route is taken as off for every sandbox, while it is. */
+  routeOffReason(route: string = GENERIC_TICKET_ROUTE): string | undefined {
+    const off = this.routesOff.get(route);
+    return off && Date.now() < off.until ? off.reason : undefined;
+  }
+
   async call<T>(sandboxId: string, call: GatewayCall): Promise<T | typeof USE_API> {
     if (this.fellBack.has(sandboxId)) {
       return USE_API;
     }
 
-    // A route of its own that was off a moment ago: no ticket request.
-    const offUntil = call.ticketRoute ? this.routesOff.get(call.ticketRoute) : undefined;
-    if (offUntil !== undefined) {
-      if (Date.now() < offUntil) return USE_API;
-      this.routesOff.delete(call.ticketRoute!);
+    // A ticket route that issued no tickets a moment ago: no ticket request.
+    const route = call.ticketRoute ?? GENERIC_TICKET_ROUTE;
+    const off = this.routesOff.get(route);
+    if (off !== undefined) {
+      if (Date.now() < off.until) return USE_API;
+      this.routesOff.delete(route);
     }
 
     const issued = await this.ticket(sandboxId, call);
@@ -241,28 +289,51 @@ export class HostGateway {
     }
 
     const body = await readJson(response);
+    const route = call.ticketRoute ?? GENERIC_TICKET_ROUTE;
 
     if (!response.ok) {
-      // Tickets are off, or this sandbox's host has no gateway yet: the
-      // API's route, for this sandbox from now on.
-      // A route of its own that is off says nothing about the others; it is
-      // off for every sandbox for a while. Only the API's switch says so
-      // (ROUTE_OFF_CODES): a sandbox's own 404 ("Sandbox not found.") must
-      // not send every other sandbox's calls to the API.
-      if (response.status === 404 && call.ticketRoute && ROUTE_OFF_CODES.has(errorCode(body) ?? "")) {
-        this.routesOff.set(call.ticketRoute, Date.now() + ROUTE_OFF_MS);
+      const code = errorCode(body);
+      // This sandbox's host has no gateway yet: the API's route, for this
+      // sandbox from now on.
+      if (code === "host_gateway_unavailable") {
+        this.fellBack.set(sandboxId, `ticket refused: ${response.status} ${code}`);
+        return USE_API;
       }
-      if ((response.status === 404 && !call.ticketRoute) || errorCode(body) === "host_gateway_unavailable") {
-        this.fellBack.set(sandboxId, `ticket refused: ${response.status}${errorCode(body) ? ` ${errorCode(body)}` : ""}`);
+      // Any other 4xx, but a conflict (a sleeping sandbox, a fenced
+      // workspace), a rate limit or a refusal about this sandbox or
+      // permission (refusedForThisCall), says this API issues no tickets on
+      // this route: no such route (a release before it, which answers an
+      // API key a code-less 403 and a user a plain-text 404; a proxy), its
+      // switch off, or none for this credential. The API's route is the
+      // path from before the gateway, so taking it for every sandbox for a
+      // while is always safe.
+      if (
+        response.status >= 400 &&
+        response.status < 500 &&
+        response.status !== 409 &&
+        response.status !== 429 &&
+        !refusedForThisCall(response.status, body)
+      ) {
+        this.routeOff(route, `ticket refused: ${response.status}${code ? ` ${code}` : ""}`);
       }
-      // Anything else (no permission, a sleeping sandbox) the API's own
-      // route answers too, in its own words: this call goes there.
+      // The API's own route answers the rest too, in its own words: this
+      // call goes there.
       return USE_API;
     }
 
     const answer = body as Partial<TicketAnswer> | null;
-    if (!answer || typeof answer.ticket !== "string" || typeof answer.gatewayUrl !== "string") {
-      throw new RemoteHostConnectionError("The API answered a gateway ticket request without a ticket.");
+    // A 2xx without a ticket (an API, or a proxy in front of it, answering a
+    // route it doesn't have) says this API issues none on this route, not
+    // that this sandbox's gateway is broken. Nothing has run, so the call
+    // goes to the API, as does every call on this route for a while.
+    if (
+      !answer ||
+      typeof answer !== "object" ||
+      typeof answer.ticket !== "string" ||
+      typeof answer.gatewayUrl !== "string"
+    ) {
+      this.routeOff(route, `ticket answer without a ticket: ${response.status}`);
+      return USE_API;
     }
 
     if (!isSafeGatewayUrl(answer.gatewayUrl)) {
@@ -271,6 +342,10 @@ export class HostGateway {
     }
 
     return answer as TicketAnswer;
+  }
+
+  private routeOff(route: string, reason: string) {
+    this.routesOff.set(route, { until: Date.now() + ROUTE_OFF_MS, reason });
   }
 }
 
