@@ -1,5 +1,5 @@
 import type { components } from "./generated/schema.js";
-import { USE_API, hostGatewayFor } from "./host-gateway.js";
+import { GATEWAY_TICKET_HEADER, USE_API, hostGatewayFor } from "./host-gateway.js";
 import type { APIClient } from "./internal.js";
 import { unwrap } from "./internal.js";
 import type { RequestOptions } from "./request-options.js";
@@ -23,6 +23,7 @@ export class SandboxCommands {
     const signal = requestSignal(options);
 
     // Through the sandbox's own host when the client is set to (REM-690).
+    let ticket: string | undefined;
     const viaGateway = await hostGatewayFor(this.api)?.call<CommandResult>(this.sandboxId, {
       permission: "sandbox.terminal.connect",
       method: "POST",
@@ -30,16 +31,22 @@ export class SandboxCommands {
       body: { command, timeoutSeconds },
       idempotent: false,
       signal,
+      onTicket: (jti) => {
+        ticket = jti;
+      },
     });
     if (viaGateway !== undefined && viaGateway !== USE_API) {
       return viaGateway;
     }
 
+    // A command that had a ticket names it, so an API that sees the gateway
+    // already redeemed it refuses rather than run it twice (REM-1159).
     return unwrap(
       this.api.POST("/sandboxes/{sandboxId}/exec", {
         params: { path: { sandboxId: this.sandboxId } },
         body: { command, timeoutSeconds },
         signal,
+        ...(ticket ? { headers: { [GATEWAY_TICKET_HEADER]: ticket } } : {}),
       }),
     );
   }

@@ -56,8 +56,33 @@ import type { APIClient } from "./internal.js";
 // A gateway built before `policy_lost` answers a policy lost mid-command
 // with `policy_unavailable`, which reads as "nothing ran": until the
 // gateways run a build with it, a command can still be sent twice then.
+//
+// A command that goes to the API after a ticket was issued for it names that
+// ticket (GATEWAY_TICKET_HEADER, REM-1159). With HOST_GATEWAY_REDEMPTIONS on,
+// the API refuses it, 409 `ticket_redeemed`, if the gateway already redeemed
+// that ticket: it may have run there, whatever the client saw. An API
+// without it ignores the header.
 
 export const HOST_GATEWAY_ENV = "REMOTEHOST_HOST_GATEWAY";
+
+// The ticket a command first tried at the gateway, on its way to the API's
+// exec route instead (REM-1159): the ticket's id, which grants nothing.
+export const GATEWAY_TICKET_HEADER = "RemoteHost-Gateway-Ticket";
+
+// A ticket's id (its payload's `jti`), or null for anything that is not a
+// ticket. rh_hgt_<base64url payload>.<base64url signature>; the signature is
+// the gateway's to check, and the id alone grants nothing.
+export function ticketId(ticket: string): string | null {
+  const match = /^rh_hgt_([A-Za-z0-9_-]+)\.[A-Za-z0-9_-]+$/.exec(ticket);
+  if (!match) return null;
+  try {
+    const base64 = match[1]!.replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(atob(base64 + "=".repeat((4 - (base64.length % 4)) % 4))) as { jti?: unknown };
+    return typeof payload.jti === "string" && /^[A-Za-z0-9_-]{16,64}$/.test(payload.jti) ? payload.jti : null;
+  } catch {
+    return null;
+  }
+}
 
 export type GatewayPermission = "sandbox.terminal.connect" | "sandbox.files.read" | "sandbox.files.write";
 
@@ -67,11 +92,14 @@ export const USE_API: unique symbol = Symbol("use the API");
 // The gateway's refusals before it touches a sandbox (internal/gateway
 // api.go and streams.go): a ticket it would not take, a revocation policy it
 // cannot vouch for, no envd credential from the API, a group of routes that
-// is off, or a stream cap. Nothing ran, so the API's route is safe to use
-// instead. Not `policy_lost`: the policy went stale while the call ran.
+// is off, a stream cap, or a single-use ticket cache with no room for a new
+// ticket (`ticket_cache_full`, REM-1161). Nothing ran, so the API's route is
+// safe to use instead. Not `policy_lost`: the policy went stale while the
+// call ran.
 const REFUSED_BEFORE_RUNNING = new Set([
   "missing_ticket",
   "invalid_ticket",
+  "ticket_cache_full",
   "policy_unavailable",
   "credential_unavailable",
   "no_credential",
@@ -83,7 +111,10 @@ const REFUSED_BEFORE_RUNNING = new Set([
 // sandbox, so its later calls go straight to the API: the gateway would not
 // take the API's own ticket. The rest pass: a policy catching up, the
 // gateway briefly unable to get a credential from the API (its route's
-// 429, 401 or 503), a sandbox moving or waking, a cap, a route off.
+// 429, 401 or 503), a sandbox moving or waking, a cap, a route off, a host
+// too busy to take a new ticket just now (`ticket_cache_full`: before
+// REM-1161 a gateway said `invalid_ticket` for that, and kept every client
+// that heard it off that host for good).
 export const GATEWAY_BROKEN_FOR_SANDBOX = new Set(["missing_ticket", "invalid_ticket"]);
 
 // The code-less 404 gateways sent for `no_credential` before it had a code.
@@ -186,6 +217,9 @@ export type GatewayCall = {
   // write only when the gateway refused it before touching the sandbox.
   idempotent: boolean;
   signal?: AbortSignal;
+  // Told the id of the ticket issued for this call, once it is (REM-1159),
+  // so a command that then goes to the API can name it.
+  onTicket?: (jti: string) => void;
 };
 
 export type HostGatewayConfig = {
@@ -341,6 +375,8 @@ export class HostGateway {
     if (issued === USE_API) {
       return USE_API;
     }
+    const jti = ticketId(issued.ticket);
+    if (jti) call.onTicket?.(jti);
 
     const url = new URL(`${issued.gatewayUrl.replace(/\/+$/, "")}${call.path}`);
     for (const [name, value] of Object.entries(call.query ?? {})) {

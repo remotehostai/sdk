@@ -13,10 +13,12 @@ import {
   ROUTE_OFF_MS,
   USE_API,
   fallsBack,
+  GATEWAY_TICKET_HEADER,
   hostGatewayFor,
   isSafeGatewayUrl,
   neverConnected,
   sdkGatewayFetch,
+  ticketId,
 } from "../src/host-gateway.js";
 import type { SandboxData } from "../src/sandboxes.js";
 
@@ -55,7 +57,7 @@ const sandboxData: SandboxData = {
   updated_at: "2026-09-13T00:00:00.000Z",
 };
 
-type Seen = { method: string; url: string; authorization: string | null; body: unknown };
+type Seen = { method: string; url: string; authorization: string | null; body: unknown; gatewayTicket: string | null };
 
 // A fake API and gateway behind one fetch. `gateway` answers the gateway's
 // requests; `ticket` the ticket route's.
@@ -82,7 +84,13 @@ function world(options: {
     fetch: async (request) => {
       const text = request.body ? await request.text() : "";
       const body = text ? JSON.parse(text) : null;
-      seen.push({ method: request.method, url: request.url, authorization: request.headers.get("authorization"), body });
+      seen.push({
+        method: request.method,
+        url: request.url,
+        authorization: request.headers.get("authorization"),
+        body,
+        gatewayTicket: request.headers.get(GATEWAY_TICKET_HEADER),
+      });
       const url = new URL(request.url);
 
       // A sandbox the API no longer has: retrievable from an earlier read,
@@ -854,6 +862,7 @@ test("the fallback policy, answer by answer", () => {
     // label, status, body, read falls back, command falls back
     ["missing_ticket", 401, coded("missing_ticket"), true, true],
     ["invalid_ticket", 403, coded("invalid_ticket"), true, true],
+    ["ticket_cache_full", 503, coded("ticket_cache_full"), true, true],
     ["policy_unavailable", 503, coded("policy_unavailable"), true, true],
     ["credential_unavailable", 503, coded("credential_unavailable"), true, true],
     ["no_credential", 404, coded("no_credential"), true, true],
@@ -885,6 +894,7 @@ test("only a refused ticket keeps a sandbox on the API; every other failure is f
     [403, "invalid_ticket"],
   ] as const;
   const passing = [
+    [503, "ticket_cache_full"],
     [503, "credential_unavailable"],
     [404, "no_credential"],
     [404, "not_found"],
@@ -913,6 +923,25 @@ test("only a refused ticket keeps a sandbox on the API; every other failure is f
       assert.equal(tickets, 2, `${code}: a second ticket`);
     }
   }
+});
+
+// REM-1161: a gateway whose single-use cache is full refused the ticket
+// before anything ran, and says "not now", not "never for this sandbox".
+test("a full ticket cache sends a command to the API for that call alone", async () => {
+  let calls = 0;
+  const { client, apiCalls } = world({
+    hostGateway: true,
+    gateway: () =>
+      ++calls === 1
+        ? Response.json({ error: { message: "busy", code: "ticket_cache_full" } }, { status: 503 })
+        : Response.json(execResult),
+  });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  assert.equal((await sandbox.commands.run("true")).stdout, "from the api\n");
+  assert.equal(apiCalls("/exec").length, 1);
+  assert.equal((await sandbox.commands.run("true")).stdout, "from the gateway\n", "the gateway again");
+  assert.equal(apiCalls("/exec").length, 1);
+  assert.equal(calls, 2);
 });
 
 test("a lost connection on a read falls back for that call, and later calls use the gateway", async () => {
@@ -1125,7 +1154,13 @@ function nodeWorld(t: TestContext, gatewayUrl: string) {
     const request = new Request(input, init);
     const url = new URL(request.url);
     const text = request.body ? await request.text() : "";
-    seen.push({ method: request.method, url: request.url, authorization: request.headers.get("authorization"), body: text ? JSON.parse(text) : null });
+    seen.push({
+      method: request.method,
+      url: request.url,
+      authorization: request.headers.get("authorization"),
+      body: text ? JSON.parse(text) : null,
+      gatewayTicket: request.headers.get(GATEWAY_TICKET_HEADER),
+    });
     if (url.origin === new URL(gatewayUrl).origin) {
       throughGlobalFetch.push(`${request.method} ${url.pathname}`);
       throw fetchFailed("ECONNREFUSED");
@@ -1628,3 +1663,59 @@ test("a key that runs commands but can't read files makes one probe per pin, and
   assert.equal(onTheAPI(), FAILING_PIN_AFTER + 40, "every command on the API");
   assert.equal(seen.filter((s) => s.url.startsWith(GATEWAY)).length, FAILING_PIN_AFTER, "none on the gateway past the pin");
 });
+
+// REM-1159: a command that goes to the API after a ticket was issued for it
+// names that ticket, so an API that finds the gateway already redeemed it
+// refuses rather than run it a second time.
+const JTI = "ticket-id-0000000000001";
+const realTicket = (jti: string) =>
+  `rh_hgt_${Buffer.from(JSON.stringify({ v: 1, kid: "k1", sid: "s", hid: "h", perm: "sandbox.terminal.connect", iat: 1, exp: 31, jti })).toString("base64url")}.c2ln`;
+
+test("reads a ticket's id, and nothing from what is not a ticket", () => {
+  assert.equal(ticketId(realTicket(JTI)), JTI);
+  for (const value of ["", "rh_hgt_ticket-1", "rh_sk_x.y", `${realTicket(JTI)}.extra`, realTicket("short"), "rh_hgt_e30.c2ln"]) {
+    assert.equal(ticketId(value), null, value);
+  }
+});
+
+test("a command that falls back to the API names the ticket it tried", async () => {
+  for (const [label, gateway] of [
+    ["refused before running", () => Response.json({ error: { message: "no", code: "credential_unavailable" } }, { status: 503 })],
+    ["a full ticket cache", () => Response.json({ error: { message: "busy", code: "ticket_cache_full" } }, { status: 503 })],
+  ] as const) {
+    const { client, apiCalls } = world({
+      hostGateway: true,
+      ticket: (permission) =>
+        Response.json({
+          ticket: realTicket(JTI),
+          gatewayUrl: GATEWAY,
+          expiresAt: new Date(Date.now() + 30_000).toISOString(),
+          sandboxId: SANDBOX.replace(/-/g, ""),
+          permission,
+        }),
+      gateway,
+    });
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    assert.equal((await sandbox.commands.run("make deploy")).stdout, "from the api\n", label);
+    const exec = apiCalls("/exec");
+    assert.equal(exec.length, 1, label);
+    assert.equal(exec[0]!.gatewayTicket, JTI, label);
+  }
+});
+
+test("a command with no ticket, or no gateway, names none", async () => {
+  for (const options of [
+    { hostGateway: false },
+    {
+      hostGateway: true,
+      ticket: () =>
+        Response.json({ error: { message: "This sandbox's host has no gateway yet.", code: "host_gateway_unavailable" } }, { status: 409 }),
+    },
+  ]) {
+    const { client, apiCalls } = world(options);
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    await sandbox.commands.run("true");
+    assert.equal(apiCalls("/exec")[0]?.gatewayTicket, null, JSON.stringify(options));
+  }
+});
+
