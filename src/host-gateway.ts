@@ -31,6 +31,14 @@ import type { APIClient } from "./internal.js";
 //   twice is harmless.
 // - Never an answer in the API's own words that the API would give too: a
 //   file not in the workspace, a body it refuses, a revoked access.
+// - A command or a write too when the connection to the gateway was never
+//   ready for it (refused, a name that does not resolve, no route, a TLS
+//   handshake that failed, the connect timing out after
+//   GATEWAY_CONNECT_TIMEOUT_MS), and only on the SDK's own transport, which
+//   saw that no byte of the request left: nothing was sent (REM-967).
+//   Through a fetch the caller passed, or a dispatcher the SDK did not make,
+//   an earlier attempt may have sent it before a retry was refused, so that
+//   is an error.
 // - A command or a write never after it may have run: a 5xx, `policy_lost`,
 //   a 2xx cut off, a timeout or a connection lost mid-command is an error,
 //   never a second run.
@@ -39,7 +47,11 @@ import type { APIClient } from "./internal.js";
 // the API for the life of the client only when its gateway path cannot work:
 // the gateway would not take the API's ticket (GATEWAY_BROKEN_FOR_SANDBOX),
 // its host has no gateway (host_gateway_unavailable), or the gateway URL is
-// not https.
+// not https. A gateway that keeps failing a sandbox's calls
+// (FAILING_PIN_AFTER in a row) sends them to the API for FAILING_PIN_MS
+// without asking for tickets. Once that runs out one read at a time tries
+// the gateway again, and commands and writes stay on the API until a read
+// has succeeded there (REM-967).
 //
 // A gateway built before `policy_lost` answers a policy lost mid-command
 // with `policy_unavailable`, which reads as "nothing ran": until the
@@ -76,6 +88,57 @@ export const GATEWAY_BROKEN_FOR_SANDBOX = new Set(["missing_ticket", "invalid_ti
 
 // The code-less 404 gateways sent for `no_credential` before it had a code.
 const NO_CREDENTIAL_MESSAGE = "No envd credential for this sandbox.";
+
+// Connection failures before a byte of the request was sent, by the code
+// Node or undici puts on the error or its cause: nothing reached the
+// gateway, so even a command may go to the API (REM-967). Not a reset or a
+// socket closed after connecting (ECONNRESET, UND_ERR_SOCKET), nor ETIMEDOUT,
+// which a read can give too.
+const NEVER_CONNECTED = new Set([
+  "ECONNREFUSED",
+  "ENOTFOUND",
+  "EAI_AGAIN",
+  "ENETUNREACH",
+  "EHOSTUNREACH",
+  "UND_ERR_CONNECT_TIMEOUT",
+]);
+
+// A gateway that fails this many of a sandbox's calls in a row (a 5xx, an
+// answer not in the API's shape, a refusal before running such as
+// `credential_unavailable`, a lost or never-opened connection, a timeout)
+// sends that sandbox's calls to the API for FAILING_PIN_MS, give or take
+// FAILING_PIN_JITTER, with no ticket requests: each failure costs a ticket, a
+// gateway round trip and, for `credential_unavailable`, a request to the
+// API's credential route (REM-967). A success clears the count; a 429 leaves
+// it as it was.
+//
+// Once the pin runs out, one read at a time probes the gateway while every
+// other call keeps to the API. A probe that fails pins the sandbox again; one
+// that succeeds lifts the pin. Commands and writes never probe: they stay on
+// the API until a read has succeeded, and one of them past the pin with no
+// probe out sets off the SDK's own (a list of /code). An answer to a call sent before the
+// pin was set says nothing about the gateway since, so it neither lifts the
+// pin nor counts.
+export const FAILING_PIN_AFTER = 3;
+export const FAILING_PIN_MS = 60_000;
+export const FAILING_PIN_JITTER = 0.1;
+// Sandboxes whose failures are remembered at once, at most: past this the
+// oldest is forgotten, which only sends its calls to the gateway sooner.
+export const FAILING_MAX_SANDBOXES = 1_000;
+
+type Failing = {
+  count: number;
+  // When the pin was last set, and until when it holds (performance.now());
+  // `until` 0 while not pinned. A pin that has run out stays set until a
+  // read probe succeeds.
+  pinnedAt: number;
+  until: number;
+  // A read probing the gateway past the pin.
+  probing: boolean;
+};
+
+// A call let through to the gateway: when, and whether it is the probe.
+type Admitted = { sentAt: number; probe: boolean };
 
 const ON_VALUES = new Set(["1", "true", "yes", "on"]);
 const OFF_VALUES = new Set(["0", "false", "no", "off"]);
@@ -128,8 +191,10 @@ export type GatewayCall = {
 export type HostGatewayConfig = {
   baseUrl: string;
   headers: Headers;
-  // The client's own fetch, without the SDK's retries: a ticket is spent by
-  // its first use.
+  // The gateway's transport, without the SDK's retries: a ticket is spent
+  // by its first use. The caller's own fetch when it passed one; otherwise
+  // the SDK's (sdkGatewayFetch), the only one whose connection failures let
+  // a command or a write go to the API.
   fetch: (request: Request) => Promise<Response>;
   // The API's fetch, with the SDK's retries, for the ticket itself.
   apiFetch: (request: Request) => Promise<Response>;
@@ -170,6 +235,9 @@ export class HostGateway {
   // Ticket routes found not issuing tickets, until when (ROUTE_OFF_MS), and
   // why: one entry per route, for every sandbox.
   private readonly routesOff = new Map<string, { until: number; reason: string }>();
+  // Each sandbox's gateway failures in a row, and its pin (FAILING_PIN_AFTER,
+  // FAILING_PIN_MS).
+  private readonly failing = new Map<string, Failing>();
 
   constructor(private readonly config: HostGatewayConfig) {}
 
@@ -184,10 +252,17 @@ export class HostGateway {
     return off && Date.now() < off.until ? off.reason : undefined;
   }
 
+  /**
+   * Until when (performance.now()) a sandbox's calls skip a gateway that
+   * keeps failing, if they do.
+   */
+  failingUntil(sandboxId: string): number | undefined {
+    const until = this.failing.get(sandboxId)?.until;
+    return until && performance.now() < until ? until : undefined;
+  }
+
   async call<T>(sandboxId: string, call: GatewayCall): Promise<T | typeof USE_API> {
-    if (this.fellBack.has(sandboxId)) {
-      return USE_API;
-    }
+    if (this.fellBack.has(sandboxId)) return USE_API;
 
     // A ticket route that issued no tickets a moment ago: no ticket request.
     const route = call.ticketRoute ?? GENERIC_TICKET_ROUTE;
@@ -197,6 +272,71 @@ export class HostGateway {
       this.routesOff.delete(route);
     }
 
+    const admitted = this.admit(sandboxId, call);
+    if (admitted === USE_API) return USE_API;
+    try {
+      return await this.viaGateway<T>(sandboxId, call, admitted);
+    } finally {
+      if (admitted.probe) {
+        const failing = this.failing.get(sandboxId);
+        if (failing) failing.probing = false;
+      }
+    }
+  }
+
+  // Whether a call may go to the gateway, given the sandbox's pin: not while
+  // it holds; past it, one read at a time, and never a command or a write
+  // until a read has succeeded. A command or a write past the pin sets off
+  // the SDK's own read instead, so a client that only runs commands comes
+  // back to the gateway too.
+  private admit(sandboxId: string, call: GatewayCall): Admitted | typeof USE_API {
+    const sentAt = performance.now();
+    const failing = this.failing.get(sandboxId);
+    if (!failing || failing.until === 0) return { sentAt, probe: false };
+    if (sentAt < failing.until || failing.probing) return USE_API;
+    if (!call.idempotent) {
+      this.probe(sandboxId);
+      return USE_API;
+    }
+    failing.probing = true;
+    return { sentAt, probe: true };
+  }
+
+  // The SDK's own probe past a pin: a list of /code. Its answer is dropped
+  // and only moves the pin. One that gets no usable answer (a refused
+  // ticket, as for a key that runs commands but can't read files; a 401 or
+  // 403; a 429; a timeout; an error) pins the sandbox again, so a client
+  // makes at most one probe per pin, never a ticket request per command.
+  private probe(sandboxId: string) {
+    void this.call(sandboxId, {
+      permission: "sandbox.files.read",
+      method: "GET",
+      path: "/v1/files",
+      query: { path: "/code" },
+      idempotent: true,
+    }).then(
+      (answer) => {
+        if (answer === USE_API) this.pinAgain(sandboxId);
+      },
+      () => this.pinAgain(sandboxId),
+    );
+  }
+
+  // Pins a sandbox again whose pin a probe did not lift.
+  private pinAgain(sandboxId: string) {
+    const failing = this.failing.get(sandboxId);
+    if (failing && failing.until !== 0) this.pin(failing);
+  }
+
+  // For FAILING_PIN_MS give or take FAILING_PIN_JITTER, so sandboxes pinned
+  // together don't all probe together.
+  private pin(failing: Failing) {
+    const now = performance.now();
+    failing.pinnedAt = now;
+    failing.until = now + FAILING_PIN_MS * (1 - FAILING_PIN_JITTER + 2 * FAILING_PIN_JITTER * Math.random());
+  }
+
+  private async viaGateway<T>(sandboxId: string, call: GatewayCall, admitted: Admitted): Promise<T | typeof USE_API> {
     const issued = await this.ticket(sandboxId, call);
     if (issued === USE_API) {
       return USE_API;
@@ -226,11 +366,23 @@ export class HostGateway {
       );
     } catch (error) {
       if (call.signal?.aborted) throw error;
+      this.gatewayFailed(sandboxId, admitted);
       // A read goes to the API, a timeout included, for this call only: a
       // connection lost once says nothing about the next one (REM-906).
       if (call.idempotent) return USE_API;
       if (timeout.aborted) {
         throw new RemoteHostTimeoutError("The sandbox's host gateway timed out.", { cause: error });
+      }
+      // A connection never ready for the request carried nothing: a command
+      // or a write too, but only when the SDK's own transport saw that
+      // (REM-967).
+      if (sentNothing(error)) return USE_API;
+      if (neverConnected(error)) {
+        throw new RemoteHostConnectionError(
+          "Could not connect to the sandbox's host gateway. The call was not sent to the API instead: through a " +
+            "custom fetch or dispatcher the SDK cannot tell whether an earlier attempt, before a retry, reached the gateway.",
+          { cause: error },
+        );
       }
       throw new RemoteHostConnectionError("Lost the connection to the sandbox's host gateway.", {
         cause: error,
@@ -243,15 +395,31 @@ export class HostGateway {
     // read goes to the API; a command or a write may have run, so it is an
     // error, never a second run.
     if (response.ok && !(body && typeof body === "object")) {
-      if (call.idempotent) return USE_API;
       // An answer cut off by the caller's abort or the SDK's timeout says
       // so, as a request cut off before its answer does.
       if (call.signal?.aborted) throw call.signal.reason;
+      this.gatewayFailed(sandboxId, admitted);
+      if (call.idempotent) return USE_API;
       if (timeout.aborted) throw new RemoteHostTimeoutError("The sandbox's host gateway timed out.");
       throw new RemoteHostConnectionError("The sandbox's host gateway sent an incomplete answer.");
     }
 
     if (!response.ok) {
+      // The gateway, or the path to it, failing: a 5xx, an answer not in the
+      // API's shape, a refusal before running. An answer in the API's own
+      // words is the gateway working. A cap (429) is neither: it leaves the
+      // count and the pin as they were.
+      if (response.status === 429) {
+        // Neither.
+      } else if (
+        response.status >= 500 ||
+        apiErrorMessage(body) === null ||
+        REFUSED_BEFORE_RUNNING.has(errorCode(body) ?? "")
+      ) {
+        this.gatewayFailed(sandboxId, admitted);
+      } else {
+        this.gatewayWorked(sandboxId, admitted);
+      }
       if (fallsBack(call, response.status, body)) {
         const code = errorCode(body);
         if (code && GATEWAY_BROKEN_FOR_SANDBOX.has(code)) {
@@ -262,7 +430,36 @@ export class HostGateway {
       throw new RemoteHostAPIError(response, body);
     }
 
+    this.gatewayWorked(sandboxId, admitted);
     return body as T;
+  }
+
+  // An answer to a call sent before the sandbox's pin was last set: from the
+  // gateway as it was then, so it neither counts nor lifts the pin.
+  private stale(failing: Failing | undefined, admitted: Admitted): boolean {
+    return failing !== undefined && failing.pinnedAt !== 0 && admitted.sentAt <= failing.pinnedAt;
+  }
+
+  private gatewayWorked(sandboxId: string, admitted: Admitted) {
+    if (!this.stale(this.failing.get(sandboxId), admitted)) this.failing.delete(sandboxId);
+  }
+
+  private gatewayFailed(sandboxId: string, admitted: Admitted) {
+    let failing = this.failing.get(sandboxId);
+    if (this.stale(failing, admitted)) return;
+    if (!failing) {
+      if (this.failing.size >= FAILING_MAX_SANDBOXES) {
+        const oldest = this.failing.keys().next();
+        if (!oldest.done) this.failing.delete(oldest.value);
+      }
+      failing = { count: 0, pinnedAt: 0, until: 0, probing: false };
+      this.failing.set(sandboxId, failing);
+    }
+    failing.count += 1;
+    // FAILING_PIN_AFTER in a row, or a probe past the pin failing: pinned
+    // (again), for FAILING_PIN_MS give or take FAILING_PIN_JITTER, so
+    // sandboxes pinned together don't all probe together.
+    if (failing.count >= FAILING_PIN_AFTER || failing.until !== 0) this.pin(failing);
   }
 
   private async ticket(sandboxId: string, call: GatewayCall): Promise<TicketAnswer | typeof USE_API> {
@@ -366,6 +563,190 @@ export function isSafeGatewayUrl(value: string): boolean {
     !url.search &&
     !url.hash
   );
+}
+
+// Whether a failed fetch never opened its connection (NEVER_CONNECTED): the
+// code on the error or the first cause that has one. For an AggregateError
+// (Node trying each address in turn), every attempt's, whatever its own
+// code says: Node sets that to the first attempt's.
+export function neverConnected(error: unknown): boolean {
+  let current: unknown = error;
+  for (let depth = 0; current && typeof current === "object" && depth < 8; depth += 1) {
+    const attempts = (current as { errors?: unknown }).errors;
+    if (current instanceof AggregateError || Array.isArray(attempts)) {
+      return Array.isArray(attempts) && attempts.length > 0 && attempts.every((attempt) => neverConnected(attempt));
+    }
+    const code = (current as { code?: unknown }).code;
+    if (typeof code === "string") return NEVER_CONNECTED.has(code);
+    current = (current as { cause?: unknown }).cause;
+  }
+  return false;
+}
+
+// Errors from the SDK's own transport (sdkGatewayFetch) raised before its
+// connection could carry a byte of the request: before the TCP connect, and
+// for https before `secureConnect` (a refusal, a name that does not resolve,
+// a TLS handshake that failed, the connect timing out). Only that transport
+// adds to it, so an error from a fetch the caller passed is never in it.
+const unsent = new WeakSet<object>();
+
+// Whether a failed gateway fetch certainly sent nothing: the SDK's own
+// transport failed before its connection was ready for the request.
+export function sentNothing(error: unknown): boolean {
+  return typeof error === "object" && error !== null && unsent.has(error);
+}
+
+// How long the SDK's transport waits for a gateway connection to be ready
+// (TCP, and TLS for https) before giving up on it, as the CLI does: above
+// the gateway's own 5 s wait for a fresh connection. Past it nothing was
+// sent, so the call goes to the API. It never cuts a request once sent.
+export const GATEWAY_CONNECT_TIMEOUT_MS = 10_000;
+
+// The little of node:http and node:https the SDK's transport uses.
+type NodeSocket = {
+  once(event: "connect" | "secureConnect", listener: () => void): unknown;
+};
+type NodeResponse = {
+  statusCode?: number;
+  statusMessage?: string;
+  rawHeaders: string[];
+  complete: boolean;
+  on(event: "data", listener: (chunk: Uint8Array) => void): unknown;
+  on(event: "end" | "close", listener: () => void): unknown;
+  on(event: "error", listener: (error: Error) => void): unknown;
+  destroy(): void;
+};
+type NodeRequest = {
+  reusedSocket: boolean;
+  destroy(error: Error): void;
+  on(event: "socket", listener: (socket: NodeSocket) => void): unknown;
+  on(event: "close", listener: () => void): unknown;
+  on(event: "response", listener: (response: NodeResponse) => void): unknown;
+  on(event: "error", listener: (error: Error) => void): unknown;
+  end(body?: Uint8Array): void;
+};
+type NodeHttp = {
+  Agent: new (options: { keepAlive: boolean; timeout: number }) => unknown;
+  request(
+    url: URL,
+    options: { method: string; headers: Record<string, string>; agent: unknown; signal: AbortSignal },
+  ): NodeRequest;
+};
+
+// The SDK's own transport to host gateways under Node: node:http(s) on
+// agents of its own, not globalThis.fetch, whose global dispatcher the app
+// may have made retry (undici's RetryAgent). It sends each request once and
+// knows whether its connection was ever ready for the request: a failure
+// before that, a connect that took longer than `connectTimeoutMs` included,
+// sent nothing (sentNothing). Undefined where the runtime has no
+// process.getBuiltinModule (browsers, Workers, Node before 20.16).
+export function sdkGatewayFetch(
+  options: { connectTimeoutMs?: number; idleTimeoutMs?: number } = {},
+): ((request: Request) => Promise<Response>) | undefined {
+  const connectTimeoutMs = options.connectTimeoutMs ?? GATEWAY_CONNECT_TIMEOUT_MS;
+  const idleTimeoutMs = options.idleTimeoutMs ?? 4_000;
+  const runtime = globalThis as typeof globalThis & {
+    process?: { getBuiltinModule?: (id: string) => unknown };
+  };
+  const load = runtime.process?.getBuiltinModule;
+  if (typeof load !== "function") return undefined;
+  const http = load.call(runtime.process, "node:http") as NodeHttp | undefined;
+  const https = load.call(runtime.process, "node:https") as NodeHttp | undefined;
+  if (typeof http?.request !== "function" || typeof https?.request !== "function") return undefined;
+  // Idle sockets closed after 4 s, as fetch's own agent does, well before a
+  // server would close one under a request.
+  const agents = {
+    "http:": new http.Agent({ keepAlive: true, timeout: idleTimeoutMs }),
+    "https:": new https.Agent({ keepAlive: true, timeout: idleTimeoutMs }),
+  };
+
+  return async (request) => {
+    const url = new URL(request.url);
+    if (url.protocol !== "https:" && url.protocol !== "http:") {
+      throw new TypeError(`The host gateway transport does not speak ${url.protocol}`);
+    }
+    const body = request.body ? new Uint8Array(await request.arrayBuffer()) : undefined;
+    const headers: Record<string, string> = {};
+    request.headers.forEach((value, name) => {
+      headers[name] = value;
+    });
+    if (body) headers["content-length"] = String(body.byteLength);
+
+    return new Promise<Response>((resolve, reject) => {
+      const secure = url.protocol === "https:";
+      // Whether the connection can carry the request yet: connected, and
+      // for https past the TLS handshake. Until then no byte of it has left.
+      let ready = false;
+      const outgoing = (secure ? https : http).request(url, {
+        method: request.method,
+        headers,
+        agent: agents[url.protocol as "http:" | "https:"],
+        signal: request.signal,
+      });
+      const connectTimer = setTimeout(() => {
+        if (ready) return;
+        outgoing.destroy(
+          Object.assign(new Error(`The host gateway's connection was not ready within ${connectTimeoutMs} ms.`), {
+            code: "UND_ERR_CONNECT_TIMEOUT",
+          }),
+        );
+      }, connectTimeoutMs);
+      const isReady = () => {
+        ready = true;
+        clearTimeout(connectTimer);
+      };
+      outgoing.on("close", () => clearTimeout(connectTimer));
+      outgoing.on("socket", (socket) => {
+        // A kept-alive socket was made ready long ago.
+        if (outgoing.reusedSocket) isReady();
+        else socket.once(secure ? "secureConnect" : "connect", isReady);
+      });
+      outgoing.on("error", (error) => {
+        clearTimeout(connectTimer);
+        if (!ready && typeof error === "object" && error !== null) unsent.add(error);
+        reject(error);
+      });
+      outgoing.on("response", (incoming) => {
+        let settled = false;
+        const stream = new ReadableStream<Uint8Array>({
+          start(controller) {
+            const cutOff = (error: Error) => {
+              if (!settled) controller.error(error);
+              settled = true;
+            };
+            incoming.on("data", (chunk) => {
+              if (!settled) controller.enqueue(new Uint8Array(chunk));
+            });
+            incoming.on("end", () => {
+              if (!settled) controller.close();
+              settled = true;
+            });
+            incoming.on("error", cutOff);
+            incoming.on("close", () => {
+              if (!incoming.complete) cutOff(new Error("The host gateway's answer was cut off."));
+            });
+          },
+          cancel() {
+            settled = true;
+            incoming.destroy();
+          },
+        });
+        const answerHeaders = new Headers();
+        for (let i = 0; i + 1 < incoming.rawHeaders.length; i += 2) {
+          answerHeaders.append(incoming.rawHeaders[i]!, incoming.rawHeaders[i + 1]!);
+        }
+        const status = incoming.statusCode ?? 502;
+        try {
+          const empty = request.method === "HEAD" || status === 204 || status === 205 || status === 304;
+          resolve(new Response(empty ? null : stream, { status, statusText: incoming.statusMessage ?? "", headers: answerHeaders }));
+        } catch (error) {
+          incoming.destroy();
+          reject(error);
+        }
+      });
+      outgoing.end(body);
+    });
+  };
 }
 
 // Whether a gateway's failed answer sends this call to the API: the policy

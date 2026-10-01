@@ -2,7 +2,7 @@ import createClient from "openapi-fetch";
 
 import { RemoteHostConfigurationError } from "./errors.js";
 import type { paths } from "./generated/schema.js";
-import { HOST_GATEWAY_ENV, HostGateway, hostGatewayFromEnv, useHostGateway } from "./host-gateway.js";
+import { HOST_GATEWAY_ENV, HostGateway, hostGatewayFromEnv, sdkGatewayFetch, useHostGateway } from "./host-gateway.js";
 import type { APIClient } from "./internal.js";
 import { Sandboxes } from "./sandboxes.js";
 import { VERSION } from "./version.js";
@@ -19,7 +19,19 @@ export type RemoteHostOptions = {
   baseURL?: string;
   /** Default organization for organization-scoped operations. */
   orgId?: string;
-  /** Custom Fetch implementation, useful for tests and non-Node runtimes. */
+  /**
+   * Custom Fetch implementation, useful for tests and non-Node runtimes.
+   *
+   * With the host gateway on, it carries the gateway calls too. The SDK
+   * cannot see inside it: if it, or a dispatcher behind it, retries, an
+   * earlier attempt may have reached the gateway before a retry was refused.
+   * So through it, a command or a file write whose gateway connection fails
+   * is an error, never sent again through the API; reads still fall back.
+   * Without it, the SDK reaches gateways under Node with its own node:http(s)
+   * transport, not globalThis.fetch and its global dispatcher, and sends a
+   * command or a write to the API only when that transport saw no connection
+   * open.
+   */
   fetch?: (request: Request) => Promise<Response>;
   /** Headers included with every request. Authorization and SDK version are managed by the SDK. */
   headers?: HeadersInit;
@@ -109,7 +121,13 @@ export class RemoteHost {
     if (options.hostGateway ?? hostGatewayFromEnv(readEnvironmentVariable(HOST_GATEWAY_ENV), runsOnNode())) {
       useHostGateway(
         api,
-        new HostGateway({ baseUrl, headers, fetch: fetcher, apiFetch: reliableFetch, timeoutMs }),
+        new HostGateway({
+          baseUrl,
+          headers,
+          fetch: options.fetch ?? sdkGatewayFetch() ?? fetcher,
+          apiFetch: reliableFetch,
+          timeoutMs,
+        }),
       );
     }
 

@@ -1,8 +1,23 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { createServer as createHttpServer } from "node:http";
+import { createServer, connect, type Server, type Socket } from "node:net";
+import test, { type TestContext } from "node:test";
 
 import RemoteHost, { RemoteHostAPIError, RemoteHostConnectionError, RemoteHostTimeoutError } from "../src/index.js";
-import { GATEWAY_BROKEN_FOR_SANDBOX, ROUTE_OFF_MS, fallsBack, isSafeGatewayUrl } from "../src/host-gateway.js";
+import {
+  FAILING_PIN_AFTER,
+  FAILING_PIN_JITTER,
+  FAILING_PIN_MS,
+  GATEWAY_BROKEN_FOR_SANDBOX,
+  HostGateway,
+  ROUTE_OFF_MS,
+  USE_API,
+  fallsBack,
+  hostGatewayFor,
+  isSafeGatewayUrl,
+  neverConnected,
+  sdkGatewayFetch,
+} from "../src/host-gateway.js";
 import type { SandboxData } from "../src/sandboxes.js";
 
 // Commands and files through the sandbox's own host (REM-690): on by
@@ -50,6 +65,9 @@ function world(options: {
   gateway?: (request: Request) => Promise<Response> | Response;
   timeoutMs?: number;
   dangerouslyAllowBrowser?: boolean;
+  // The caller's fetch retries a gateway request once after a network
+  // error, as a retrying wrapper or undici's RetryAgent does.
+  retryGateway?: boolean;
 }) {
   const seen: Seen[] = [];
   const inFlight = new Set<Request>();
@@ -85,9 +103,14 @@ function world(options: {
         // signal can be collected before it aborts.
         inFlight.add(request);
         answer.finally(() => inFlight.delete(request)).catch(() => {});
+        const retried = options.retryGateway
+          ? answer.catch(() =>
+              options.gateway!(new Request(request.url, { method: request.method, headers: request.headers, body: text || undefined })),
+            )
+          : answer;
         return new Promise<Response>((resolve, reject) => {
           request.signal.addEventListener("abort", () => reject(request.signal.reason), { once: true });
-          answer.then(resolve, reject);
+          retried.then(resolve, reject);
         });
       }
       if (url.pathname.endsWith("/gateway-ticket")) {
@@ -913,10 +936,14 @@ test("a 2xx cut off: a read falls back, a command or a write is an error and nev
     ["JSON cut off", () => new Response('{"exitCode":0,"std', { status: 200, headers: { "content-type": "application/json" } })],
     ["not JSON", () => new Response("<html>ok</html>", { status: 200 })],
   ] as const) {
+    // Reads and writes on separate clients, each under FAILING_PIN_AFTER,
+    // so every call meets the gateway rather than the pin.
+    const reads = world({ hostGateway: true, gateway: answer });
+    const readSandbox = await reads.client.sandboxes.retrieve(SANDBOX);
+    assert.equal((await readSandbox.metrics.get()).cpuPercent, 1, `${label}: metrics from the API`);
+    assert.equal(await readSandbox.files.readText("a"), "api", `${label}: read from the API`);
     const { client, apiCalls } = world({ hostGateway: true, gateway: answer });
     const sandbox = await client.sandboxes.retrieve(SANDBOX);
-    assert.equal((await sandbox.metrics.get()).cpuPercent, 1, `${label}: metrics from the API`);
-    assert.equal(await sandbox.files.readText("a"), "api", `${label}: read from the API`);
     await assert.rejects(sandbox.commands.run("make deploy"), RemoteHostConnectionError, label);
     await assert.rejects(sandbox.files.write("a", "x"), RemoteHostConnectionError, label);
     assert.equal(apiCalls("/exec").length, 0, label);
@@ -975,4 +1002,629 @@ test("never sends a ticket to a gateway that is not https", async () => {
   for (const bad of ["http://gw.example.com", "https://u:p@gw.example.com", "https://gw.example.com?x=1", "wss://gw", "nope"]) {
     assert.ok(!isSafeGatewayUrl(bad), bad);
   }
+});
+
+// REM-967: a connection that never opened sent nothing, so a command or a
+// write goes to the API too; one that opened and was lost does not.
+function fetchFailed(code: string) {
+  return new TypeError("fetch failed", { cause: Object.assign(new Error(`connect ${code}`), { code }) });
+}
+
+const NEVER_CONNECTED_CODES = ["ECONNREFUSED", "ENOTFOUND", "EAI_AGAIN", "ENETUNREACH", "EHOSTUNREACH", "UND_ERR_CONNECT_TIMEOUT"];
+
+test("each never-connected code, on the error or its cause, is a connection that never opened", () => {
+  for (const code of NEVER_CONNECTED_CODES) {
+    assert.equal(neverConnected(fetchFailed(code)), true, code);
+    assert.equal(neverConnected(Object.assign(new Error(code), { code })), true, code);
+  }
+});
+
+// Review A of #811, finding 1: a fetch the caller passed may retry, so a
+// refused connection says nothing about an earlier attempt.
+test("through the caller's fetch, a command or a write whose gateway connection never opened is an error, never sent to the API", async () => {
+  for (const code of NEVER_CONNECTED_CODES) {
+    const { client, apiCalls } = world({
+      hostGateway: true,
+      gateway: () => {
+        throw fetchFailed(code);
+      },
+    });
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    await assert.rejects(sandbox.commands.run("make deploy"), (error: unknown) => {
+      assert.ok(error instanceof RemoteHostConnectionError, code);
+      assert.match(error.message, /custom fetch or dispatcher/, code);
+      return true;
+    });
+    await assert.rejects(sandbox.files.write("a", "x"), RemoteHostConnectionError, code);
+    assert.equal(apiCalls("/exec").length, 0, `${code}: never on the API`);
+    assert.equal(apiCalls("/file").filter((s) => s.method === "PUT").length, 0, code);
+    // A read still goes to the API.
+    assert.equal(await sandbox.files.readText("a"), "api", code);
+  }
+});
+
+test("through a fetch that retries, a command sent before a refused retry is never sent again through the API", async () => {
+  // The first attempt delivers the call and is reset; the retry is refused.
+  const delivered: unknown[] = [];
+  let attempts = 0;
+  const { client, apiCalls } = world({
+    hostGateway: true,
+    retryGateway: true,
+    gateway: async (request) => {
+      attempts += 1;
+      if (attempts % 2 === 1) {
+        delivered.push(await request.json());
+        throw fetchFailed("ECONNRESET");
+      }
+      throw fetchFailed("ECONNREFUSED");
+    },
+  });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  await assert.rejects(sandbox.commands.run("make deploy"), RemoteHostConnectionError);
+  await assert.rejects(sandbox.files.write("a", "x"), RemoteHostConnectionError);
+  assert.equal(delivered.length, 2, "each reached the gateway once");
+  assert.equal(apiCalls("/exec").length, 0, "and never the API");
+  assert.equal(apiCalls("/file").filter((s) => s.method === "PUT").length, 0);
+});
+
+async function listen(server: Server): Promise<number> {
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  assert.ok(address && typeof address === "object");
+  return address.port;
+}
+
+async function closedPort(): Promise<number> {
+  const server = createServer();
+  const port = await listen(server);
+  await new Promise<void>((resolve) => server.close(() => resolve()));
+  return port;
+}
+
+// A gateway that reads each whole request, then resets the connection: the
+// call reached it, and no answer came back.
+async function resettingGateway() {
+  const requests: string[] = [];
+  const sockets = new Set<Socket>();
+  const server = createServer((socket) => {
+    sockets.add(socket);
+    socket.on("error", () => {});
+    socket.on("close", () => sockets.delete(socket));
+    let received = "";
+    socket.on("data", (chunk) => {
+      received += chunk.toString("latin1");
+      const head = received.indexOf("\r\n\r\n");
+      if (head < 0) return;
+      const length = Number(/content-length: *(\d+)/i.exec(received.slice(0, head))?.[1] ?? 0);
+      if (received.length - head - 4 < length) return;
+      requests.push(received);
+      socket.resetAndDestroy();
+    });
+  });
+  const port = await listen(server);
+  return {
+    url: `http://127.0.0.1:${port}`,
+    requests,
+    close: () => {
+      for (const socket of sockets) socket.destroy();
+      return new Promise<void>((resolve) => server.close(() => resolve()));
+    },
+  };
+}
+
+// A client with no fetch of its own, under Node: the API is
+// globalThis.fetch, faked here, and the gateway is reached for real at
+// `gatewayUrl` by the SDK's own transport. The fake global fetch stands for
+// a global dispatcher that retries (undici's RetryAgent): a gateway request
+// through it was delivered by a first attempt and reset, and its retry was
+// refused.
+function nodeWorld(t: TestContext, gatewayUrl: string) {
+  const seen: Seen[] = [];
+  const throughGlobalFetch: string[] = [];
+  t.mock.method(globalThis, "fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
+    const request = new Request(input, init);
+    const url = new URL(request.url);
+    const text = request.body ? await request.text() : "";
+    seen.push({ method: request.method, url: request.url, authorization: request.headers.get("authorization"), body: text ? JSON.parse(text) : null });
+    if (url.origin === new URL(gatewayUrl).origin) {
+      throughGlobalFetch.push(`${request.method} ${url.pathname}`);
+      throw fetchFailed("ECONNREFUSED");
+    }
+    if (url.pathname.endsWith("/gateway-ticket")) {
+      return Response.json({ ticket: "rh_hgt_ticket", gatewayUrl, expiresAt: new Date(Date.now() + 30_000).toISOString(), sandboxId: SANDBOX });
+    }
+    if (url.pathname.endsWith(`/sandboxes/${SANDBOX}`)) return Response.json({ sandbox: sandboxData });
+    if (url.pathname.endsWith("/exec")) {
+      return Response.json({ exitCode: 0, stdout: "from the api\n", stderr: "", truncated: false, timedOut: false });
+    }
+    if (url.pathname.endsWith("/file") && request.method === "PUT") return Response.json({ path: "/code/a", size: 1 });
+    return Response.json({ error: { message: `unexpected ${request.method} ${url.pathname}` } }, { status: 500 });
+  });
+  const client = new RemoteHost({ apiKey: "rh_secret_key", orgId: "org_123", maxRetries: 0, hostGateway: true });
+  const apiCalls = (suffix: string) =>
+    seen.filter((s) => s.url.startsWith("https://api.remotehost.ai/") && new URL(s.url).pathname.endsWith(suffix));
+  return { client, apiCalls, throughGlobalFetch };
+}
+
+test("without a fetch of its own, a command or a write reaches the gateway once, whatever the global dispatcher retries", async (t) => {
+  const gateway = await resettingGateway();
+  t.after(gateway.close);
+  const { client, apiCalls, throughGlobalFetch } = nodeWorld(t, gateway.url);
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  await assert.rejects(sandbox.commands.run("make deploy"), RemoteHostConnectionError);
+  await assert.rejects(sandbox.files.write("a", "x"), RemoteHostConnectionError);
+  assert.equal(gateway.requests.length, 2, "each sent to the gateway once");
+  assert.match(gateway.requests[0]!, /^POST \/v1\/exec /);
+  assert.match(gateway.requests[1]!, /^PUT \/v1\/file /);
+  assert.deepEqual(throughGlobalFetch, [], "not through globalThis.fetch");
+  assert.equal(apiCalls("/exec").length, 0, "never on the API");
+  assert.equal(apiCalls("/file").length, 0);
+});
+
+test("without a fetch of its own, a command or a write goes to the API when the gateway's connection never opened", async (t) => {
+  const port = await closedPort();
+  // 127.0.0.1 refuses once; localhost may try ::1 and 127.0.0.1, which
+  // Node reports as an AggregateError.
+  for (const host of ["127.0.0.1", "localhost"]) {
+    const { client, apiCalls, throughGlobalFetch } = nodeWorld(t, `http://${host}:${port}`);
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    assert.equal((await sandbox.commands.run("make deploy")).stdout, "from the api\n", host);
+    assert.equal((await sandbox.files.write("a", "x")).path, "/code/a", host);
+    assert.equal(apiCalls("/exec").length, 1, `${host}: one run, on the API`);
+    assert.equal(apiCalls("/file").filter((s) => s.method === "PUT").length, 1, host);
+    assert.deepEqual(throughGlobalFetch, [], host);
+    t.mock.restoreAll();
+  }
+});
+
+// Review A of #811, finding 2: Node's AggregateError carries the first
+// attempt's code itself, so every attempt must be read whatever it says.
+test("Node's AggregateError of every address refused is a connection that never opened; one reset among them is not", async () => {
+  const refused = (address: string) => Object.assign(new Error(`connect ECONNREFUSED ${address}`), { code: "ECONNREFUSED" });
+  const reset = Object.assign(new Error("read ECONNRESET"), { code: "ECONNRESET" });
+  // Shaped as Node makes it: `code` set to the first attempt's.
+  const aggregate = (attempts: Error[]) =>
+    Object.assign(new AggregateError(attempts), { code: (attempts[0] as { code?: string } | undefined)?.code });
+  assert.equal(neverConnected(new TypeError("fetch failed", { cause: aggregate([refused("::1"), refused("127.0.0.1")]) })), true);
+  assert.equal(neverConnected(new TypeError("fetch failed", { cause: aggregate([refused("::1"), reset]) })), false);
+  assert.equal(neverConnected(aggregate([refused("::1"), reset])), false);
+  assert.equal(neverConnected(new TypeError("fetch failed")), false, "no code: may have been sent");
+  assert.equal(neverConnected(Object.assign(new AggregateError([]), { code: "ECONNREFUSED" })), false);
+
+  // And Node's own, from a connect to every address of localhost refused.
+  const port = await closedPort();
+  const real = await new Promise<Error>((resolve) => connect({ host: "localhost", port }).on("error", resolve));
+  assert.equal(neverConnected(real), true, `${real.constructor.name} ${(real as { code?: string }).code}`);
+});
+
+// The pin's clock, under the test's control.
+function pinClock(t: TestContext) {
+  let now = performance.now();
+  t.mock.method(performance, "now", () => now);
+  return (ms: number) => {
+    now += ms;
+  };
+}
+
+// Past any pin, however it was jittered.
+const PAST_PIN = FAILING_PIN_MS * (1 + FAILING_PIN_JITTER) + 1;
+
+test("a reset after the connection opened still throws for a command or a write, never a second run", async () => {
+  for (const code of ["ECONNRESET", "UND_ERR_SOCKET", "ETIMEDOUT", "EPIPE"]) {
+    const { client, apiCalls } = world({
+      hostGateway: true,
+      gateway: () => {
+        throw fetchFailed(code);
+      },
+    });
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    await assert.rejects(sandbox.commands.run("make deploy"), RemoteHostConnectionError, code);
+    await assert.rejects(sandbox.files.write("a", "x"), RemoteHostConnectionError, code);
+    assert.equal(apiCalls("/exec").length, 0, code);
+    assert.equal(apiCalls("/file").filter((s) => s.method === "PUT").length, 0, code);
+  }
+});
+
+test("a gateway that keeps failing a sandbox is skipped for a while, with no ticket requests", async (t) => {
+  const advance = pinClock(t);
+  let gatewayCalls = 0;
+  let healthy = false;
+  const { client, apiCalls } = world({
+    hostGateway: true,
+    gateway: () => {
+      gatewayCalls += 1;
+      return healthy
+        ? Response.json(liveMetrics)
+        : Response.json({ error: { message: "no credential", code: "credential_unavailable" } }, { status: 503 });
+    },
+  });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  for (let i = 0; i < FAILING_PIN_AFTER; i += 1) assert.equal((await sandbox.metrics.get()).cpuPercent, 1);
+  assert.equal(gatewayCalls, FAILING_PIN_AFTER);
+  const tickets = () => apiCalls("/gateway-ticket").length;
+  assert.equal(tickets(), FAILING_PIN_AFTER);
+
+  // Pinned: the API, with no ticket and no gateway call.
+  for (let i = 0; i < 5; i += 1) assert.equal((await sandbox.commands.run("true")).stdout, "from the api\n");
+  assert.equal(gatewayCalls, FAILING_PIN_AFTER);
+  assert.equal(tickets(), FAILING_PIN_AFTER);
+
+  // Another sandbox is not pinned.
+  const other = await client.sandboxes.retrieve(OTHER);
+  await other.metrics.get();
+  assert.equal(gatewayCalls, FAILING_PIN_AFTER + 1);
+
+  // Past the pin, one read tries; a failure pins again at once.
+  advance(PAST_PIN);
+  assert.equal((await sandbox.metrics.get()).cpuPercent, 1);
+  assert.equal(gatewayCalls, FAILING_PIN_AFTER + 2);
+  await sandbox.metrics.get();
+  assert.equal(gatewayCalls, FAILING_PIN_AFTER + 2, "pinned again after one failure");
+
+  // Past that pin, a success clears the count.
+  advance(PAST_PIN);
+  healthy = true;
+  assert.equal((await sandbox.metrics.get()).cpuPercent, 12.5);
+  healthy = false;
+  for (let i = 0; i < FAILING_PIN_AFTER - 1; i += 1) await sandbox.metrics.get();
+  healthy = true;
+  assert.equal((await sandbox.metrics.get()).cpuPercent, 12.5, "under the count: still the gateway");
+});
+
+test("a success, or an answer in the API's own words, resets the count", async () => {
+  let calls = 0;
+  const { client } = world({
+    hostGateway: true,
+    gateway: () => {
+      calls += 1;
+      // fail, fail, the API's own 404, fail, fail, then healthy
+      if (calls === 3) return Response.json({ error: { message: "Path was not found in the workspace." } }, { status: 404 });
+      if (calls <= 5) return Response.json({ error: { message: "boom" } }, { status: 500 });
+      return Response.json({ content: "gw", encoding: "utf8", size: 2, path: "/code/a" });
+    },
+  });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  await sandbox.files.readText("a");
+  await sandbox.files.readText("a");
+  await assert.rejects(sandbox.files.readText("a"), RemoteHostAPIError);
+  await sandbox.files.readText("a");
+  await sandbox.files.readText("a");
+  assert.equal(await sandbox.files.readText("a"), "gw", "never three failures in a row, so never pinned");
+  assert.equal(calls, 6);
+});
+
+// Review B of #751: the abort branch of the cut-off 2xx check.
+test("a command whose cut-off answer the caller aborts gives the abort's reason, and is never sent to the API", async () => {
+  const controller = new AbortController();
+  const cutOff = () =>
+    new Response(
+      new ReadableStream({
+        start(stream) {
+          stream.enqueue(new TextEncoder().encode('{"exitCode":0,'));
+          setTimeout(() => controller.abort(new Error("caller gave up")), 20);
+          setTimeout(() => stream.error(new Error("connection reset")), 100);
+        },
+      }),
+      { status: 200, headers: { "content-type": "application/json" } },
+    );
+  const { client, apiCalls } = world({ hostGateway: true, gateway: cutOff });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  await assert.rejects(sandbox.commands.run("make deploy", { signal: controller.signal }), /caller gave up/);
+  assert.equal(apiCalls("/exec").length, 0);
+});
+
+// Review A of #811, finding 3: a 429 is not a success, and an answer to a
+// call sent before the pin says nothing about the gateway since.
+const cloudflare429 = () => new Response("<html>rate limited</html>", { status: 429 });
+
+test("a 429 neither counts as a failure nor clears the count", async (t) => {
+  pinClock(t);
+  const answers = [cloudflare502, cloudflare502, cloudflare429, cloudflare502];
+  let gatewayCalls = 0;
+  const { client } = world({ hostGateway: true, gateway: () => (answers[gatewayCalls++] ?? (() => Response.json(liveMetrics)))() });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  for (let i = 0; i < answers.length; i += 1) assert.equal((await sandbox.metrics.get()).cpuPercent, 1);
+  assert.ok(hostGatewayFor(client.raw)!.failingUntil(SANDBOX) !== undefined, "failure, failure, 429, failure pins");
+  await sandbox.metrics.get();
+  assert.equal(gatewayCalls, answers.length, "pinned: no gateway call");
+});
+
+async function until(condition: () => boolean) {
+  for (let i = 0; i < 1_000 && !condition(); i += 1) await new Promise((resolve) => setImmediate(resolve));
+  assert.ok(condition());
+}
+
+test("an answer to a call sent before the pin, a 2xx or a 429, leaves the pin", async (t) => {
+  pinClock(t);
+  const held: Array<(answer: Response) => void> = [];
+  const { client } = world({ hostGateway: true, gateway: () => new Promise<Response>((resolve) => held.push(resolve)) });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  const gateway = hostGatewayFor(client.raw)!;
+  const calls = Array.from({ length: 5 }, () => sandbox.metrics.get());
+  await until(() => held.length === 5);
+  for (let i = 0; i < FAILING_PIN_AFTER; i += 1) {
+    held[i]!(cloudflare502());
+    assert.equal((await calls[i]!).cpuPercent, 1);
+  }
+  assert.ok(gateway.failingUntil(SANDBOX) !== undefined, "pinned");
+  held[3]!(Response.json(liveMetrics));
+  held[4]!(cloudflare429());
+  assert.equal((await calls[3]!).cpuPercent, 12.5, "the late answer is still the call's answer");
+  assert.equal((await calls[4]!).cpuPercent, 1);
+  assert.ok(gateway.failingUntil(SANDBOX) !== undefined, "still pinned");
+  await sandbox.metrics.get();
+  assert.equal(held.length, 5, "no gateway call while pinned");
+});
+
+// Review A of #811, finding 4, and review B: past the pin exactly one call
+// probes the gateway, and it is a read.
+// Whether a sandbox is still pinned, the pin run out or not: until a read
+// probe succeeds.
+function pinned(client: RemoteHost): boolean {
+  return (hostGatewayFor(client.raw) as unknown as { failing: Map<string, { until: number }> }).failing.get(SANDBOX)?.until
+    ? true
+    : false;
+}
+
+test("past the pin exactly one call probes the gateway, a read; commands and writes keep to the API", async (t) => {
+  const advance = pinClock(t);
+  let failing = true;
+  const gatewayRequests: string[] = [];
+  let releaseProbe: ((answer: Response) => void) | undefined;
+  const { client, apiCalls } = world({
+    hostGateway: true,
+    gateway: (request) => {
+      const path = new URL(request.url).pathname;
+      gatewayRequests.push(`${request.method} ${path}`);
+      if (failing) return cloudflare502();
+      if (request.method === "GET" && !releaseProbe) return new Promise<Response>((resolve) => (releaseProbe = resolve));
+      return path === "/v1/exec" ? Response.json(execResult) : Response.json(liveMetrics);
+    },
+  });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  for (let i = 0; i < FAILING_PIN_AFTER; i += 1) await sandbox.metrics.get();
+  assert.ok(hostGatewayFor(client.raw)!.failingUntil(SANDBOX) !== undefined, "pinned");
+  failing = false;
+  advance(PAST_PIN);
+  const tickets = apiCalls("/gateway-ticket").length;
+
+  // Eight at once, a command first: it sets off the SDK's own read, and
+  // every call keeps to the API while that is out.
+  const results = await Promise.all([
+    sandbox.commands.run("make deploy"),
+    sandbox.files.write("a", "x"),
+    sandbox.metrics.get(),
+    sandbox.commands.run("make test"),
+    sandbox.files.readText("a"),
+    sandbox.metrics.get(),
+    sandbox.files.write("b", "y"),
+    sandbox.commands.run("true"),
+  ]);
+  await until(() => releaseProbe !== undefined);
+  assert.deepEqual(gatewayRequests.slice(FAILING_PIN_AFTER), ["GET /v1/files"], "exactly one gateway call, a read");
+  assert.equal(apiCalls("/gateway-ticket").length, tickets + 1, "one ticket, the probe's");
+  assert.equal(apiCalls("/exec").length, 3, "every command on the API");
+  assert.equal((results[2] as { cpuPercent: number }).cpuPercent, 1, "reads on the API too");
+  assert.ok(pinned(client), "still pinned while the probe is out");
+
+  // The probe succeeds: the pin is lifted, and commands use the gateway.
+  releaseProbe!(Response.json({ path: "/code", truncated: false, entries: [] }));
+  await until(() => !pinned(client));
+  assert.equal((await sandbox.commands.run("true")).stdout, "from the gateway\n");
+});
+
+test("a client that only runs commands comes back to the gateway past the pin, through the SDK's own read", async (t) => {
+  const advance = pinClock(t);
+  let failing = true;
+  const gatewayRequests: string[] = [];
+  const { client } = world({
+    hostGateway: true,
+    gateway: (request) => {
+      const path = new URL(request.url).pathname;
+      gatewayRequests.push(`${request.method} ${path}`);
+      if (failing) return cloudflare502();
+      return path === "/v1/exec" ? Response.json(execResult) : Response.json({ path: "/code", truncated: false, entries: [] });
+    },
+  });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  for (let i = 0; i < FAILING_PIN_AFTER; i += 1) await sandbox.metrics.get();
+  advance(PAST_PIN);
+
+  // The gateway still fails: the SDK's read re-pins, and the command ran on the API.
+  assert.equal((await sandbox.commands.run("true")).stdout, "from the api\n");
+  await until(() => hostGatewayFor(client.raw)!.failingUntil(SANDBOX) !== undefined);
+  assert.deepEqual(gatewayRequests.slice(FAILING_PIN_AFTER), ["GET /v1/files"]);
+
+  // Healthy again, past that pin: the next command's read lifts it.
+  failing = false;
+  advance(PAST_PIN);
+  assert.equal((await sandbox.commands.run("true")).stdout, "from the api\n");
+  await until(() => !pinned(client));
+  assert.equal((await sandbox.commands.run("true")).stdout, "from the gateway\n");
+  assert.deepEqual(gatewayRequests.slice(FAILING_PIN_AFTER), ["GET /v1/files", "GET /v1/files", "POST /v1/exec"]);
+});
+
+test("a probe that fails pins the sandbox again, and a 429 on the probe lets the next read probe", async (t) => {
+  const advance = pinClock(t);
+  const answers: Array<() => Response> = [];
+  let gatewayCalls = 0;
+  const { client } = world({
+    hostGateway: true,
+    gateway: () => (answers[gatewayCalls++] ?? cloudflare502)(),
+  });
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  const gateway = hostGatewayFor(client.raw)!;
+  for (let i = 0; i < FAILING_PIN_AFTER; i += 1) await sandbox.metrics.get();
+  assert.ok(gateway.failingUntil(SANDBOX) !== undefined);
+
+  advance(PAST_PIN);
+  // Indexed by the gateway call; a 502 where there is none.
+  answers[FAILING_PIN_AFTER] = cloudflare429;
+  answers[FAILING_PIN_AFTER + 1] = () => Response.json(liveMetrics);
+  assert.equal((await sandbox.metrics.get()).cpuPercent, 1, "the probe's 429: the API");
+  assert.equal(gateway.failingUntil(SANDBOX), undefined, "a 429 does not pin");
+  assert.equal((await sandbox.metrics.get()).cpuPercent, 12.5, "the next read probes, and succeeds");
+  assert.equal(gatewayCalls, FAILING_PIN_AFTER + 2);
+
+  // Fail again: pinned; past it, a failed probe pins at once.
+  for (let i = 0; i < FAILING_PIN_AFTER; i += 1) await sandbox.metrics.get();
+  assert.ok(gateway.failingUntil(SANDBOX) !== undefined);
+  advance(PAST_PIN);
+  await sandbox.metrics.get();
+  assert.ok(gateway.failingUntil(SANDBOX) !== undefined, "a failed probe pins again");
+  const calls = gatewayCalls;
+  await sandbox.metrics.get();
+  assert.equal(gatewayCalls, calls);
+});
+
+test("a pin is jittered by up to a tenth either way", async (t) => {
+  pinClock(t);
+  const pinnedAt = performance.now();
+  for (const random of [0, 0.5, 0.999]) {
+    t.mock.method(Math, "random", () => random);
+    const { client } = world({ hostGateway: true, gateway: cloudflare502 });
+    const sandbox = await client.sandboxes.retrieve(SANDBOX);
+    for (let i = 0; i < FAILING_PIN_AFTER; i += 1) await sandbox.metrics.get();
+    const pin = hostGatewayFor(client.raw)!.failingUntil(SANDBOX)! - pinnedAt;
+    assert.ok(Math.abs(pin - FAILING_PIN_MS * (1 - FAILING_PIN_JITTER + 2 * FAILING_PIN_JITTER * random)) < 1e-6, `${random}: ${pin}`);
+  }
+});
+
+// Review B of 7316d4fa: the SDK's transport gives up on a connection that is
+// never ready, a TLS handshake that fails sent nothing, and neither bound
+// ever cuts a request once sent.
+const gatewayCommand = {
+  permission: "sandbox.terminal.connect",
+  method: "POST",
+  path: "/v1/exec",
+  body: { command: "make deploy" },
+  idempotent: false,
+} as const;
+
+// A HostGateway on the SDK's transport, with a fake API that issues tickets
+// for `gatewayUrl`.
+function onTransport(gatewayUrl: string, options: { connectTimeoutMs: number; idleTimeoutMs?: number }) {
+  const transport = sdkGatewayFetch(options);
+  assert.ok(transport);
+  return new HostGateway({
+    baseUrl: "https://api.remotehost.ai/v1",
+    headers: new Headers({ authorization: "Bearer rh_secret_key" }),
+    fetch: transport,
+    apiFetch: async () => Response.json({ ticket: "rh_hgt_ticket", gatewayUrl, expiresAt: "", sandboxId: SANDBOX }),
+    timeoutMs: 3_000,
+  });
+}
+
+// A TCP server on 127.0.0.1 that does `onConnection` with each connection,
+// and keeps what each one sent.
+async function tcpGateway(onConnection: (socket: Socket) => void) {
+  const received: Buffer[] = [];
+  const sockets = new Set<Socket>();
+  const server = createServer((socket) => {
+    sockets.add(socket);
+    socket.on("error", () => {});
+    socket.on("close", () => sockets.delete(socket));
+    socket.on("data", (chunk) => received.push(chunk));
+    onConnection(socket);
+  });
+  const port = await listen(server);
+  return {
+    port,
+    received: () => Buffer.concat(received),
+    close: () => {
+      for (const socket of sockets) socket.destroy();
+      return new Promise<void>((resolve) => server.close(() => resolve()));
+    },
+  };
+}
+
+test("a gateway that never completes the connection is given up on after the connect timeout, and a command goes to the API", async (t) => {
+  // Takes the connection, then says nothing to the TLS handshake.
+  const silent = await tcpGateway(() => {});
+  t.after(silent.close);
+  const started = Date.now();
+  const answer = await onTransport(`https://127.0.0.1:${silent.port}`, { connectTimeoutMs: 100 }).call(SANDBOX, gatewayCommand);
+  assert.equal(answer, USE_API, "nothing was sent, so the API");
+  assert.ok(Date.now() - started < 2_000, `gave up after ${Date.now() - started} ms`);
+  assert.equal(silent.received()[0], 0x16, "only a TLS handshake reached it");
+  assert.ok(!silent.received().includes("make deploy"));
+});
+
+test("a TLS handshake that fails sent nothing, so a command goes to the API", async (t) => {
+  const cases: Array<[string, (socket: Socket) => void]> = [
+    ["an answer that is not TLS", (socket) => void socket.once("data", () => socket.end("HTTP/1.1 400 Bad Request\r\n\r\n"))],
+    ["closed at once", (socket) => void socket.end()],
+    ["reset on the ClientHello", (socket) => void socket.once("data", () => socket.resetAndDestroy())],
+  ];
+  for (const [label, onConnection] of cases) {
+    const gateway = await tcpGateway(onConnection);
+    t.after(gateway.close);
+    const answer = await onTransport(`https://127.0.0.1:${gateway.port}`, { connectTimeoutMs: 2_000 }).call(SANDBOX, gatewayCommand);
+    assert.equal(answer, USE_API, label);
+    assert.ok(!gateway.received().includes("make deploy"), label);
+  }
+});
+
+test("the connect timeout never cuts a request once sent: a slow but healthy gateway answers, on a fresh socket and a kept-alive one", async (t) => {
+  const requests: string[] = [];
+  const server = createHttpServer((request, response) => {
+    requests.push(`${request.method} ${request.url}`);
+    request.resume();
+    // Well past the connect timeout and the idle timeout: the head, half
+    // the body, then the rest.
+    setTimeout(() => {
+      response.writeHead(200, { "content-type": "application/json" });
+      response.write('{"exitCode":7,"stdout":"from the gateway\\n",');
+      setTimeout(() => response.end('"stderr":"","truncated":false,"timedOut":false}'), 300);
+    }, 300);
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  assert.ok(address && typeof address === "object");
+  t.after(() => {
+    server.closeAllConnections();
+    return new Promise<void>((resolve) => server.close(() => resolve()));
+  });
+  const gateway = onTransport(`http://127.0.0.1:${address.port}`, { connectTimeoutMs: 50, idleTimeoutMs: 50 });
+  for (const label of ["fresh", "again"]) {
+    const answer = await gateway.call<{ stdout: string }>(SANDBOX, gatewayCommand);
+    assert.notEqual(answer, USE_API, label);
+    assert.equal((answer as { stdout: string }).stdout, "from the gateway\n", label);
+  }
+  const read = await gateway.call<{ exitCode: number }>(SANDBOX, { ...gatewayCommand, idempotent: true });
+  assert.equal((read as { exitCode: number }).exitCode, 7, "a long read too");
+  assert.equal(requests.length, 3, "each sent once");
+});
+
+// Review B of 77354589: the SDK's own probe that gets no usable answer pins
+// again, so a key refused for reads never costs a ticket request per command.
+test("a key that runs commands but can't read files makes one probe per pin, and every command uses the API", async (t) => {
+  const advance = pinClock(t);
+  const { client, seen, apiCalls } = world({
+    hostGateway: true,
+    ticket: (permission) =>
+      permission === "sandbox.files.read"
+        ? Response.json({ error: { message: "Permission sandbox.files.read is required." } }, { status: 403 })
+        : Response.json({ ticket: "rh_hgt_ticket", gatewayUrl: GATEWAY, expiresAt: "", sandboxId: SANDBOX }),
+    // Refused before running: each command falls back, and counts.
+    gateway: () => Response.json({ error: { message: "no credential", code: "credential_unavailable" } }, { status: 503 }),
+  });
+  const readTickets = () =>
+    seen.filter((s) => new URL(s.url).pathname.endsWith("/gateway-ticket") && (s.body as { permission?: string } | null)?.permission === "sandbox.files.read").length;
+  const sandbox = await client.sandboxes.retrieve(SANDBOX);
+  for (let i = 0; i < FAILING_PIN_AFTER; i += 1) assert.equal((await sandbox.commands.run("true")).stdout, "from the api\n");
+  assert.ok(hostGatewayFor(client.raw)!.failingUntil(SANDBOX) !== undefined, "pinned");
+  const onTheAPI = () => apiCalls("/exec").length;
+
+  for (const window of [1, 2]) {
+    advance(PAST_PIN);
+    for (let i = 0; i < 20; i += 1) {
+      assert.equal((await sandbox.commands.run("true")).stdout, "from the api\n");
+      await new Promise((resolve) => setImmediate(resolve));
+    }
+    assert.equal(readTickets(), window, `one probe in expiry window ${window}`);
+    assert.ok(hostGatewayFor(client.raw)!.failingUntil(SANDBOX) !== undefined, "pinned again");
+  }
+  assert.equal(onTheAPI(), FAILING_PIN_AFTER + 40, "every command on the API");
+  assert.equal(seen.filter((s) => s.url.startsWith(GATEWAY)).length, FAILING_PIN_AFTER, "none on the gateway past the pin");
 });
