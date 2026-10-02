@@ -1629,6 +1629,8 @@ export interface components {
             label?: string | null;
             expiresAt?: string;
             url: string;
+            /** @description A team preview's URL with a one-use viewer handoff added, for the caller's own browser to open once, within two minutes: it signs that browser in to the preview where the preview's site keeps no RemoteHost cookie, such as a frame on a console on another site. Show and share `url`, never this. Present only for a person's own session while the environment issues handoffs. */
+            viewerUrl?: string;
         };
         CreatePreviewBody: {
             target?: string;
