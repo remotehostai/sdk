@@ -190,6 +190,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orgs/{orgId}/projects/{projectId}/mcp-connections/{connectionId}/credential": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set an MCP connection's credential
+         * @description Sets or replaces the credential of an api_key MCP connection: `headers` sent with every request to an http or sse server, or `env` for a stdio server's process. It is stored encrypted and never returned. Needs mcp.manage on the project; API keys are refused. A credential is delivered to every sandbox in the project at each start, into its RAM-only secrets directory, where every process in those sandboxes, and anyone who may open a terminal (sandbox.terminal.connect) or read files (sandbox.files.read) there, can read it. Changing where the connection points (its transport, URL, command, arguments or auth type), or moving it to another project, deletes it.
+         */
+        put: operations["setProjectMcpCredential"];
+        post?: never;
+        /**
+         * Remove an MCP connection's credential
+         * @description Deletes the connection's credential; sandboxes stop receiving it at their next start. Needs mcp.manage on the project; API keys are refused.
+         */
+        delete: operations["clearProjectMcpCredential"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/orgs/{orgId}/projects/{projectId}/skill-connections": {
         parameters: {
             query?: never;
@@ -1461,8 +1485,12 @@ export interface components {
             allowed_tools: string[];
             last_used_at: string | null;
             created_by: string | null;
+            listing_id: string | null;
             created_at: string;
             updated_at: string;
+            credential_set: boolean;
+            credential_set_by: string | null;
+            credential_set_at: string | null;
         };
         ProjectSkillConnection: {
             id: string;
@@ -3513,6 +3541,339 @@ export interface operations {
             };
             /** @description Database error. */
             500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    setProjectMcpCredential: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+                connectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    headers: {
+                        [key: string]: string;
+                    };
+                } | {
+                    env: {
+                        [key: string]: string;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description The connection, now connected, with whether it has a credential. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        connection: components["schemas"]["ProjectMcpConnection"];
+                        exposure: string;
+                    };
+                };
+            };
+            /** @description A body that is not the connection's kind of credential (`mcp_credential_invalid`), a connection that needs none (`mcp_credential_not_needed`), or an OAuth one (`mcp_credential_oauth_unsupported`). */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Permission mcp.manage is required. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Connection not found. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The connection changed while this was set (`mcp_connection_changed`). */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    clearProjectMcpCredential: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+                connectionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed. */
+            204: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission mcp.manage is required. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Connection not found, or it has no credential (`mcp_credential_not_found`). */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
