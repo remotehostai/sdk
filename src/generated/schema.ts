@@ -4081,7 +4081,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description The requested template has no build to boot from yet. */
+            /** @description The requested template has no build to boot from yet, or one more sandbox in the project would take a resource it gives each sandbox by default past what the org bought or its plan allows (`resource_quantity_exceeded`, `resource_quota_not_set`, `resource_quota_exceeded`), or the org's entitlements changed while this was checked (`resource_allocation_changed`, retry). */
             409: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
