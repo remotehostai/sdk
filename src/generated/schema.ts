@@ -1215,7 +1215,7 @@ export interface paths {
         };
         /**
          * Browse RemoteHost's add-ons
-         * @description RemoteHost's own and reviewed add-ons (provenance `first_party` or `verified`) that are listed: what a signed-out store shows. Needs no credential and reads none, so the answer is the same for everyone and carries nothing about any org. Cacheable (`Cache-Control: public`, an ETag); rate limited per address.
+         * @description RemoteHost's own and reviewed add-ons (provenance `first_party` or `verified`) that are listed: what a signed-out marketplace shows. Needs no credential and reads none, so the answer is the same for everyone and carries nothing about any org. Cacheable (`Cache-Control: public`, an ETag); rate limited per address.
          */
         get: operations["listPublicAddons"];
         put?: never;
@@ -1235,7 +1235,7 @@ export interface paths {
         };
         /**
          * Browse an organization's add-on catalog
-         * @description The catalog as the org sees it: each entry says whether the org holds it and why, and the org's policy for it. Needs `org.read` (every member). Each kind is shown to whoever could add it somewhere: MCP servers to `mcp.read`, skills to `skills.read` and plugins to `plugins.read` on the org or any project in it, apps to every member, resources to `resources.read` on the org or any project, and resources and every paid listing to `billing.read`. A member who holds none of those sees apps only. Browsing shows listed entries; `slug` finds one entry whatever its status but draft.
+         * @description The catalog as the org sees it: each entry says whether the org holds it and why, and the org's policy for it. Needs `org.read` (every member). Each kind is shown to whoever could add it somewhere: MCP servers to `mcp.read`, skills to `skills.read` and plugins to `plugins.read` on the org or any project in it, apps to every member, resources to `resources.read` on the org or any project, and resources and every paid listing to `billing.read`. A member who holds none of those sees apps only. Browsing shows listed entries; `slug` finds one entry whatever its status but draft, and a retired slug kept as an alias finds the entry that replaced it.
          */
         get: operations["listAddons"];
         put?: never;
@@ -1275,7 +1275,7 @@ export interface paths {
         };
         /**
          * Get one add-on, with its details
-         * @description One catalog entry, as the list shows it, and its kind's details: an MCP server's transport and tools, or a skill's package and requirements. Apps, plugins and resources have none. A listing the caller could not see in the list is a 404 here too.
+         * @description One catalog entry, as the list shows it, and its kind's details: an MCP server's transport and tools, or a skill's package and requirements. Apps, plugins and resources have none. An alias's id (a retired slug's) answers as the entry that replaced it. A listing the caller could not see in the list is a 404 here too.
          */
         get: operations["getAddon"];
         put?: never;
