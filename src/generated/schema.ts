@@ -121,6 +121,170 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orgs/{orgId}/workspaces": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List an organization's workspaces
+         * @description With `workspaces.read` (owner, admin, security_admin, billing_admin), every workspace in the org. Otherwise (a member), only the workspaces holding a project the caller holds a project role on; never a 403 for a member. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone. API keys cannot call it yet.
+         */
+        get: operations["listOrgWorkspaces"];
+        put?: never;
+        /**
+         * Create a workspace
+         * @description Needs `workspaces.manage` (owners and admins). The kind is set here and never changes. Without a slug, one is made from the name. Audited. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone. API keys cannot call it yet.
+         */
+        post: operations["createOrgWorkspace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/workspaces/{workspaceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a workspace
+         * @description With `workspaces.read`, or a role on a project in the workspace. A workspace the caller cannot see answers the same 404 as one that does not exist. An API key pinned to a workspace may read that workspace and no other (another workspace answers the same 404 as one that does not exist): its scopes must carry `project.read`, and the person or service account it acts as must still read every project in the org or hold a project role in that workspace. No other API key can call it. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone.
+         */
+        get: operations["getOrgWorkspace"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete an empty workspace
+         * @description Needs `workspaces.manage`. Only a workspace with no projects (409 `workspace_not_empty` otherwise; never a cascade) that is not one of the org's defaults. Audited. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone. API keys cannot call it yet.
+         */
+        delete: operations["deleteOrgWorkspace"];
+        options?: never;
+        head?: never;
+        /**
+         * Rename a workspace or change its slug
+         * @description Needs `workspaces.manage`. The kind cannot change. Audited. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone. API keys cannot call it yet.
+         */
+        patch: operations["updateOrgWorkspace"];
+        trace?: never;
+    };
+    "/orgs/{orgId}/workspaces/{workspaceId}/usage-guardrails": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read a workspace's machine-hour limit and its usage
+         * @description Needs `billing.read`. The workspace's cap on billable machine-hours this billing period, beside the org's and each project's, and what its projects have used. Sandbox create and wake check the org's cap, then the workspace's, then the project's. An API key may call it; a key pinned to a workspace only for its own, and any other workspace answers it the same 404 as one that does not exist. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone.
+         */
+        get: operations["getOrgWorkspaceUsageGuardrails"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Set a workspace's machine-hour limit
+         * @description Needs `billing.manage`. Null removes the workspace's cap. API keys cannot call it. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone.
+         */
+        patch: operations["updateOrgWorkspaceUsageGuardrails"];
+        trace?: never;
+    };
+    "/orgs/{orgId}/workspaces/{workspaceId}/end-user-limits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read an External workspace's end-user caps
+         * @description Needs `billing.read`. The default cap per end user, the action at the cap, and every override. An Internal workspace has no end users: every operation here answers it with 409 `internal_workspace`. API keys cannot call it. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone.
+         */
+        get: operations["getWorkspaceEndUserLimits"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Set an External workspace's default end-user cap and the action at it
+         * @description Needs `billing.manage`. Sandbox create and wake check the org's cap, the workspace's, the project's, then the end user's. An Internal workspace has no end users: every operation here answers it with 409 `internal_workspace`. API keys cannot call it. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone.
+         */
+        patch: operations["updateWorkspaceEndUserLimits"];
+        trace?: never;
+    };
+    "/orgs/{orgId}/workspaces/{workspaceId}/end-user-limits/{endUserId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set one end user's cap in an External workspace
+         * @description Needs `billing.manage`. Overrides the workspace's default for this end user; null exempts it. An Internal workspace has no end users: every operation here answers it with 409 `internal_workspace`. API keys cannot call it. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone.
+         */
+        put: operations["setWorkspaceEndUserOverride"];
+        post?: never;
+        /**
+         * Remove one end user's cap override
+         * @description Needs `billing.manage`. The end user goes back to the workspace's default. An Internal workspace has no end users: every operation here answers it with 409 `internal_workspace`. API keys cannot call it. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone.
+         */
+        delete: operations["deleteWorkspaceEndUserOverride"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/workspaces/{workspaceId}/end-users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List an External workspace's end users with their usage and caps
+         * @description Needs `billing.read`. Every end user with usage in the workspace's projects this billing period, an override, or a notice, by machine-hours descending, with the cap that holds it and whether it reached it. An API key may call it; a key pinned to a workspace only for its own, and any other workspace answers it the same 404 as one that does not exist. An Internal workspace has no end users: every operation here answers it with 409 `internal_workspace`. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone.
+         */
+        get: operations["listWorkspaceEndUsers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/workspaces/{workspaceId}/usage/vendor-cost": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read a workspace's usage at vendor cost, itemized
+         * @description Needs `billing.read` at the workspace. The usage of the projects in the workspace now, for the billing period, line by line at each vendor's own rate, with the usage fee and the platform fee, which are displayed for transparency: nothing bills them yet. A caller who cannot see the workspace (a member holding no project in it) gets the same 404 as a workspace that does not exist. API keys cannot call it. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone.
+         */
+        get: operations["getWorkspaceVendorCost"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/orgs/{orgId}/projects": {
         parameters: {
             query?: never;
@@ -745,7 +909,7 @@ export interface paths {
         put?: never;
         /**
          * Rotate an API key
-         * @description Mints a successor with the same name, scopes and lifetime, and ends the old key after `overlapHours` (default 24, at most 168; 0 ends it now). The old key's new expiry is stored on it and returned. Only the key's creator may rotate it; API keys cannot call this operation. A sandbox's own Claims key (`rh_sb_`) is managed by RemoteHost and answers 409 with `code: "sandbox_key_managed"`.
+         * @description Mints a successor with the same name, scopes and lifetime, and ends the old key after `overlapHours` (default 24, at most 168; 0 ends it now). The old key's new expiry is stored on it and returned. Only the key's creator may rotate it; API keys cannot call this operation. A sandbox's own Claims key (`rh_sb_`) is managed by RemoteHost and answers 409 with `code: "sandbox_key_managed"`. A workspace-pinned key's successor keeps the pin, and its scopes are checked again against what its principal holds in that workspace (403 `scope_exceeds_maker` otherwise).
          */
         post: operations["rotateApiKey"];
         delete?: never;
@@ -1045,6 +1209,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orgs/{orgId}/projects/{projectId}/environment-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's environment templates
+         * @description Requires environments.read.
+         */
+        get: operations["listEnvironmentTemplates"];
+        put?: never;
+        /**
+         * Create an environment template
+         * @description A named, reusable machine configuration that workspaces reference. Requires environments.manage. Secrets are not accepted yet.
+         */
+        post: operations["createEnvironmentTemplate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/projects/{projectId}/environment-templates/{environmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get an environment template
+         * @description Requires environments.read.
+         */
+        get: operations["getEnvironmentTemplate"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete an environment template
+         * @description Refused with 409 while any workspace names it, or, for the project's default, while workspaces that name no environment follow it: move them first. Sandboxes do not hold it: if any still boot from it, it is deleted for everything else (no longer listed, readable, editable, the default or usable for anything new) and kept only for them, so each keeps waking under its last egress policy, environment variables and setup script; it is released when the last of them is deleted. Requires environments.manage.
+         */
+        delete: operations["deleteEnvironmentTemplate"];
+        options?: never;
+        head?: never;
+        /**
+         * Update an environment template
+         * @description Fields left out are unchanged; null clears a nullable one. Moving to the none or full egress policy clears the allowlist. Changing egressPolicy or egressAllowlist requires environments.egress.manage; changing any other field requires environments.manage; a request that does both requires both. A change to egressPolicy or egressAllowlist, or to whether the project is enforced, is pushed to the running sandboxes it affects as it is saved; one the push cannot reach is stopped so it cannot keep the old rules, and the response's egressPropagation says which.
+         */
+        patch: operations["updateEnvironmentTemplate"];
+        trace?: never;
+    };
     "/orgs/{orgId}/projects/{projectId}/environments": {
         parameters: {
             query?: never;
@@ -1054,13 +1270,15 @@ export interface paths {
         };
         /**
          * List a project's environments
-         * @description Requires environments.read.
+         * @deprecated
+         * @description Deprecated: use the same operation under /environment-templates. Requires environments.read.
          */
         get: operations["listEnvironments"];
         put?: never;
         /**
          * Create an environment
-         * @description A named, reusable machine configuration that workspaces reference. Requires environments.manage. Secrets are not accepted yet.
+         * @deprecated
+         * @description Deprecated: use the same operation under /environment-templates. A named, reusable machine configuration that workspaces reference. Requires environments.manage. Secrets are not accepted yet.
          */
         post: operations["createEnvironment"];
         delete?: never;
@@ -1078,21 +1296,24 @@ export interface paths {
         };
         /**
          * Get an environment
-         * @description Requires environments.read.
+         * @deprecated
+         * @description Deprecated: use the same operation under /environment-templates. Requires environments.read.
          */
         get: operations["getEnvironment"];
         put?: never;
         post?: never;
         /**
          * Delete an environment
-         * @description Refused with 409 while any workspace names it, or, for the project's default, while workspaces that name no environment follow it: move them first. Sandboxes do not hold it: if any still boot from it, it is deleted for everything else (no longer listed, readable, editable, the default or usable for anything new) and kept only for them, so each keeps waking under its last egress policy, environment variables and setup script; it is released when the last of them is deleted. Requires environments.manage.
+         * @deprecated
+         * @description Deprecated: use the same operation under /environment-templates. Refused with 409 while any workspace names it, or, for the project's default, while workspaces that name no environment follow it: move them first. Sandboxes do not hold it: if any still boot from it, it is deleted for everything else (no longer listed, readable, editable, the default or usable for anything new) and kept only for them, so each keeps waking under its last egress policy, environment variables and setup script; it is released when the last of them is deleted. Requires environments.manage.
          */
         delete: operations["deleteEnvironment"];
         options?: never;
         head?: never;
         /**
          * Update an environment
-         * @description Fields left out are unchanged; null clears a nullable one. Moving to the none or full egress policy clears the allowlist. Changing egressPolicy or egressAllowlist requires environments.egress.manage; changing any other field requires environments.manage; a request that does both requires both. A change to egressPolicy or egressAllowlist, or to whether the project is enforced, is pushed to the running sandboxes it affects as it is saved; one the push cannot reach is stopped so it cannot keep the old rules, and the response's egressPropagation says which.
+         * @deprecated
+         * @description Deprecated: use the same operation under /environment-templates. Fields left out are unchanged; null clears a nullable one. Moving to the none or full egress policy clears the allowlist. Changing egressPolicy or egressAllowlist requires environments.egress.manage; changing any other field requires environments.manage; a request that does both requires both. A change to egressPolicy or egressAllowlist, or to whether the project is enforced, is pushed to the running sandboxes it affects as it is saved; one the push cannot reach is stopped so it cannot keep the old rules, and the response's egressPropagation says which.
          */
         patch: operations["updateEnvironment"];
         trace?: never;
@@ -1106,13 +1327,13 @@ export interface paths {
         };
         /**
          * List a project's workspaces
-         * @description Most recently active first. Deleted workspaces are not listed.
+         * @description Most recently active first. Deleted workspaces are not listed. With an API key, only the workspaces its principal owns (the person who minted it, or its service account). API keys reach these operations only where key access to environments is enabled for this deployment, and then only their principal's own workspaces; until then every API key is refused with 403.
          */
         get: operations["listWorkspaces"];
         put?: never;
         /**
          * Create a workspace
-         * @description Creates a workspace: durable work that outlives any one sandbox. It starts asleep with no execution; attach it to get a sandbox. Its name fixes its git branch, remotehost/<name>.
+         * @description Creates a workspace: durable work that outlives any one sandbox. It starts asleep with no execution; attach it to get a sandbox. Its name fixes its git branch, remotehost/<name>. Made with an API key, it belongs to the key's principal: the person who minted the key, or the service account it acts as. API keys reach these operations only where key access to environments is enabled for this deployment, and then only their principal's own workspaces; until then every API key is refused with 403.
          */
         post: operations["createWorkspace"];
         delete?: never;
@@ -1128,13 +1349,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Read a workspace */
+        /**
+         * Read a workspace
+         * @description An API key reads only a workspace its principal owns; any other answers the same 404 as one that does not exist, and so does every other operation on it. API keys reach these operations only where key access to environments is enabled for this deployment, and then only their principal's own workspaces; until then every API key is refused with 403.
+         */
         get: operations["getWorkspace"];
         put?: never;
         post?: never;
         /**
          * Delete a workspace
-         * @description Deletes the workspace and destroys every execution of it. Uncommitted work is lost. The workspace is unattachable from the moment the call starts; an execution that cannot be destroyed yet (its host is not answering, or an operation on it is still settling) is listed in executionsPendingCleanup and destroyed automatically once it can be.
+         * @description Deletes the workspace and destroys every execution of it. Uncommitted work is lost. The workspace is unattachable from the moment the call starts; an execution that cannot be destroyed yet (its host is not answering, or an operation on it is still settling) is listed in executionsPendingCleanup and destroyed automatically once it can be. Needs sandbox.environment.delete, which every role holding sandbox.destroy holds. An API key holds it only when its own scopes name it: an unscoped key and every key template lack it, and are refused with 403. API keys reach these operations only where key access to environments is enabled for this deployment, and then only their principal's own workspaces; until then every API key is refused with 403.
          */
         delete: operations["deleteWorkspace"];
         options?: never;
@@ -1428,13 +1652,201 @@ export interface components {
             /** @description True when the slug asked for is an old one; `org.slug` is the current slug to move to. */
             viaAlias: boolean;
         };
+        OrgWorkspace: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            org_id: string;
+            /**
+             * @description Internal (where the team builds) or External (the infrastructure the team's product runs on, for its customers). Set when the workspace is created and never changed; every project in it has this kind.
+             * @enum {string}
+             */
+            kind: "internal" | "external";
+            name: string;
+            slug: string;
+            /** @description One of the org's defaults: where a new project lands when it names no workspace (the Internal one), or an external-use project created without one (the External one). Defaults cannot be deleted. */
+            is_default: boolean;
+            created_at: string;
+            updated_at: string;
+        };
+        OrgWorkspaceUsageGuardrails: {
+            workspace: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                kind: "internal" | "external";
+            };
+            usageGuardrails: {
+                /** @description The workspace's cap this billing period; null for none. */
+                sandboxMachineHourLimit: number | null;
+            };
+            periodStartsAt: string | null;
+            periodEndsAt: string | null;
+            /** @description Machine-hours the workspace's projects used this period; null with no active billing period. A project moved between workspaces takes its usage with it. */
+            usedMachineHours: number | null;
+            remainingMachineHours: number | null;
+            usageAlert: {
+                percentUsed: number | null;
+                status: string;
+                message: string;
+            } | null;
+        };
+        WorkspaceEndUserLimits: {
+            workspace: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                kind: "internal" | "external";
+            };
+            /** @description Each end user's cap this billing period unless it has an override; null for none. */
+            defaultMachineHourLimit: number | null;
+            /**
+             * @description What an end user reaching its cap does: `refuse_new` refuses its new sandboxes and wakes (402 `end_user_usage_limit`) and never stops a running one; `notify_only` lets them through. Either way the first time in a billing period is recorded and listed as `reachedAt`.
+             * @enum {string}
+             */
+            action: "refuse_new" | "notify_only";
+            overrides: components["schemas"]["WorkspaceEndUserOverride"][];
+        };
+        WorkspaceEndUserOverride: {
+            endUserId: string;
+            /** @description This end user's cap this billing period; null exempts it from any cap. */
+            machineHourLimit: number | null;
+            updatedAt: string;
+        };
+        WorkspaceEndUserUsage: {
+            workspace: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                kind: "internal" | "external";
+            };
+            defaultMachineHourLimit: number | null;
+            /**
+             * @description What an end user reaching its cap does: `refuse_new` refuses its new sandboxes and wakes (402 `end_user_usage_limit`) and never stops a running one; `notify_only` lets them through. Either way the first time in a billing period is recorded and listed as `reachedAt`.
+             * @enum {string}
+             */
+            action: "refuse_new" | "notify_only";
+            periodStartsAt: string;
+            periodEndsAt: string | null;
+            endUsers: {
+                endUserId: string;
+                machineHours: number;
+                estimatedCogsUsd: number;
+                machineHourLimit: number | null;
+                /** @enum {string|null} */
+                limitSource: "override" | "default" | null;
+                /** @enum {string} */
+                status: "under" | "reached" | "uncapped";
+                /** @description When this end user first reached its cap this billing period, if it has. */
+                reachedAt: string | null;
+            }[];
+        };
+        WorkspaceVendorUsage: {
+            workspace: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                kind: "internal" | "external";
+            };
+            /** @enum {string} */
+            period: "current" | "previous";
+            periodStartsAt: string;
+            periodEndsAt: string | null;
+            /** @description The pricing catalog the vendors and rates come from. Metering does not record a vendor or rate per event yet, so every line is priced at this catalog's figures for its region. */
+            rateCatalogVersion: string;
+            /** @description One line per resource, vendor and region the workspace's projects used this period: priced lines by region, then any without a rate. */
+            lines: components["schemas"]["VendorUsageLine"][];
+            /** @description The sum of the lines' `costUsd`, exactly. In US dollars, as an exact decimal string. */
+            totalCostUsd: string;
+            usageFee: components["schemas"]["WorkspaceUsageFee"];
+            /** @description The org's platform fee: its plan's monthly price from the pricing catalog (by seat mix on Business), for the whole org, not apportioned to this workspace. Written to 6 decimal places. Null (listed in `unavailable`) when the org holds no live plan, when its plan has no fixed price (Enterprise), or for the previous period, whose plan is not recorded. Displayed for transparency: nothing bills it yet. In US dollars, as an exact decimal string. */
+            platformFeeUsd: string | null;
+            /** @description Each fee the API cannot state for this period, and why: answered null rather than estimated. Empty when both are stated. */
+            unavailable: {
+                /** @enum {string} */
+                field: "usageFee" | "platformFeeUsd";
+                /**
+                 * @description `not_in_force`, no usage-fee schedule version was in force when the period began; `no_plan`, the org holds no live plan; `custom_pricing`, its plan has no fixed price; `plan_history_not_recorded`, a past period, whose plan is not recorded.
+                 * @enum {string}
+                 */
+                reason: "not_in_force" | "no_plan" | "custom_pricing" | "plan_history_not_recorded";
+                message: string;
+            }[];
+        };
+        VendorUsageLine: {
+            /**
+             * @description What was used. `compute` is sandbox runtime, the one resource metered today.
+             * @enum {string}
+             */
+            resource: "compute";
+            /** @description Who the hardware is bought from, as the pricing catalog names a region's substrate (`ovh-dedicated`). Null when the line has no rate (`unavailableReason`). */
+            vendor: string | null;
+            /** @description The region the runtime ran in, as recorded (`eu-central`). Null for the org's own self-hosted fleet, or runtime recorded with no region. */
+            region: string | null;
+            /** @description How much, in `unit`, to 6 decimal places, as a decimal string. */
+            quantity: string;
+            /**
+             * @description A standard machine-hour: one hour of a 4 vCPU, 8 GB, 80 GB sandbox. A larger shape counts as its largest resource ratio to that one.
+             * @enum {string}
+             */
+            unit: "machine-hour";
+            /** @description The vendor's own rate per `rateUnit`: measured hardware cost at full packing, with nothing added. Null when `unavailableReason` is set. In US dollars, as an exact decimal string. */
+            rateUsd: string | null;
+            /** @enum {string} */
+            rateUnit: "machine-hour";
+            /** @description What the line cost at the vendor's rate this period, rounded half up to 6 decimal places. Null when `unavailableReason` is set. In US dollars, as an exact decimal string. */
+            costUsd: string | null;
+            /**
+             * @description Why the line has no rate or cost: `region_not_priced`, the pricing catalog prices no region by that name (runtime recorded before regions were catalog ids); `self_hosted_fleet`, it ran on the org's own fleet, whose vendor bills the org directly. Null for a priced line.
+             * @enum {string|null}
+             */
+            unavailableReason: "region_not_priced" | "self_hosted_fleet" | null;
+        };
+        /** @description The usage fee on this period's usage, from the schedule version in force when the period began. Null when no version was in force then (listed in `unavailable`). Displayed for transparency: nothing bills it yet. */
+        WorkspaceUsageFee: {
+            /** @description The usage-fee schedule version this period is priced with, named by the UTC day it took effect: the version in force when the period began. */
+            scheduleVersion: string;
+            /** @description The whole usage fee: the components' sum, exactly. A percentage, as an exact decimal string. */
+            percent: string;
+            /** @description The most of any version's usage fee that may be RemoteHost's margin (1.0). A percentage, as an exact decimal string. */
+            marginPercentMax: string;
+            /** @description The percentage itemized: each pass-through fee, and the margin. */
+            components: components["schemas"]["WorkspaceUsageFeeComponent"][];
+            /** @description `percent` of `totalCostUsd`, rounded half up to 6 decimal places. In US dollars, as an exact decimal string. */
+            amountUsd: string;
+        } | null;
+        WorkspaceUsageFeeComponent: {
+            /** @description Stable across schedule versions: `payment_processing`, `billing_tax_tooling`, `remotehost_margin`. */
+            id: string;
+            label: string;
+            /** @description This component's share of the usage fee. A percentage, as an exact decimal string. */
+            percent: string;
+            /**
+             * @description `pass_through`, a fee paid to a third party on the customer's behalf, at its cost; `margin`, what RemoteHost keeps.
+             * @enum {string}
+             */
+            kind: "pass_through" | "margin";
+        };
         Project: {
             id: string;
             org_id: string;
             name: string;
             context: string | null;
-            /** @enum {string} */
+            /**
+             * @description The project's kind: always its workspace's (workspace_kind).
+             * @enum {string}
+             */
             use_case: "internal" | "external";
+            /**
+             * Format: uuid
+             * @description The org workspace the project lives in (Org workspaces).
+             */
+            workspace_id: string;
+            /**
+             * @description Its workspace's kind, which is the project's.
+             * @enum {string}
+             */
+            workspace_kind: "internal" | "external";
             sandbox_machine_hour_limit: number | null;
             color: string;
             created_at: string;
@@ -1444,12 +1856,16 @@ export interface components {
             name?: string;
             context?: string;
             useCase?: string;
+            /** @description The org workspace to create the project in; it takes the workspace's kind. Without one, the org's default workspace of `useCase` (internal unless given). Needs `workspaces.read`; refused while the workspace API is not enabled, and from API keys. */
+            workspaceId?: string;
         };
         UpdateProjectBody: {
             name?: string;
             context?: string | null;
             useCase?: string;
             color?: string;
+            /** @description Moves the project to another workspace of its kind in the org. Needs `project.update` and `workspaces.manage` on both the workspace it leaves and the one it joins, decided in the move's transaction; audited. Refused while the workspace API is not enabled, and from API keys. */
+            workspaceId?: string;
         };
         ProjectRepository: {
             id: string;
@@ -1786,6 +2202,8 @@ export interface components {
             expires_at: string | null;
             scopes: string[] | null;
             created_by: string | null;
+            /** @description The org workspace the key is pinned to: it reaches only that workspace's projects, and nothing answered for the whole org. Null for a key bound to its org alone. */
+            workspace_id?: string | null;
         };
         AgentSessionCommunication: {
             /** @enum {string} */
@@ -1840,7 +2258,7 @@ export interface components {
                 reason: string;
             }[];
         };
-        Environment: {
+        EnvironmentTemplate: {
             /** @description Workspaces and sandboxes, other than deleted ones, that boot from this environment. An edit reaches each at its next start; a delete is refused while either is non-zero. */
             usage: {
                 workspaces: number;
@@ -1886,6 +2304,47 @@ export interface components {
             command: string;
             port: number | null;
             cwd: string | null;
+        };
+        Environment: {
+            /** @description Workspaces and sandboxes, other than deleted ones, that boot from this environment. An edit reaches each at its next start; a delete is refused while either is non-zero. */
+            usage: {
+                workspaces: number;
+                sandboxes: number;
+            };
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            projectId: string;
+            name: string;
+            description: string | null;
+            isDefault: boolean;
+            /** @description Whether, as the project's default, this environment is what every sandbox and workspace execution in the project boots from, whatever the caller's role: another environment or template is refused. Has no effect on an environment that is not the default. */
+            enforced: boolean;
+            /** @description Null boots the platform's standard image. */
+            template: {
+                /** Format: uuid */
+                id: string;
+                name: string | null;
+                platform: boolean;
+            } | null;
+            /** @enum {string|null} */
+            machineSize: "small" | "default" | "large" | "xlarge" | null;
+            setupScript: string | null;
+            /** @description Started after the setup script on every create and cold boot where services are enabled (rolling out; until then recorded only); see GET /sandboxes/{sandboxId}/services. */
+            services: components["schemas"]["EnvironmentService"][];
+            /** @description Listed on each sandbox with a team preview ready to open: GET /sandboxes/{sandboxId}/ports. Never public by default. */
+            ports: number[];
+            /** @description Non-secret configuration only, stored and returned in plaintext. */
+            envVars: {
+                [key: string]: string;
+            };
+            /** @enum {string} */
+            egressPolicy: "none" | "trusted" | "full" | "custom";
+            egressAllowlist: string[];
+            /** @description Whether sandboxes created with this environment's id boot from it: template, machine size, environment variables, setup script, services (where enabled) and egress policy, re-applied on every wake. Its ports are listed on each sandbox with a team preview. */
+            applied: boolean;
+            createdAt: string;
+            updatedAt: string;
         };
         Workspace: {
             /** Format: uuid */
@@ -2919,6 +3378,2217 @@ export interface operations {
             };
         };
     };
+    listOrgWorkspaces: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The org's workspaces the caller can see, defaults first. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        workspaces: components["schemas"]["OrgWorkspace"][];
+                    };
+                };
+            };
+            /** @description Not a member of this org, or an API key. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    createOrgWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    name: string;
+                    /** @enum {string} */
+                    kind: "internal" | "external";
+                    /** @description 3 to 39 lower-case letters, digits and single hyphens, starting and ending with a letter or digit, and not shaped like an id (a UUID). */
+                    slug?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The new workspace. */
+            201: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        workspace: components["schemas"]["OrgWorkspace"];
+                    };
+                };
+            };
+            /** @description A missing or too long name (`name_invalid`), a kind that is not internal or external (`kind_invalid`), a slug that breaks the rule (`slug_invalid`), or `isDefault` in the body (`default_fixed`). */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Lacks `workspaces.manage`, not a member, or an API key. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Another workspace in the org has the slug (`slug_taken`). */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getOrgWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The workspace. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        workspace: components["schemas"]["OrgWorkspace"];
+                    };
+                };
+            };
+            /** @description Not a member of this org; an API key that is not pinned to a workspace, or pinned in another org; or a pinned key without `project.read` in its scopes or in its workspace. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such workspace in this org, one the caller cannot see, or the workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    deleteOrgWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted. */
+            204: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Lacks `workspaces.manage`, not a member, or an API key. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such workspace in this org, or the workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The workspace is one of the org's defaults (`default_workspace`), still has projects (`workspace_not_empty`), or has live API keys pinned to it (`workspace_has_keys`, their ids in `error.keyIds`; revoked and expired ones are deleted with it). */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    updateOrgWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    name?: string;
+                    /** @description 3 to 39 lower-case letters, digits and single hyphens, starting and ending with a letter or digit, and not shaped like an id (a UUID). */
+                    slug?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated workspace. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        workspace: components["schemas"]["OrgWorkspace"];
+                    };
+                };
+            };
+            /** @description Nothing to change, a bad name (`name_invalid`) or slug (`slug_invalid`), `kind` in the body (`kind_fixed`), or `isDefault` in the body (`default_fixed`). */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Lacks `workspaces.manage`, not a member, or an API key. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such workspace in this org, or the workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Another workspace in the org has the slug (`slug_taken`). */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getOrgWorkspaceUsageGuardrails: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The workspace's limit and this period's usage. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgWorkspaceUsageGuardrails"];
+                };
+            };
+            /** @description Lacks `billing.read`, or not a member. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such workspace in this org (what a key pinned to another workspace is told too), or the workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    updateOrgWorkspaceUsageGuardrails: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description Machine-hours this billing period; null for no workspace cap. */
+                    sandboxMachineHourLimit: number | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The workspace and its limit. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        workspace: {
+                            /** Format: uuid */
+                            id: string;
+                            /** @enum {string} */
+                            kind: "internal" | "external";
+                        };
+                        usageGuardrails: {
+                            sandboxMachineHourLimit: number | null;
+                        };
+                    };
+                };
+            };
+            /** @description sandboxMachineHourLimit missing, negative, or not a number. */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Lacks `billing.manage`, not a member, or an API key. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such workspace in this org, or the workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getWorkspaceEndUserLimits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The workspace's end-user caps. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceEndUserLimits"];
+                };
+            };
+            /** @description Lacks the permission, not a member, or an API key. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such workspace in this org, or the workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The workspace is Internal (`internal_workspace`). */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    updateWorkspaceEndUserLimits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    defaultMachineHourLimit?: number | null;
+                    /**
+                     * @description What an end user reaching its cap does: `refuse_new` refuses its new sandboxes and wakes (402 `end_user_usage_limit`) and never stops a running one; `notify_only` lets them through. Either way the first time in a billing period is recorded and listed as `reachedAt`.
+                     * @enum {string}
+                     */
+                    action?: "refuse_new" | "notify_only";
+                };
+            };
+        };
+        responses: {
+            /** @description The workspace's end-user caps. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceEndUserLimits"];
+                };
+            };
+            /** @description Nothing to change, a negative or non-numeric limit, or an action that is not refuse_new or notify_only (`action_invalid`). */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Lacks the permission, not a member, or an API key. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such workspace in this org, or the workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The workspace is Internal (`internal_workspace`). */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    setWorkspaceEndUserOverride: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                workspaceId: string;
+                /** @description The caller's own end-user id, as given in a sandbox's `endUserId`, URL-encoded. */
+                endUserId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    machineHourLimit: number | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The end user's override. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        override: components["schemas"]["WorkspaceEndUserOverride"];
+                    };
+                };
+            };
+            /** @description A bad end-user id, or a machineHourLimit that is not a non-negative number or null. */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Lacks the permission, not a member, or an API key. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such workspace in this org, or the workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The workspace is Internal (`internal_workspace`). */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    deleteWorkspaceEndUserOverride: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                workspaceId: string;
+                /** @description The caller's own end-user id, as given in a sandbox's `endUserId`, URL-encoded. */
+                endUserId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed. */
+            204: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Lacks the permission, not a member, or an API key. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No override for that end user, no such workspace in this org, or the workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The workspace is Internal (`internal_workspace`). */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listWorkspaceEndUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The end users this period. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceEndUserUsage"];
+                };
+            };
+            /** @description Lacks `billing.read`, as a person or an API key, or not a member of the org. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such workspace in this org, or the workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The workspace is Internal (`internal_workspace`), or the org has no active billing period (`no_billing_period`). */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getWorkspaceVendorCost: {
+        parameters: {
+            query?: {
+                /** @description `current` (the default), the org's billing period now; `previous`, the one before it. */
+                period?: "current" | "previous";
+            };
+            header?: never;
+            path: {
+                orgId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The workspace's usage at vendor cost. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceVendorUsage"];
+                };
+            };
+            /** @description `period` is not "current" or "previous" (`period_invalid`). */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Lacks billing.read, not a member, or an API key. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such workspace in this org, one the caller cannot see, or the workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The org has no such billing period (`no_billing_period`). */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
     listOrgProjects: {
         parameters: {
             query?: never;
@@ -3217,7 +5887,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description Permission project.update is required. */
+            /** @description Permission project.update is required, and workspaces.manage as well to move the project. */
             403: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
@@ -3273,6 +5943,33 @@ export interface operations {
             };
             /** @description The request body did not arrive within 30 seconds. */
             408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description With org workspaces enabled, a change of the project's kind (`kind_fixed`): a useCase other than its kind, or a workspace of the other kind. A project's kind is its workspace's and never changes. */
+            409: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
@@ -8732,6 +11429,11 @@ export interface operations {
             content: {
                 "application/json": {
                     name: string;
+                    /**
+                     * Format: uuid
+                     * @description Pin the key to one of the org's workspaces: it reaches only that workspace's projects, creates projects only there, and is refused anything answered for the whole org (the subscription, the org's usage, Claims). Set here and never changed; a rotation keeps it. Needs a workspace the caller can use (org-wide `workspaces.read`, or a project role on one of its projects; otherwise 400 `workspace_not_found`), and every scope held by the key's principal (the caller, or the service account it acts as) through its org role or a project role in that workspace: a pin only narrows, so any other scope is 403 `scope_exceeds_maker`, naming them. Refused while the workspace API is not enabled. Audited.
+                     */
+                    workspaceId?: string;
                 } & ({
                     scopes: string[];
                 } | {
@@ -11819,6 +14521,1455 @@ export interface operations {
                             code?: string;
                             turnId?: string;
                             communication?: components["schemas"]["AgentSessionCommunication"];
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listEnvironmentTemplates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The project's environments, by name. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        environments: components["schemas"]["EnvironmentTemplate"][];
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    createEnvironmentTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                    description?: string | null;
+                    /** @description Make this the project's default environment. At most one per project. */
+                    isDefault?: boolean;
+                    /** @description While this is the project's default, every sandbox and workspace execution in the project boots from it, including plain creates that name no environment and existing ones at their next wake: its egress policy, environment variables and setup script apply to all of them, and nobody can choose another environment or template for a new one. A sandbox that already exists keeps its own disk, and so its image. A PATCH that changes only egress posture -- this flag, egressPolicy, egressAllowlist -- needs environments.egress.manage, and a change that mixes posture with anything else needs both. Which environment is the default is authoring (environments.manage), and a default move, unset or delete that starts or ends enforcement -- including making a still-flagged environment the default again -- also needs environments.egress.manage; each is recorded on the audit log. */
+                    enforced?: boolean;
+                    /** @description A template id or name, the org's own first, then the platform's. Null for the standard image. */
+                    templateId?: string | null;
+                    /** @enum {string|null} */
+                    machineSize?: "small" | "default" | "large" | "xlarge" | null;
+                    /** @description Runs on every fresh or cold boot, as the sandbox user from /code, after the checkout and before the agent, for at most 30 minutes with no stdin; output goes to ~/.remotehost-setup.log. Must be idempotent: a cold boot re-runs it on the same disk. At most 65536 bytes. Refused if it contains what looks like a credential. */
+                    setupScript?: string | null;
+                    /** @description Long-running commands, each started (where services are enabled; rolling out) after the setup script on every create and cold boot, as the sandbox user from cwd (default /code), with the environment variables and no stdin; output goes to ~/.remotehost/services/<name>.log. A resume from memory keeps them running; one that exits is not restarted. A command must stay in the foreground: one that daemonizes (pg_ctl start, docker compose up -d) reports as exited. Commands that look like they contain a credential are refused. */
+                    services?: {
+                        name: string;
+                        command: string;
+                        port?: number | null;
+                        cwd?: string | null;
+                    }[];
+                    /** @description Ports to expose to the project's team: each sandbox lists them with a team preview ready to open (GET /sandboxes/{sandboxId}/ports). Nothing is made public. */
+                    ports?: number[];
+                    /** @description Non-secret configuration. Names and values that look like credentials are refused; secrets will be stored in the credential vault. */
+                    envVars?: {
+                        [key: string]: string;
+                    };
+                    /**
+                     * @description none: no network. trusted (default): package registries, git providers and model APIs, plus egressAllowlist. full: the open internet. custom: egressAllowlist only.
+                     * @enum {string}
+                     */
+                    egressPolicy?: "none" | "trusted" | "full" | "custom";
+                    /** @description Domains, like registry.npmjs.org or *.example.com. Only with trusted or custom. */
+                    egressAllowlist?: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description Created. */
+            201: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        environment: components["schemas"]["EnvironmentTemplate"];
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getEnvironmentTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+                environmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The environment. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        environment: components["schemas"]["EnvironmentTemplate"];
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    deleteEnvironmentTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+                environmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        deleted: boolean;
+                        /** @description Present and true when sandboxes still boot from it: it is kept for them until the last one is deleted. */
+                        keptForSandboxes?: boolean;
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    updateEnvironmentTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+                environmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name?: string;
+                    description?: string | null;
+                    /** @description Make this the project's default environment. At most one per project. */
+                    isDefault?: boolean;
+                    /** @description While this is the project's default, every sandbox and workspace execution in the project boots from it, including plain creates that name no environment and existing ones at their next wake: its egress policy, environment variables and setup script apply to all of them, and nobody can choose another environment or template for a new one. A sandbox that already exists keeps its own disk, and so its image. A PATCH that changes only egress posture -- this flag, egressPolicy, egressAllowlist -- needs environments.egress.manage, and a change that mixes posture with anything else needs both. Which environment is the default is authoring (environments.manage), and a default move, unset or delete that starts or ends enforcement -- including making a still-flagged environment the default again -- also needs environments.egress.manage; each is recorded on the audit log. */
+                    enforced?: boolean;
+                    /** @description A template id or name, the org's own first, then the platform's. Null for the standard image. */
+                    templateId?: string | null;
+                    /** @enum {string|null} */
+                    machineSize?: "small" | "default" | "large" | "xlarge" | null;
+                    /** @description Runs on every fresh or cold boot, as the sandbox user from /code, after the checkout and before the agent, for at most 30 minutes with no stdin; output goes to ~/.remotehost-setup.log. Must be idempotent: a cold boot re-runs it on the same disk. At most 65536 bytes. Refused if it contains what looks like a credential. */
+                    setupScript?: string | null;
+                    /** @description Long-running commands, each started (where services are enabled; rolling out) after the setup script on every create and cold boot, as the sandbox user from cwd (default /code), with the environment variables and no stdin; output goes to ~/.remotehost/services/<name>.log. A resume from memory keeps them running; one that exits is not restarted. A command must stay in the foreground: one that daemonizes (pg_ctl start, docker compose up -d) reports as exited. Commands that look like they contain a credential are refused. */
+                    services?: {
+                        name: string;
+                        command: string;
+                        port?: number | null;
+                        cwd?: string | null;
+                    }[];
+                    /** @description Ports to expose to the project's team: each sandbox lists them with a team preview ready to open (GET /sandboxes/{sandboxId}/ports). Nothing is made public. */
+                    ports?: number[];
+                    /** @description Non-secret configuration. Names and values that look like credentials are refused; secrets will be stored in the credential vault. */
+                    envVars?: {
+                        [key: string]: string;
+                    };
+                    /**
+                     * @description none: no network. trusted (default): package registries, git providers and model APIs, plus egressAllowlist. full: the open internet. custom: egressAllowlist only.
+                     * @enum {string}
+                     */
+                    egressPolicy?: "none" | "trusted" | "full" | "custom";
+                    /** @description Domains, like registry.npmjs.org or *.example.com. Only with trusted or custom. */
+                    egressAllowlist?: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description Updated. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        environment: components["schemas"]["EnvironmentTemplate"];
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The operation could not be completed; inspect error.message. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                        };
+                        /** @description Present when the request changed what running sandboxes are held to: an egress policy or allowlist, which environment is the default, or whether it is enforced. A sandbox that is not running needs nothing: every start reads its environment. */
+                        egressPropagation?: {
+                            /** @description Running sandboxes that now enforce the rules they are held to. */
+                            applied: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Running sandboxes the new rules could not reach, after one retry. */
+                            failed: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                error: string;
+                                /** @description Stopped so it cannot keep the old rules: a persistent sandbox wakes under the new ones, an ephemeral one is deleted as any stop deletes it. False means it could not be stopped either and is still running on the old ones. */
+                                stopped: boolean;
+                            }[];
+                            /** @description Sandboxes whose machine had already gone when the push arrived. */
+                            notRunning: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                            }[];
+                            /** @description Set when the running sandboxes could not be listed: nothing was pushed, and some may still be on the old rules. */
+                            listError?: string;
                         };
                     };
                 };

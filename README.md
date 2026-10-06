@@ -44,6 +44,29 @@ creation waits until the sandbox is running and the agent inside it answers,
 so the first command works; pass `waitForReady: false` to get the
 provisioning response immediately.
 
+An organization's work is split into workspaces, each `internal` or
+`external` for good; projects live in one. A project's environments are
+durable work (a disk, checkpoints, a git branch) that a sandbox attaches to,
+and each boots from one of the project's environment templates:
+
+```ts
+const workspaces = await remotehost.workspaces.list();
+
+const [template] = await remotehost.environmentTemplates.list({ projectId: "project_123" });
+const environment = await remotehost.environments.create({
+  projectId: "project_123",
+  name: "feature-x",
+  environmentTemplateId: template?.id,
+});
+const { sandbox: attached } = await remotehost.environments.attach(environment.id, {
+  projectId: "project_123",
+});
+await remotehost.environments.detach(environment.id, { projectId: "project_123" });
+```
+
+`remotehost.workspaces` answers 404 until the workspace API is enabled for the
+deployment.
+
 API failures throw `RemoteHostAPIError` with `status`, `code` (for example
 `rate_limited` or `limit_reached`), `requestId`, and the response body.
 

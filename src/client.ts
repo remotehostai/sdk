@@ -1,11 +1,14 @@
 import createClient from "openapi-fetch";
 
+import { EnvironmentTemplates } from "./environment-templates.js";
+import { Environments } from "./environments.js";
 import { RemoteHostConfigurationError } from "./errors.js";
 import type { paths } from "./generated/schema.js";
 import { HOST_GATEWAY_ENV, HostGateway, hostGatewayFromEnv, sdkGatewayFetch, useHostGateway } from "./host-gateway.js";
 import type { APIClient } from "./internal.js";
 import { Sandboxes } from "./sandboxes.js";
 import { VERSION } from "./version.js";
+import { Workspaces } from "./workspaces.js";
 
 const DEFAULT_BASE_URL = "https://api.remotehost.ai/v1";
 const DEFAULT_TIMEOUT_MS = 10 * 60 * 1000;
@@ -73,6 +76,12 @@ export class RemoteHost {
   readonly raw: APIClient;
   /** Create, list, and retrieve sandboxes. */
   readonly sandboxes: Sandboxes;
+  /** An organization's Internal and External workspaces. */
+  readonly workspaces: Workspaces;
+  /** A project's environments: durable work that sandboxes attach to. */
+  readonly environments: Environments;
+  /** A project's environment templates: the boot configurations environments and sandboxes start from. */
+  readonly environmentTemplates: EnvironmentTemplates;
 
   constructor(options: RemoteHostOptions = {}) {
     if (isBrowser() && !options.dangerouslyAllowBrowser) {
@@ -133,6 +142,9 @@ export class RemoteHost {
 
     this.raw = api;
     this.sandboxes = new Sandboxes(api, options.orgId);
+    this.workspaces = new Workspaces(api, options.orgId);
+    this.environments = new Environments(api, options.orgId);
+    this.environmentTemplates = new EnvironmentTemplates(api, options.orgId);
   }
 }
 
