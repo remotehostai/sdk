@@ -373,7 +373,11 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete an empty project
+         * @description Deletes a project that holds nothing: no sandbox, environment, environment template, agent session, repository, MCP or skill connection, resource allocation, pending egress change or volume. Its members and invitations go with it. Needs `project.delete` (owners and admins); audited as `project.delete`. API keys cannot call it.
+         */
+        delete: operations["deleteProject"];
         options?: never;
         head?: never;
         /** Update a project */
@@ -6563,6 +6567,163 @@ export interface operations {
             };
             /** @description Database error. */
             500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    deleteProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The project was deleted. */
+            204: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission project.delete is required. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Project not found. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body did not arrive within 30 seconds. */
+            408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The project holds something (`project_not_empty`); `held` names what. Nothing is cascaded. */
+            409: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description The request body is larger than 1 MiB. */
+            413: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
