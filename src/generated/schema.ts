@@ -285,6 +285,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orgs/{orgId}/workspaces/{workspaceId}/storage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read a workspace's storage
+         * @description The durable disks of the environments in the workspace's projects, with their forks, checkpoints and last disk samples, from the projects where the caller holds `sandbox.read`. Stored bytes, this month's storage cost and storage backends are not served yet, and are named in `unavailable`. A caller who cannot see the workspace (a member holding no project in it) gets the same 404 as a workspace that does not exist. API keys cannot call it. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone.
+         */
+        get: operations["getWorkspaceStorage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/workspaces/{workspaceId}/compute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read a workspace's compute
+         * @description The machines of the workspace's projects, from those where the caller holds `sandbox.read`, with counts by status, and the regions machines can run in. The Macs that mount its environments, and which locations the workspace may run on, are not served yet, and are named in `unavailable`. A caller who cannot see the workspace (a member holding no project in it) gets the same 404 as a workspace that does not exist. API keys cannot call it. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone.
+         */
+        get: operations["getWorkspaceCompute"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orgs/{orgId}/workspaces/{workspaceId}/network": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read a workspace's network
+         * @description The preview links of the workspace's machines that still open, from the projects where the caller holds `sandbox.read`, and each environment's egress, from those where it holds `environments.read`. A workspace network (WireGuard, peers, Tailscale, private networks by label) and preview links' URLs are not served, and are named in `unavailable`. A caller who cannot see the workspace (a member holding no project in it) gets the same 404 as a workspace that does not exist. API keys cannot call it. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone.
+         */
+        get: operations["getWorkspaceNetwork"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/orgs/{orgId}/projects": {
         parameters: {
             query?: never;
@@ -1839,6 +1899,249 @@ export interface components {
              */
             kind: "pass_through" | "margin";
         };
+        WorkspaceStorage: {
+            workspace: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                kind: "internal" | "external";
+            };
+            volumes: components["schemas"]["WorkspaceVolume"][];
+            /** @description How many volumes there are in all. */
+            volumeTotal: number;
+            unavailable: components["schemas"]["WorkspaceStorageUnavailable"];
+        };
+        /** @description An environment's durable disk in one of the workspace's projects. */
+        WorkspaceVolume: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            title: string | null;
+            /** Format: uuid */
+            projectId: string;
+            /** @description The environment template it boots from, when it names one. */
+            environment: {
+                /** Format: uuid */
+                id: string;
+                name: string | null;
+            } | null;
+            /**
+             * @description `fork`, a disk made from another's checkpoint; `volume` otherwise.
+             * @enum {string}
+             */
+            kind: "volume" | "fork";
+            forkedFrom: {
+                /** Format: uuid */
+                volumeId: string;
+                /** Format: uuid */
+                checkpointId: string | null;
+            } | null;
+            /** @description `active`, `sleeping`, `moving` or `archived`. */
+            status: string;
+            lifetimePolicy: string;
+            /** Format: uuid */
+            ownerUserId: string | null;
+            /** @description The machine holding its write lease. Live while the lease has not lapsed: the disk is mounted there. */
+            lease: {
+                /** Format: uuid */
+                machineId: string;
+                live: boolean;
+                /** @description An ISO-8601 timestamp. */
+                expiresAt: string | null;
+            } | null;
+            /** @description Its snapshots: the checkpoints object storage has confirmed. */
+            checkpoints: {
+                count: number;
+                /** @description An ISO-8601 timestamp. */
+                lastDurableAt: string | null;
+            };
+            /** @description The newest disk sample any of its machines reported: the guest's own count of the disk, not what object storage keeps. Null until one is taken. */
+            lastDiskSample: {
+                /** Format: uuid */
+                machineId: string;
+                usedBytes: number;
+                totalBytes: number;
+                /** @description An ISO-8601 timestamp. */
+                sampledAt: string | null;
+            } | null;
+            /** @description An ISO-8601 timestamp. */
+            createdAt: string;
+            /** @description An ISO-8601 timestamp. */
+            lastActivityAt: string;
+        };
+        /** @description Each part of the screen the API cannot serve, and why: left out rather than estimated. */
+        WorkspaceStorageUnavailable: {
+            /** @enum {string} */
+            field: "storedBytes" | "monthCostUsd" | "backends";
+            /**
+             * @description `not_metered`, the system does not measure it yet; `not_recorded`, nothing in the system records it yet.
+             * @enum {string}
+             */
+            reason: "not_metered" | "not_recorded";
+            message: string;
+        }[];
+        WorkspaceCompute: {
+            workspace: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                kind: "internal" | "external";
+            };
+            machines: components["schemas"]["WorkspaceMachine"][];
+            /** @description Counts over every machine, not only this page's. */
+            summary: {
+                total: number;
+                byStatus: {
+                    [key: string]: number;
+                };
+            };
+            locations: components["schemas"]["WorkspaceLocation"][];
+            unavailable: components["schemas"]["WorkspaceComputeUnavailable"];
+        };
+        /** @description A machine of one of the workspace's projects. */
+        WorkspaceMachine: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: uuid */
+            projectId: string;
+            /** @description The environment template it booted from, when it names one. */
+            environment: {
+                /** Format: uuid */
+                id: string;
+                name: string | null;
+            } | null;
+            /**
+             * Format: uuid
+             * @description The disk it mounts: a volume in the workspace's storage read. Null for none.
+             */
+            volumeId: string | null;
+            /** @description `provisioning`, `ready`, `running`, `stopping`, `stopped` or `error`. */
+            status: string;
+            template: {
+                /** Format: uuid */
+                id: string;
+                name: string | null;
+            } | null;
+            /** @description Its sandbox profile: `agent-standard` and so on. */
+            profile: string;
+            machineSize: string;
+            /** @description What it is allocated. */
+            size: {
+                vcpu: number | null;
+                memoryGb: number | null;
+                diskGb: number | null;
+            };
+            /** @description Where it runs: a region and its vendor, as the pricing catalog names them (vendor null for a region the catalog does not name), or the org's own self-hosted fleet. */
+            location: {
+                region: string | null;
+                vendor: string | null;
+                /** Format: uuid */
+                selfHostedFleetId: string | null;
+            };
+            /** @description The metadata it was created with: `tenant=cust_8f2` is `{ "tenant": "cust_8f2" }`. */
+            labels: {
+                [key: string]: unknown;
+            };
+            endUserId: string | null;
+            /** @description Its last disk sample, null until one is taken. */
+            disk: {
+                usedBytes: number;
+                totalBytes: number;
+                /** @description An ISO-8601 timestamp. */
+                sampledAt: string | null;
+            } | null;
+            /** @description An ISO-8601 timestamp. */
+            createdAt: string;
+            /** @description An ISO-8601 timestamp. */
+            lastActivityAt: string | null;
+        };
+        /** @description A region machines can run in, from the published pricing catalog. */
+        WorkspaceLocation: {
+            id: string;
+            label: string;
+            locations: string;
+            vendor: string;
+            /** @description Whether machines may be placed there now. */
+            available: boolean;
+            isDefault: boolean;
+        };
+        /** @description Each part of the screen the API cannot serve, and why: left out rather than estimated. */
+        WorkspaceComputeUnavailable: {
+            /** @enum {string} */
+            field: "macs" | "enabledLocations";
+            /**
+             * @description `not_metered`, the system does not measure it yet; `not_recorded`, nothing in the system records it yet.
+             * @enum {string}
+             */
+            reason: "not_metered" | "not_recorded";
+            message: string;
+        }[];
+        WorkspaceNetwork: {
+            workspace: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                kind: "internal" | "external";
+            };
+            previewLinks: components["schemas"]["WorkspacePreviewLink"][];
+            previewLinkTotal: number;
+            egress: components["schemas"]["WorkspaceEgress"][];
+            egressTotal: number;
+            unavailable: components["schemas"]["WorkspaceNetworkUnavailable"];
+        };
+        /** @description A preview link onto one port of one of the workspace's machines that still opens: not revoked, not expired. Its URL is not here: it carries the token, which is never stored. */
+        WorkspacePreviewLink: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            machineId: string;
+            port: number;
+            /**
+             * @description `team`, the viewer must be a member of the org; `public`, anyone holding the URL gets in.
+             * @enum {string}
+             */
+            audience: "team" | "public";
+            label: string | null;
+            endUserId: string | null;
+            /** @description An ISO-8601 timestamp. */
+            createdAt: string;
+            /** @description An ISO-8601 timestamp. */
+            expiresAt: string | null;
+            /** @description When it was last opened. */
+            lastSeenAt: string | null;
+        };
+        /** @description An environment's egress, as the host firewall applies it to machines booted from it. */
+        WorkspaceEgress: {
+            environment: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            };
+            /** Format: uuid */
+            projectId: string;
+            isDefault: boolean;
+            /** @description Whether the project's machines must boot from it (its default, enforced). */
+            enforced: boolean;
+            /**
+             * @description Where its machines may connect: `none`, nowhere; `trusted`, package registries, the git provider and the model APIs, plus `allowlist`; `full`, the open internet; `custom`, `allowlist` only.
+             * @enum {string}
+             */
+            policy: "none" | "trusted" | "full" | "custom";
+            /** @description Domains allowed on top of the policy: `example.com`, or `*.example.com` for its subdomains. */
+            allowlist: string[];
+        };
+        /** @description Each part of the screen the API cannot serve, and why: left out rather than estimated. */
+        WorkspaceNetworkUnavailable: {
+            /** @enum {string} */
+            field: "wireguard" | "peers" | "tailscale" | "privateNetworks" | "previewUrls";
+            /**
+             * @description `not_metered`, the system does not measure it yet; `not_recorded`, nothing in the system records it yet.
+             * @enum {string}
+             */
+            reason: "not_metered" | "not_recorded";
+            message: string;
+        }[];
         Project: {
             id: string;
             org_id: string;
@@ -5612,6 +5915,411 @@ export interface operations {
             };
         };
     };
+    getWorkspaceStorage: {
+        parameters: {
+            query?: {
+                /** @description How many rows a list holds: 1 to 500, 100 by default. Disks and machines come most recently active first, preview links newest first, and egress project by project with each project's default environment first; the total says how many there are in all. */
+                limit?: string;
+            };
+            header?: never;
+            path: {
+                orgId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The workspace's storage. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceStorage"];
+                };
+            };
+            /** @description `limit` is not a whole number from 1 to 500 (`limit_invalid`). */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Not a member, or an API key. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such workspace in this org, one the caller cannot see, or the workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getWorkspaceCompute: {
+        parameters: {
+            query?: {
+                /** @description How many rows a list holds: 1 to 500, 100 by default. Disks and machines come most recently active first, preview links newest first, and egress project by project with each project's default environment first; the total says how many there are in all. */
+                limit?: string;
+            };
+            header?: never;
+            path: {
+                orgId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The workspace's compute. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceCompute"];
+                };
+            };
+            /** @description `limit` is not a whole number from 1 to 500 (`limit_invalid`). */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Not a member, or an API key. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such workspace in this org, one the caller cannot see, or the workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getWorkspaceNetwork: {
+        parameters: {
+            query?: {
+                /** @description How many rows a list holds: 1 to 500, 100 by default. Disks and machines come most recently active first, preview links newest first, and egress project by project with each project's default environment first; the total says how many there are in all. */
+                limit?: string;
+            };
+            header?: never;
+            path: {
+                orgId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The workspace's network. */
+            200: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceNetwork"];
+                };
+            };
+            /** @description `limit` is not a whole number from 1 to 500 (`limit_invalid`). */
+            400: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Not a member, or an API key. */
+            403: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description No such workspace in this org, one the caller cannot see, or the workspace API is not enabled. */
+            404: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Database error. */
+            500: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+        };
+    };
     listOrgProjects: {
         parameters: {
             query?: never;
@@ -5774,6 +6482,33 @@ export interface operations {
             };
             /** @description The request body did not arrive within 30 seconds. */
             408: {
+                headers: {
+                    "X-Request-Id": components["headers"]["RequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            message: string;
+                            /** @enum {string} */
+                            code?: "rate_limited" | "limit_reached" | "plan_required" | "snapshot_in_progress" | "workspace_fenced" | "workspace_leased" | "workspace_execution" | "start_timeout" | "slug_taken" | "slug_reserved" | "slug_format" | "slug_invalid" | "slug_current" | "body_too_large" | "body_timeout" | "invalid_body" | "host_unavailable" | "addon_not_found" | "addon_listing_mismatch" | "addon_blocked" | "addon_retired" | "addon_scope_not_allowed" | "addon_forbidden_by_org" | "addon_community_not_allowed" | "addon_not_held" | "addon_scope_not_found" | "addon_off_above" | "addon_kind_not_available" | "addon_install_through_sync" | "addon_scope_not_supported" | "addon_already_installed" | "addon_install_limit" | "addon_install_not_found" | "addon_install_name_taken" | "addon_listing_ambiguous" | "custom_addons_not_allowed";
+                            retryable?: boolean;
+                            limit?: number;
+                            /** @enum {string} */
+                            window?: "minute" | "hour" | "day";
+                            retryAfterSeconds?: number;
+                            resetsAt?: string;
+                            active?: number;
+                            includedLimit?: number | null;
+                            planMaximum?: number | null;
+                            profile?: string;
+                            minimumPlan?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Another project in the org already has this name, compared case-insensitively (`project_name_taken`). */
+            409: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
@@ -5991,7 +6726,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description With org workspaces enabled, a change of the project's kind (`kind_fixed`): a useCase other than its kind, or a workspace of the other kind. A project's kind is its workspace's and never changes. */
+            /** @description A name another project in the org already has, compared case-insensitively (`project_name_taken`). Or, with org workspaces enabled, a change of the project's kind (`kind_fixed`): a useCase other than its kind, or a workspace of the other kind. A project's kind is its workspace's and never changes. */
             409: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
