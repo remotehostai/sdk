@@ -274,7 +274,7 @@ export interface paths {
         };
         /**
          * Read a workspace's usage at vendor cost, itemized
-         * @description Needs `billing.read` at the workspace. The usage of the projects in the workspace now, for the billing period, line by line at each vendor's own rate, with the usage fee and the platform fee, which are displayed for transparency: nothing bills them yet. A caller who cannot see the workspace (a member holding no project in it) gets the same 404 as a workspace that does not exist. API keys cannot call it. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone.
+         * @description Needs `billing.read` at the workspace. The usage of the projects in the workspace now, for the billing period, line by line at each vendor's own rate, with the usage fee and the platform fee, which are displayed for transparency: nothing bills them yet. A caller who cannot see the workspace (a member holding no project in it) gets the same 404 as a workspace that does not exist. An API key pinned to a workspace reads that workspace only, with `billing.read` in its own scopes; any other workspace, in this org or another, gets the same 404. No other API key may call it. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone.
          */
         get: operations["getWorkspaceVendorCost"];
         put?: never;
@@ -5502,7 +5502,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description Lacks billing.read, not a member, or an API key. */
+            /** @description Lacks billing.read (the caller, or a pinned key's scopes), not a member, or an API key not pinned to a workspace. */
             403: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
