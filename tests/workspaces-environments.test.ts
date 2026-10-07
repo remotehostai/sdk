@@ -20,6 +20,8 @@ const workspace: Workspace = {
   name: "Customers",
   slug: "customers",
   is_default: false,
+  manager_workspace_id: null,
+  add_ons: null,
   created_at: "2026-10-05T00:00:00.000Z",
   updated_at: "2026-10-05T00:00:00.000Z",
 };

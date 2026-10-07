@@ -73,7 +73,12 @@ export class Workspaces {
     return data.workspace;
   }
 
-  /** Rename a workspace or change its slug. The kind cannot change. */
+  /**
+   * Rename a workspace or change its slug; set an External workspace's
+   * manager (`managerWorkspaceId`, an Internal workspace of the org, or
+   * null); or switch an Internal workspace's add-ons (`addOns`). The kind
+   * cannot change.
+   */
   async update(workspaceId: string, options: UpdateWorkspaceOptions): Promise<Workspace> {
     const { orgId, signal: _signal, timeoutMs: _timeoutMs, ...body } = options;
     const data = await unwrap(

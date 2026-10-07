@@ -161,14 +161,14 @@ export interface paths {
         post?: never;
         /**
          * Delete an empty workspace
-         * @description Needs `workspaces.manage`. Only a workspace with no projects (409 `workspace_not_empty` otherwise; never a cascade) that is not one of the org's defaults. Audited. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone. API keys cannot call it yet.
+         * @description Needs `workspaces.manage`. Only a workspace with no projects (409 `workspace_not_empty` otherwise; never a cascade) that is not one of the org's defaults. External workspaces an Internal one managed are kept, their `manager_workspace_id` cleared. Audited. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone. API keys cannot call it yet.
          */
         delete: operations["deleteOrgWorkspace"];
         options?: never;
         head?: never;
         /**
-         * Rename a workspace or change its slug
-         * @description Needs `workspaces.manage`. The kind cannot change. Audited. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone. API keys cannot call it yet.
+         * Rename a workspace, change its slug, set its manager, or switch its add-ons
+         * @description Needs `workspaces.manage`. The kind cannot change. An External workspace's `managerWorkspaceId` names the Internal workspace that runs it, or null for none; it grants no access. An Internal workspace's `addOns` switches what its sidebar shows; it gates no API. Audited. Off until the workspace API is enabled for this deployment: until then it answers 404 to everyone. API keys cannot call it yet.
          */
         patch: operations["updateOrgWorkspace"];
         trace?: never;
@@ -1666,9 +1666,21 @@ export interface components {
             slug: string;
             /** @description One of the org's defaults: where a new project lands when it names no workspace (the Internal one), or an external-use project created without one (the External one). Defaults cannot be deleted. */
             is_default: boolean;
+            /**
+             * Format: uuid
+             * @description For an External workspace, the Internal workspace of the org that runs it; null when none, always for an Internal workspace, and when the caller cannot see the manager. Descriptive only: it grants no access. Deleting the manager clears it.
+             */
+            manager_workspace_id: string | null;
+            add_ons: components["schemas"]["OrgWorkspaceAddOns"];
             created_at: string;
             updated_at: string;
         };
+        /** @description An Internal workspace's add-ons, each on unless switched off: what its sidebar shows under Add-ons. Display only: an add-on that is off gates no API. Null for an External workspace, which has none. */
+        OrgWorkspaceAddOns: {
+            issues: boolean;
+            repos: boolean;
+            agents: boolean;
+        } | null;
         OrgWorkspaceUsageGuardrails: {
             workspace: {
                 /** Format: uuid */
@@ -4015,6 +4027,17 @@ export interface operations {
                     name?: string;
                     /** @description 3 to 39 lower-case letters, digits and single hyphens, starting and ending with a letter or digit, and not shaped like an id (a UUID). */
                     slug?: string;
+                    /**
+                     * Format: uuid
+                     * @description External workspaces only: an Internal workspace of this org, or null to clear the link.
+                     */
+                    managerWorkspaceId?: string | null;
+                    /** @description Internal workspaces only: the add-ons to switch on (true) or off (false); those not named keep their state. */
+                    addOns?: {
+                        issues?: boolean;
+                        repos?: boolean;
+                        agents?: boolean;
+                    };
                 };
             };
         };
@@ -4031,7 +4054,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description Nothing to change, a bad name (`name_invalid`) or slug (`slug_invalid`), `kind` in the body (`kind_fixed`), or `isDefault` in the body (`default_fixed`). */
+            /** @description Nothing to change, a bad name (`name_invalid`) or slug (`slug_invalid`), `kind` in the body (`kind_fixed`), `isDefault` in the body (`default_fixed`), a manager on an Internal workspace (`manager_only_external`), a manager that is not an Internal workspace of this org (`manager_not_found`), add-ons on an External workspace (`add_ons_only_internal`), or `addOns` that is empty or names anything but issues, repos and agents with true or false (`add_ons_invalid`). */
             400: {
                 headers: {
                     "X-Request-Id": components["headers"]["RequestId"];
