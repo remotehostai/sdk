@@ -6,7 +6,7 @@ Source, issues, and contributions: [remotehostai/sdk](https://github.com/remoteh
 
 The low-level request and response types in `src/generated` are generated from
 the published public spec, `contracts/openapi/dist/remotehost.json`: the TS
-API's `apps/api/generated/openapi.json` plus the `contracts/openapi` documents
+API's `contracts/openapi/base/openapi.json` plus the `contracts/openapi` documents
 listed in `contracts/openapi/published.yaml`. The public resource API is
 maintained by hand in the rest of `src`.
 
