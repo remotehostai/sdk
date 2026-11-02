@@ -1,0 +1,599 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+import RemoteHost, {
+  RemoteHostAPIError,
+  RemoteHostConfigurationError,
+  RemoteHostTimeoutError,
+  VERSION,
+} from "../src/index.js";
+import type { ResizeSandboxBody, SandboxData } from "../src/sandboxes.js";
+
+const sandbox: SandboxData = {
+  id: "sandbox_123",
+  org_id: "org_123",
+  project_id: "project_123",
+  name: "My sandbox",
+  agent: "codex",
+  status: "provisioning",
+  mode: "persistent",
+  region: "us-east",
+  persistence_policy: "sleep_resume",
+  sandbox_profile: "agent-standard",
+  machine_size: "default",
+  provider: "firecracker",
+  vmm: "firecracker",
+  allocated_vcpu: 4,
+  allocated_memory_gb: 8,
+  allocated_disk_gb: 40,
+  end_user_id: null,
+  vm_lost_at: null,
+  environment_id: null,
+  disk: null,
+  created_at: "2026-09-13T00:00:00.000Z",
+  updated_at: "2026-09-13T00:00:00.000Z",
+};
+
+test("reports the package version in requests", async () => {
+  const packageJson = JSON.parse(
+    await readFile(new URL("../package.json", import.meta.url), "utf8"),
+  ) as { version: string };
+  let requestVersion: string | null = null;
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    fetch: async (request) => {
+      requestVersion = request.headers.get("x-remotehost-sdk-version");
+      return jsonResponse({ sandboxes: [] });
+    },
+  });
+
+  await client.sandboxes.list();
+
+  assert.equal(VERSION, packageJson.version);
+  assert.equal(requestVersion, VERSION);
+});
+
+test("requires an organization before making an organization-scoped request", async () => {
+  const client = new RemoteHost({ apiKey: "rh_test", fetch: unexpectedFetch });
+
+  await assert.rejects(
+    client.sandboxes.list(),
+    (error: unknown) =>
+      error instanceof RemoteHostConfigurationError && error.message.includes("orgId"),
+  );
+});
+
+test("lists sandboxes with bearer authentication and the configured organization", async () => {
+  const requests: Request[] = [];
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    baseURL: "https://api.example.test/v1/",
+    orgId: "org_123",
+    fetch: async (request) => {
+      requests.push(request);
+      return jsonResponse({ sandboxes: [sandbox] });
+    },
+  });
+
+  const sandboxes = await client.sandboxes.list({ projectId: "project_123" });
+
+  assert.equal(requests.length, 1);
+  assert.equal(
+    requests[0]?.url,
+    "https://api.example.test/v1/orgs/org_123/sandboxes?projectId=project_123",
+  );
+  assert.equal(requests[0]?.headers.get("authorization"), "Bearer rh_test");
+  assert.equal(sandboxes[0]?.id, "sandbox_123");
+  assert.equal(sandboxes[0]?.projectId, "project_123");
+});
+
+test("creates a sandbox and keeps its resource instance current after lifecycle calls", async () => {
+  const requests: Request[] = [];
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    fetch: async (request) => {
+      requests.push(request);
+      if (request.url.endsWith("/sleep")) {
+        return jsonResponse({ sandbox: { ...sandbox, status: "stopped" } });
+      }
+      return jsonResponse({ sandbox }, 201);
+    },
+  });
+
+  const created = await client.sandboxes.create({
+    projectId: "project_123",
+    agent: "codex",
+    waitForReady: false,
+  });
+  const body = await requests[0]?.json();
+
+  assert.deepEqual(body, { projectId: "project_123", agent: "codex" });
+  assert.equal(created.status, "provisioning");
+  assert.equal(await created.sleep(), created);
+  assert.equal(created.status, "stopped");
+  assert.equal(requests[1]?.url, "https://api.remotehost.ai/v1/sandboxes/sandbox_123/sleep");
+});
+
+test("sends the VMM a create asks for and keeps a VMM it does not know as a string (REM-4739)", async () => {
+  const requests: Request[] = [];
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    fetch: async (request) => {
+      requests.push(request);
+      return jsonResponse({ sandbox: { ...sandbox, vmm: "cloud-hypervisor" } }, 201);
+    },
+  });
+
+  const created = await client.sandboxes.create({
+    projectId: "project_123",
+    agent: "codex",
+    vmm: "qemu",
+    waitForReady: false,
+  });
+
+  assert.deepEqual(await requests[0]?.json(), {
+    projectId: "project_123",
+    agent: "codex",
+    vmm: "qemu",
+  });
+  assert.equal(created.data.vmm, "cloud-hypervisor");
+  assert.equal(created.data.provider, "firecracker");
+});
+
+test("throws typed API errors with request metadata", async () => {
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    fetch: async () =>
+      jsonResponse({ error: { message: "Sandbox limit reached" } }, 429, {
+        "x-request-id": "request_123",
+      }),
+  });
+
+  await assert.rejects(
+    client.sandboxes.create({
+      projectId: "project_123",
+      agent: "codex",
+      waitForReady: false,
+    }),
+    (error: unknown) => {
+      assert.ok(error instanceof RemoteHostAPIError);
+      assert.equal(error.status, 429);
+      assert.equal(error.requestId, "request_123");
+      assert.equal(error.message, "Sandbox limit reached");
+      return true;
+    },
+  );
+});
+
+test("exposes command, file, preview, and metrics resources on a sandbox", async () => {
+  const requests: Request[] = [];
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    // The API's own routes; the gateway path is tested in host-gateway.test.ts.
+    hostGateway: false,
+    fetch: async (request) => {
+      requests.push(request);
+      const path = new URL(request.url).pathname;
+
+      if (path.endsWith("/exec")) {
+        return jsonResponse({
+          exitCode: 0,
+          stdout: "ok\n",
+          stderr: "",
+          truncated: false,
+          timedOut: false,
+        });
+      }
+      if (path.endsWith("/file") && request.method === "PUT") {
+        return jsonResponse({ path: "/code/src/index.ts", size: 18 });
+      }
+      if (path.endsWith("/file")) {
+        return jsonResponse({
+          path: "/code/src/index.ts",
+          content: "console.log('ok')\n",
+          encoding: "utf8",
+          size: 18,
+        });
+      }
+      if (path.endsWith("/previews") && request.method === "POST") {
+        return jsonResponse({
+          preview: {
+            kind: "port",
+            audience: "team",
+            port: 3000,
+            status: "ready",
+            target: "3000",
+            url: "https://preview.example.test",
+          },
+        });
+      }
+      if (path.endsWith("/metrics/live")) {
+        return jsonResponse({
+          cpuPercent: 4,
+          memoryTotalGb: 8,
+          memoryUsedGb: 2,
+          diskTotalGb: 40,
+          diskUsedGb: 5,
+        });
+      }
+      return jsonResponse({ sandbox });
+    },
+  });
+  const instance = await client.sandboxes.retrieve("sandbox_123");
+
+  assert.equal((await instance.commands.run("printf ok")).stdout, "ok\n");
+  assert.equal(await instance.files.readText("src/index.ts"), "console.log('ok')\n");
+  assert.equal((await instance.files.write("src/index.ts", "console.log('ok')\n")).size, 18);
+  assert.equal(
+    (await instance.previews.create({ port: 3000 })).url,
+    "https://preview.example.test",
+  );
+  assert.equal((await instance.metrics.get()).cpuPercent, 4);
+  assert.equal(requests.length, 6);
+});
+
+test("waits for a provisioning sandbox to become ready and for its agent to answer", async () => {
+  const requests: string[] = [];
+  let reads = 0;
+  let probes = 0;
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    // The API's own routes; the gateway path is tested in host-gateway.test.ts.
+    hostGateway: false,
+    // The transport retry would otherwise absorb the 502 below.
+    maxRetries: 0,
+    fetch: async (request) => {
+      const path = new URL(request.url).pathname;
+      requests.push(path);
+      if (path.endsWith("/files")) {
+        probes += 1;
+        // The control plane says running before envd inside the guest answers.
+        return probes < 2
+          ? jsonResponse({ error: { message: "agent unreachable" } }, 502)
+          : jsonResponse({ path: "/code", truncated: false, entries: [] });
+      }
+      reads += 1;
+      return jsonResponse({
+        sandbox: { ...sandbox, status: reads < 2 ? "provisioning" : "running" },
+      });
+    },
+  });
+  const instance = await client.sandboxes.retrieve("sandbox_123");
+
+  assert.equal((await instance.waitUntilReady({ pollIntervalMs: 1 })).status, "running");
+  assert.deepEqual(requests, [
+    "/v1/sandboxes/sandbox_123",
+    "/v1/sandboxes/sandbox_123",
+    "/v1/sandboxes/sandbox_123/files",
+    "/v1/sandboxes/sandbox_123",
+    "/v1/sandboxes/sandbox_123/files",
+  ]);
+});
+
+test("stops waiting for a sandbox that went to sleep instead of becoming ready", async () => {
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    fetch: async () => jsonResponse({ sandbox: { ...sandbox, status: "stopping" } }),
+  });
+  const instance = await client.sandboxes.retrieve("sandbox_123");
+
+  await assert.rejects(instance.waitUntilReady({ pollIntervalMs: 1 }), /status "stopping"/);
+});
+
+test("surfaces the machine-readable error code the API sets", async () => {
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    fetch: async () =>
+      jsonResponse(
+        { error: { message: "Too many starts", code: "rate_limited", retryAfterSeconds: 30 } },
+        429,
+      ),
+  });
+
+  await assert.rejects(
+    client.sandboxes.create({ projectId: "project_123", agent: "codex", waitForReady: false }),
+    (error: unknown) => {
+      assert.ok(error instanceof RemoteHostAPIError);
+      assert.equal(error.code, "rate_limited");
+      return true;
+    },
+  );
+});
+
+test("retries transient reads but never retries mutations", async () => {
+  let reads = 0;
+  const retryingClient = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    fetch: async () => {
+      reads += 1;
+      return reads === 1
+        ? jsonResponse({ error: { message: "try again" } }, 503, { "retry-after": "0" })
+        : jsonResponse({ sandboxes: [] });
+    },
+  });
+
+  assert.deepEqual(await retryingClient.sandboxes.list(), []);
+  assert.equal(reads, 2);
+
+  let writes = 0;
+  const nonRetryingClient = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    maxRetries: 5,
+    fetch: async () => {
+      writes += 1;
+      return jsonResponse({ error: { message: "failed" } }, 503);
+    },
+  });
+
+  await assert.rejects(
+    nonRetryingClient.sandboxes.create({
+      projectId: "project_123",
+      agent: "codex",
+      waitForReady: false,
+    }),
+    RemoteHostAPIError,
+  );
+  assert.equal(writes, 1);
+});
+
+test("turns transport deadlines into typed timeout errors", async () => {
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    timeoutMs: 5,
+    fetch: async (request) => {
+      const keepAlive = setTimeout(() => undefined, 100);
+      return new Promise<Response>((_resolve, reject) => {
+        request.signal.addEventListener("abort", () => reject(request.signal.reason), {
+          once: true,
+        });
+      }).finally(() => clearTimeout(keepAlive));
+    },
+  });
+
+  await assert.rejects(client.sandboxes.list(), RemoteHostTimeoutError);
+});
+
+// REM-709: a wake or create during the host's orchestrator restart.
+function hostUnavailable(retryable = true, headers: HeadersInit = { "retry-after": "0" }): Response {
+  return jsonResponse(
+    {
+      error: {
+        message: "The host for this sandbox is restarting or unreachable. Nothing was changed; try again in a few seconds.",
+        code: "host_unavailable",
+        retryable,
+        ...(retryable ? { retryAfterSeconds: 0 } : {}),
+      },
+    },
+    503,
+    headers,
+  );
+}
+
+test("retries a wake the API refused because the host was restarting", async () => {
+  const paths: string[] = [];
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    fetch: async (request) => {
+      const path = new URL(request.url).pathname;
+      paths.push(`${request.method} ${path}`);
+      if (request.method === "GET") return jsonResponse({ sandbox: { ...sandbox, status: "stopped" } });
+      return paths.filter((entry) => entry.startsWith("POST")).length < 3
+        ? hostUnavailable()
+        : jsonResponse({ sandbox: { ...sandbox, status: "running" } });
+    },
+  });
+
+  const instance = await client.sandboxes.retrieve("sandbox_123");
+  await instance.wake();
+
+  assert.equal(instance.status, "running");
+  assert.deepEqual(
+    paths.filter((entry) => entry.startsWith("POST")),
+    Array(3).fill("POST /v1/sandboxes/sandbox_123/wake"),
+  );
+});
+
+// REM-5400: a wake right after sleep() meets the snapshot still saving.
+function snapshotSaving(): Response {
+  return jsonResponse(
+    { error: { message: "Sandbox My sandbox is still saving its snapshot. Try again in a few seconds.", code: "snapshot_in_progress" } },
+    409,
+  );
+}
+
+function wakingClient(answers: (() => Response)[]) {
+  const posts: string[] = [];
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    fetch: async (request) => {
+      const path = new URL(request.url).pathname;
+      if (request.method === "GET") return jsonResponse({ sandbox: { ...sandbox, status: "stopping" } });
+      posts.push(path);
+      return answers[Math.min(posts.length - 1, answers.length - 1)]!();
+    },
+  });
+  return { client, posts };
+}
+
+test("a wake waits for a snapshot that is still saving, then wakes", async () => {
+  const { client, posts } = wakingClient([snapshotSaving, () => jsonResponse({ sandbox: { ...sandbox, status: "running" } })]);
+
+  const instance = await client.sandboxes.retrieve("sandbox_123");
+  await instance.wake();
+
+  assert.equal(instance.status, "running");
+  assert.deepEqual(posts, ["/v1/sandboxes/sandbox_123/wake", "/v1/sandboxes/sandbox_123/wake"]);
+});
+
+test("a wake with snapshotWaitMs 0 throws the API's snapshot_in_progress at once", async () => {
+  const { client, posts } = wakingClient([snapshotSaving]);
+
+  const instance = await client.sandboxes.retrieve("sandbox_123");
+  await assert.rejects(instance.wake({ snapshotWaitMs: 0 }), (error: unknown) => {
+    assert.ok(error instanceof RemoteHostAPIError);
+    assert.equal(error.status, 409);
+    assert.equal(error.code, "snapshot_in_progress");
+    return true;
+  });
+  assert.equal(posts.length, 1);
+});
+
+test("a wake's signal ends its wait for the snapshot", async () => {
+  const { client, posts } = wakingClient([snapshotSaving]);
+  const instance = await client.sandboxes.retrieve("sandbox_123");
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(new Error("caller gave up")), 100);
+
+  await assert.rejects(instance.wake({ signal: controller.signal }), /caller gave up/);
+  assert.equal(posts.length, 1);
+});
+
+test("a wake does not wait out any other conflict", async () => {
+  const { client, posts } = wakingClient([
+    () => jsonResponse({ error: { message: "The machine was lost.", code: "vm_lost" } }, 409),
+  ]);
+
+  const instance = await client.sandboxes.retrieve("sandbox_123");
+  await assert.rejects(instance.wake(), (error: unknown) => error instanceof RemoteHostAPIError && error.code === "vm_lost");
+  assert.equal(posts.length, 1);
+});
+
+test("snapshotWaitMs must be a non-negative number", async () => {
+  const { client } = wakingClient([snapshotSaving]);
+  const instance = await client.sandboxes.retrieve("sandbox_123");
+  await assert.rejects(instance.wake({ snapshotWaitMs: -1 }), TypeError);
+});
+
+test("retries a create with the same body when the host was restarting", async () => {
+  const bodies: string[] = [];
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    fetch: async (request) => {
+      bodies.push(await request.text());
+      return bodies.length === 1 ? hostUnavailable() : jsonResponse({ sandbox }, 201);
+    },
+  });
+
+  await client.sandboxes.create({ projectId: "project_123", agent: "codex", waitForReady: false });
+
+  assert.equal(bodies.length, 2);
+  assert.equal(bodies[1], bodies[0]);
+  assert.match(bodies[0]!, /project_123/);
+});
+
+test("does not retry a host_unavailable the API did not call retryable", async () => {
+  let calls = 0;
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    fetch: async () => {
+      calls += 1;
+      return hostUnavailable(false, {});
+    },
+  });
+
+  await assert.rejects(
+    client.sandboxes.create({ projectId: "project_123", agent: "codex", waitForReady: false }),
+    (error: unknown) => {
+      assert.ok(error instanceof RemoteHostAPIError);
+      assert.equal(error.status, 503);
+      assert.equal(error.code, "host_unavailable");
+      return true;
+    },
+  );
+  assert.equal(calls, 1);
+});
+
+test("stops retrying a restarting host after hostUnavailableRetryMs", async () => {
+  let calls = 0;
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    hostUnavailableRetryMs: 50,
+    fetch: async () => {
+      calls += 1;
+      return hostUnavailable(true, { "retry-after": "1" });
+    },
+  });
+
+  const started = Date.now();
+  await assert.rejects(
+    client.sandboxes.create({ projectId: "project_123", agent: "codex", waitForReady: false }),
+    (error: unknown) => error instanceof RemoteHostAPIError && error.code === "host_unavailable",
+  );
+  assert.equal(calls, 1);
+  assert.ok(Date.now() - started < 500);
+
+  assert.throws(
+    () => new RemoteHost({ apiKey: "rh_test", hostUnavailableRetryMs: -1 }),
+    RemoteHostConfigurationError,
+  );
+});
+
+test("resize sends restart only when it is true and reports applied restart (REM-4099)", async () => {
+  const bodies: unknown[] = [];
+  let applied: "current" | "restart" = "current";
+  const client = new RemoteHost({
+    apiKey: "rh_test",
+    orgId: "org_123",
+    fetch: async (request) => {
+      const path = new URL(request.url).pathname;
+      if (path.endsWith("/resize")) {
+        bodies.push(await request.json());
+        return jsonResponse({
+          applied,
+          liveResizeError: null,
+          pendingAllocation: null,
+          sandbox: { ...sandbox, status: "running", allocated_vcpu: 8 },
+        });
+      }
+      return jsonResponse({ sandbox: { ...sandbox, status: "running" } });
+    },
+  });
+  const instance = await client.sandboxes.retrieve("sandbox_123");
+
+  const shape = { vcpu: 8, memoryGb: 16, diskGb: 40 };
+  await instance.resize(shape);
+  await instance.resize({ ...shape, restart: false });
+  applied = "restart";
+  const result = await instance.resize({ ...shape, restart: true });
+
+  assert.deepEqual(bodies, [shape, shape, { ...shape, restart: true }]);
+  assert.equal(result.applied, "restart");
+  assert.equal(result.sandbox.data.allocated_vcpu, 8);
+});
+
+// REM-5401: the API refuses a resize without all three of vcpu, memoryGb
+// and diskGb, so a partial shape must not type-check (tsconfig.test.json
+// type-checks this file, so a broken expectation fails the build).
+test("resize takes only the whole shape", () => {
+  // @ts-expect-error memoryGb and diskGb are required
+  const partial: ResizeSandboxBody = { vcpu: 8 };
+  // @ts-expect-error diskGb is required
+  const missingDisk: ResizeSandboxBody = { vcpu: 8, memoryGb: 16 };
+  const whole: ResizeSandboxBody = { vcpu: 8, memoryGb: 16, diskGb: 40, restart: true };
+  assert.ok(partial && missingDisk && whole);
+});
+
+async function unexpectedFetch(): Promise<Response> {
+  throw new Error("Fetch should not have been called");
+}
+
+function jsonResponse(body: unknown, status = 200, headers?: HeadersInit): Response {
+  return Response.json(body, { status, headers });
+}
