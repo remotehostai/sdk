@@ -55,6 +55,7 @@ import { newId } from "./ids.js";
 import { planRecord } from "./validate.js";
 import { VERSION } from "../version.js";
 import type {
+  HelloRefusal,
   OutboxEntry,
   PendingWrite,
   RecordRow,
@@ -94,6 +95,7 @@ class Client implements SyncClient {
   /** Counts starts and stops: a start that finds it moved on was stopped while it awaited. */
   private runs = 0;
   private terminal = false;
+  private refused: HelloRefusal | null = null;
   private attempt = 0;
   private supersededOnce = false;
   private maxFrameBytes = DEFAULT_MAX_FRAME_BYTES;
@@ -133,12 +135,17 @@ class Client implements SyncClient {
     return this.signedIn;
   }
 
+  get refusal(): HelloRefusal | null {
+    return this.status === "refused" ? this.refused : null;
+  }
+
   // ---- Lifecycle ------------------------------------------------------------
 
   async start(): Promise<void> {
     if (!this.stopped) return this.live.promise;
     this.stopped = false;
     this.terminal = false;
+    this.refused = null;
     this.live = deferred();
     const run = ++this.runs;
     try {
@@ -220,6 +227,7 @@ class Client implements SyncClient {
     this.status = s;
     if (s === "live") this.live.resolve();
     if (s === "update_required" || s === "forbidden") this.live.reject(new Error(`sync ${s}`));
+    if (s === "refused") this.live.reject(refusedError(this.refused));
     for (const l of this.listeners) l(s);
     if (broadcast && this.isLeader) this.leadership?.post({ kind: "status", status: s });
   }
@@ -753,6 +761,19 @@ class Client implements SyncClient {
         this.setStatus("forbidden");
         this.conn?.close(1000, "forbidden");
         return;
+      case "hello_refused":
+        // The same hello would be refused again (REM-5490): the client
+        // stops, saying why, until the app changes what it asks and starts
+        // it again.
+        this.terminal = true;
+        this.refused = {
+          code: f.code,
+          message: f.message,
+          ...(f.field !== undefined ? { field: f.field } : {}),
+        };
+        this.setStatus("refused");
+        this.conn?.close(1000, "hello refused");
+        return;
       case "device_results":
         await this.reconciled(f);
         return;
@@ -839,6 +860,12 @@ class Client implements SyncClient {
     this.reconciling = false;
     await this.sendHello();
   }
+}
+
+/** What `start()` rejects with once the service refused the hello. */
+function refusedError(r: HelloRefusal | null): Error {
+  const field = r?.field ? ` {field: ${r.field}}` : "";
+  return new Error(`sync hello refused: ${r?.code ?? "invalid"}${field}: ${r?.message ?? ""}`);
 }
 
 function deferred(): { promise: Promise<void>; resolve: () => void; reject: (e: Error) => void } {

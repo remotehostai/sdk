@@ -50,6 +50,7 @@ export type {
 } from "./generated/protocol.js";
 export type { Declaration } from "./validate.js";
 export type {
+  HelloRefusal,
   LeaderEnvironment,
   OutboxEntry,
   PendingWrite,

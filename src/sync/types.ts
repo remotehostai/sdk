@@ -6,7 +6,19 @@ import type { Op, RefusalCode } from "./generated/protocol.js";
 export type SyncOp = Op;
 
 export type SyncStatus =
-  "connecting" | "catching_up" | "live" | "offline" | "update_required" | "forbidden";
+  "connecting" | "catching_up" | "live" | "offline" | "update_required" | "forbidden" | "refused";
+
+/**
+ * Why the service refused the client's `hello` (status `refused`,
+ * REM-5490): `code` `invalid`, `field` the option it names (`backends`, a
+ * backend the service does not serve; `scopes`, a scope it does not
+ * take), and its message. Like `forbidden`, it is terminal: call `stop()`, then `start()`, to try again.
+ */
+export interface HelloRefusal {
+  code: RefusalCode;
+  field?: string;
+  message: string;
+}
 
 export interface RecordRow {
   id: string;
@@ -135,6 +147,8 @@ export interface SyncClient {
    * does not hold the socket.
    */
   readonly subject: string | null;
+  /** Why the service refused this client's hello, in the tab holding the socket while its status is `refused`; null otherwise. */
+  readonly refusal: HelloRefusal | null;
 }
 
 export interface RecordSet<T> {

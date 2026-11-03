@@ -184,6 +184,12 @@ export interface Welcome {
 
 export type EntryState = "live" | "deleted" | "moved_out";
 
+/**
+ * A row's fields as JSON values: a native entity's columns as its store
+ * keeps them (flags 0 or 1), a declared record's fields as their types
+ * say (a bool as a bool, a json field or a blob's descriptor as its
+ * object or array; REM-5490).
+ */
 export interface RowImage {
   entity: string;
   id: Key;
@@ -264,6 +270,18 @@ export interface DeviceResults {
   next_from_seq: number | null;
 }
 
+/**
+ * A workspace's `hello` refused for what it asks (REM-5490): `invalid`
+ * with `field` `backends` (a backend the copy does not serve) or `scopes`
+ * (a scope of another kind than `team`). Final for that hello.
+ */
+export interface HelloRefused {
+  workspace: Id;
+  code: RefusalCode;
+  field?: string;
+  message: string;
+}
+
 export type ServerFrame =
   | { event: "challenge"; nonce: string; subject?: Id; agent_session?: Id }
   | ({ event: "welcome" } & Welcome)
@@ -333,6 +351,7 @@ export type ServerFrame =
     }
   | { event: "ack_ok"; workspace: Id; generation: number }
   | { event: "forbidden"; workspace: Id; device_id?: Id; reason: string }
+  | ({ event: "hello_refused" } & HelloRefused)
   | { event: "reconnect"; after_ms: number; reason: string }
   | { event: "pong" };
 

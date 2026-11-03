@@ -133,3 +133,80 @@ test("a sign-out's delete is not held up by a client stopped while its IndexedDB
   const timeout = new Promise<string>((resolve) => setTimeout(() => resolve("blocked"), 1000));
   assert.deepEqual(await Promise.race([deleted, timeout]), [`rh-tasks:ana:${server.workspace}`]);
 });
+
+test("a hello the service refuses ends start() with the refusal, never sitting connecting (REM-5490)", async () => {
+  const server = new FakeServer({
+    refuseHello: (w) =>
+      w.backends?.includes("checklist")
+        ? { field: "backends", message: 'this copy does not serve backend "checklist"' }
+        : null,
+  });
+  const statuses: string[] = [];
+  const client = createSyncClient({
+    url: "ws://fake/v1/connect",
+    workspace: server.workspace,
+    token,
+    store: memoryStore(),
+    backends: ["checklist"],
+    webSocket: server.WebSocket,
+  });
+  client.onStatus((s) => statuses.push(s));
+  await assert.rejects(
+    client.start(),
+    /sync hello refused: invalid \{field: backends\}: .*checklist/,
+  );
+  assert.equal(client.status, "refused");
+  assert.deepEqual(client.refusal, {
+    code: "invalid",
+    field: "backends",
+    message: 'this copy does not serve backend "checklist"',
+  });
+  assert.ok(!statuses.includes("live"), statuses.join(","));
+  assert.equal(server.socket.readyState, 3, "the client closed its socket");
+  await new Promise((r) => setTimeout(r, 20));
+  assert.equal(server.sockets.length, 1, "and does not connect again");
+  assert.equal(server.sent("hello").length, 1);
+  await client.stop();
+  assert.equal(client.refusal, null);
+});
+
+test("a record's json and bool fields arrive as JSON values and survive a reload (REM-5490)", async () => {
+  const factory = new IDBFactory();
+  const server = new FakeServer();
+  const id = "0190f6b0-0000-7000-8000-000000000001";
+  const row = {
+    id,
+    list_id: "0190f6b0-0000-7000-8000-000000000002",
+    text: "Milk",
+    done: true,
+    meta: { tags: ["a", "b"], n: 1.5, nested: { ok: false } },
+  };
+  server.rows.set(`checklist.item/${id}`, { entity: "checklist.item", id, rev: 1, row });
+  server.seq = 1;
+  const options = {
+    url: "ws://fake/v1/connect",
+    workspace: server.workspace,
+    token,
+    backends: ["checklist"],
+    webSocket: server.WebSocket,
+    leader: false as const,
+  };
+  const a = createSyncClient({
+    ...options,
+    store: indexedDbStore({ name: "rh-json", indexedDB: factory }),
+  });
+  await a.start();
+  await until(() => a.records("checklist", "item").get(id) !== undefined);
+  assert.deepEqual(a.records("checklist", "item").get(id), row);
+  await a.stop();
+  const b = createSyncClient({
+    ...options,
+    store: indexedDbStore({ name: "rh-json", indexedDB: factory }),
+  });
+  await b.start();
+  const back = b.records<typeof row>("checklist", "item").get(id);
+  assert.deepEqual(back, row);
+  assert.equal(back?.done, true);
+  assert.equal(typeof back?.meta, "object");
+  await b.stop();
+});

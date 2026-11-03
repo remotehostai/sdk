@@ -59,6 +59,8 @@ export interface FakeOptions {
   /** Refuse an op: returns the refusal, or null to apply it. */
   refuse?: (op: any) => { code: string; reason?: string; message: string } | null;
   subject?: string;
+  /** Refuse a hello's workspace: returns the refusal's field and message, or null to welcome it. */
+  refuseHello?: (w: any) => { field: string; message: string } | null;
 }
 
 export class FakeServer {
@@ -164,6 +166,11 @@ export class FakeServer {
 
   hello(s: FakeSocket, params: any): void {
     const w = params.workspaces[0];
+    const refusal = this.opts.refuseHello?.(w) ?? null;
+    if (refusal) {
+      s.push({ event: "hello_refused", workspace: this.workspace, code: "invalid", ...refusal });
+      return;
+    }
     if (w.device === null) {
       this.deviceId = `dev-${this.secrets.length + 1}`;
       this.generation = 0;
