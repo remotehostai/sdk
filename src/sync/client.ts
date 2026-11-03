@@ -7,6 +7,7 @@
 import {
   OP_VERSION,
   PROTOCOL,
+  type Base,
   type DeviceResults,
   type HelloWorkspace,
   type Op,
@@ -63,12 +64,25 @@ import type {
   RecordSet,
   SyncClient,
   SyncClientOptions,
+  StoreTx,
   SyncStatus,
   WebSocketLike,
   WriteOutcome,
 } from "./types.js";
 
 const RECORD_OPS = new Set(["put_record", "update_record", "delete_record"]);
+
+/**
+ * Whether an applied op's writes are still ahead of the cursors, in the
+ * groups this copy holds: a write to a group it does not hold, or no
+ * longer holds, never comes (the replica's rule, replica.rs). An op that
+ * wrote several shards stays predicted until the slowest has caught up,
+ * so for that short while it masks a newer remote edit of the same row.
+ */
+function behind(tx: StoreTx, writes: Base[]): boolean {
+  const held = new Set(readGroups(tx).map((g) => g.id));
+  return writes.some((w) => held.has(w.group) && seqOf(tx, w.group, w.shard) < w.seq);
+}
 
 export function createSyncClient(options: SyncClientOptions): SyncClient {
   return new Client(options);
@@ -85,6 +99,13 @@ class Client implements SyncClient {
    * overlay predicts them at once, so a write shows before its first await.
    */
   private enqueuing: OutboxEntry[] = [];
+  /**
+   * Applied ops whose writes the cursors have not reached: still predicted
+   * until the change carrying them lands, as the desktop replica keeps an
+   * applied entry in its outbox. Without it the row disappears between
+   * the push_result and the change.
+   */
+  private landing: Array<{ entry: OutboxEntry; writes: Base[] }> = [];
   private conn: Connection | null = null;
   private signedIn: string | null = null;
   private nonce = "";
@@ -211,6 +232,8 @@ class Client implements SyncClient {
     this.clearTimers();
     this.welcomed = false;
     this.inFlight.clear();
+    // The next leader, this tab or another, reads what landed from the store.
+    this.landing = [];
     const conn = this.conn;
     this.conn = null;
     conn?.close(1000, "stopped");
@@ -221,6 +244,14 @@ class Client implements SyncClient {
     if (this.reconnectTimer !== null) this.clearTimer(this.reconnectTimer);
     this.pushTimer = null;
     this.reconnectTimer = null;
+  }
+
+  /** Drops the landing ops every write of which the cursors have reached; whether any. */
+  private landed(tx: StoreTx): boolean {
+    if (!this.landing.length) return false;
+    const before = this.landing.length;
+    this.landing = this.landing.filter((l) => behind(tx, l.writes));
+    return this.landing.length !== before;
   }
 
   /** One shard current; the client is live once every pending shard is. */
@@ -301,7 +332,8 @@ class Client implements SyncClient {
   /** After a store change: recompute the overlay, tell subscribers and the other tabs. */
   private changed(touched: Set<string>, outbox?: OutboxEntry[]): void {
     if (outbox) this.outbox = outbox;
-    for (const k of this.overlay.recompute([...this.outbox, ...this.enqueuing])) touched.add(k);
+    const ops = [...this.landing.map((l) => l.entry), ...this.outbox, ...this.enqueuing];
+    for (const k of this.overlay.recompute(ops)) touched.add(k);
     this.emit(touched);
     if (this.isLeader) this.leadership?.post({ kind: "changed" });
   }
@@ -636,6 +668,7 @@ class Client implements SyncClient {
           if (f.mode === "reset") dropGroup(tx, this.overlay, null, touched);
           const r = takeWelcomeDevice(tx, f);
           takeLayouts(tx, this.overlay, f.groups, touched);
+          this.landed(tx);
           return { ...r, outbox: tx.outbox(), device: heldDevice(tx), groups: f.groups };
         });
         for (const [from, to] of renumbered) {
@@ -685,12 +718,14 @@ class Client implements SyncClient {
         return;
       }
       case "rows_end": {
-        await store.transaction((tx) => {
+        const pruned = await store.transaction((tx) => {
           // An instant set's filtered rows_end moves no cursor (REM-2462):
           // a reconnect from it would skip the rest of the group.
           if (f.coverage?.complete && layoutCheck(tx, f.group, f.layout_version) === "ok")
             setSeq(tx, f.group, f.shard, f.layout_version, f.upto_seq);
+          return this.landed(tx);
         });
+        if (pruned) this.changed(touched);
         // atlas-sync ends each shard's catch-up with a complete `rows_end`
         // and sends no `caught_up` (stream/catchup.rs); the desktop replica
         // settles on it too. An instant set's filtered one is not the end.
@@ -717,6 +752,7 @@ class Client implements SyncClient {
           }
           for (const r of f.rows) applyRow(tx, this.overlay, f.group, f.shard, r, touched);
           setSeq(tx, f.group, f.shard, f.layout_version, f.to_seq);
+          this.landed(tx);
         });
         this.changed(touched);
         return;
@@ -726,7 +762,10 @@ class Client implements SyncClient {
         return;
       }
       case "groups": {
-        await store.transaction((tx) => applyGroups(tx, this.overlay, f, touched));
+        await store.transaction((tx) => {
+          applyGroups(tx, this.overlay, f, touched);
+          this.landed(tx);
+        });
         this.changed(touched);
         return;
       }
@@ -737,9 +776,12 @@ class Client implements SyncClient {
         // shards' caught_up again, as the desktop replica does. A new
         // hello here would be welcomed with a rotated secret and reset
         // again, forever, until the subject's registrations run out.
-        // Only a server rollback asks for a hello.
+        // Only a server rollback asks for a hello, and what it rolled back
+        // may never come: nothing it answered is held.
+        if (f.reason === "server_rollback") this.landing = [];
         const groups = await store.transaction((tx) => {
           dropGroup(tx, this.overlay, f.group ?? null, touched);
+          this.landed(tx);
           return readGroups(tx);
         });
         this.changed(touched);
@@ -757,7 +799,13 @@ class Client implements SyncClient {
       case "push_result": {
         const settled = new Set<number>();
         for (const r of f.results) if (r.status !== "rejected") settled.add(r.device_seq);
+        const sent = new Map(this.outbox.map((e) => [e.deviceSeq, e]));
         const outbox = await store.transaction((tx) => {
+          for (const r of f.results) {
+            const entry = sent.get(r.device_seq);
+            if (r.status === "applied" && entry && behind(tx, r.writes))
+              this.landing.push({ entry, writes: r.writes });
+          }
           for (const seq of settled) tx.settle(seq);
           return tx.outbox();
         });

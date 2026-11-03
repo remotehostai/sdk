@@ -61,6 +61,10 @@ export interface FakeOptions {
   subject?: string;
   /** Refuse a hello's workspace: returns the refusal's field and message, or null to welcome it. */
   refuseHello?: (w: any) => { field: string; message: string } | null;
+  /** Hold an applied op's change until `release()`, after its push_result. */
+  holdChanges?: boolean;
+  /** More writes an applied op reports, in groups the client may not hold. */
+  extraWrites?: Array<{ group: string; shard: number; seq: number }>;
 }
 
 export class FakeServer {
@@ -72,9 +76,10 @@ export class FakeServer {
   generation = 0;
   secrets: string[] = [];
   lastDeviceSeq = 0;
-  results = new Map<number, { status: string; device_seq: number }>();
+  results = new Map<number, { status: string; device_seq: number; [k: string]: unknown }>();
   readonly workspace: string;
   private waiters: Array<{ method: string; resolve: (s: Sent) => void }> = [];
+  private held: Array<() => void> = [];
 
   constructor(readonly opts: FakeOptions = {}) {
     this.workspace = opts.workspace ?? "ws-1";
@@ -230,6 +235,7 @@ export class FakeServer {
 
   pushOps(s: FakeSocket, params: any): void {
     const results = [];
+    const applied: any[] = [];
     for (const o of params.ops) {
       const done = this.results.get(o.device_seq);
       if (done) {
@@ -237,15 +243,33 @@ export class FakeServer {
         continue;
       }
       const refusal = this.opts.refuse?.(o.op) ?? null;
-      const result = refusal
-        ? { status: "refused", device_seq: o.device_seq, ...refusal }
-        : { status: "applied", device_seq: o.device_seq, writes: [] };
+      let result;
+      if (refusal) result = { status: "refused", device_seq: o.device_seq, ...refusal };
+      else {
+        applied.push(o.op);
+        const seq = this.seq + applied.length;
+        result = {
+          status: "applied",
+          device_seq: o.device_seq,
+          writes: [
+            { group: this.groups()[0]!.id, shard: 0, seq },
+            ...(this.opts.extraWrites ?? []),
+          ],
+        };
+      }
       this.results.set(o.device_seq, result);
       this.lastDeviceSeq = Math.max(this.lastDeviceSeq, o.device_seq);
       results.push(result);
-      if (!refusal) this.apply(s, o.op);
     }
+    // atlas-sync answers the push before live delivery sends its changes.
     s.push({ event: "push_result", workspace: this.workspace, results });
+    if (!this.opts.holdChanges) for (const op of applied) this.apply(s, op);
+    else this.held.push(...applied.map((op) => () => this.apply(s, op)));
+  }
+
+  /** Sends the changes held back by `holdChanges`. */
+  release(): void {
+    for (const send of this.held.splice(0)) send();
   }
 
   apply(s: FakeSocket, op: any): void {

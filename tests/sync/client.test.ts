@@ -236,3 +236,58 @@ test("a catch-up's bootstrap reset drops the group and goes live on the same hel
   assert.equal(client.records<{ title: string }>("checklist", "list").get("l1")?.title, "kept");
   await client.stop();
 });
+
+test("an applied write stays readable until the change carrying it lands (REM-5568)", async () => {
+  const server = new FakeServer({ holdChanges: true });
+  const client = createSyncClient({
+    url: "ws://fake/v1/connect",
+    workspace: server.workspace,
+    token,
+    store: memoryStore(),
+    backends: ["checklist"],
+    webSocket: server.WebSocket,
+  });
+  await client.start();
+  const changes: any[] = [];
+  client.records("checklist", "list").subscribe((c) => changes.push(c));
+  const op = checklist.putList({ title: "Groceries" });
+  const [outcome] = await client.write(op);
+  assert.equal(outcome!.status, "applied");
+  // The push is answered; its change has not come.
+  const list = client.records<{ title: string }>("checklist", "list");
+  assert.equal(list.get(op.id)?.title, "Groceries");
+  assert.ok(!changes.some((c) => c.kind === "delete"));
+  server.release();
+  await until(() => changes.some((c) => c.kind === "upsert" && c.confirmed));
+  assert.equal(list.get(op.id)?.title, "Groceries");
+  assert.ok(!changes.some((c) => c.kind === "delete"));
+  await client.stop();
+});
+
+test("an applied write to a group the client does not hold stops being predicted once its own lands (REM-5568)", async () => {
+  const server = new FakeServer({ extraWrites: [{ group: "g-elsewhere", shard: 0, seq: 99 }] });
+  const client = createSyncClient({
+    url: "ws://fake/v1/connect",
+    workspace: server.workspace,
+    token,
+    store: memoryStore(),
+    backends: ["checklist"],
+    webSocket: server.WebSocket,
+  });
+  await client.start();
+  const op = checklist.putList({ title: "Groceries" });
+  const [outcome] = await client.write(op);
+  assert.equal(outcome!.status, "applied");
+  const list = client.records<{ title: string }>("checklist", "list");
+  await until(() => list.get(op.id)?.title === "Groceries");
+  // Another device renames it: the old prediction must not mask that.
+  server.apply(server.sockets.at(-1)!, {
+    op: "update_record",
+    backend: "checklist",
+    type: "list",
+    id: op.id,
+    set: { title: "Errands" },
+  });
+  await until(() => list.get(op.id)?.title === "Errands");
+  await client.stop();
+});
