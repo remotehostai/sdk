@@ -2347,7 +2347,7 @@ export interface components {
             sshPublicKey?: string;
             persistencePolicy?: string;
             mode?: string;
-            /** @description Seconds until the sandbox auto-stops (pause for persistent policies, delete for throwaway_ephemeral). Defaults to 3600; capped by the plan's session limit; ignored for always_on. */
+            /** @description Seconds until the sandbox auto-stops (pause for persistent policies, delete for throwaway_ephemeral). Defaults to 3600; capped by the plan's session limit; ignored for always_on. Must be from 0 to 31536000 (one year) in every mode, always_on included; a value outside that range is refused with 400 invalid_body. */
             ttlSeconds?: number;
             endUserId?: string;
             metadata?: {

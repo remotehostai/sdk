@@ -28,6 +28,14 @@
       "types": "./dist/generated/schema.d.ts",
       "import": "./dist/generated/schema.js"
     },
+    "./sync": {
+      "types": "./dist/sync/index.d.ts",
+      "import": "./dist/sync/index.js"
+    },
+    "./sync/sqlite": {
+      "types": "./dist/sync/sqlite.d.ts",
+      "import": "./dist/sync/sqlite.js"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -49,6 +57,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "fake-indexeddb": "6.0.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },

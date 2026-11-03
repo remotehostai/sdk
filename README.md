@@ -77,6 +77,46 @@ For endpoints without a convenience resource, use the fully typed
 See the [SDK guide](https://docs.remotehost.ai/docs/sdk) for commands, files,
 previews, metrics, lifecycle methods, errors, retries, and cancellation.
 
+## Sync client
+
+`@remotehost/sdk/sync` keeps a local copy of a workspace's backends (`tasks`, the
+Atlas tracker's issues, teams and states) and syncs it live over sync protocol
+v1. Writes show at once and settle when the service answers; a refused write
+disappears and its `write()` resolves `refused`. Stores: `indexedDbStore()` in a
+browser (one leader tab owns the socket), `memoryStore()` for scripts, and
+`sqliteStore()` from `@remotehost/sdk/sync/sqlite` on Node 22.13 or later.
+
+```ts
+import { createSyncClient, tasks, type TasksIssue, type TasksState } from "@remotehost/sdk/sync";
+import { sqliteStore } from "@remotehost/sdk/sync/sqlite";
+
+const sync = createSyncClient({
+  url: "wss://sync-staging.remotehost.ai/v1/connect",
+  workspace: workspaceId,
+  token: async () => ({ token: await mintSyncToken() }), // POST /v1/auth/sync-token
+  store: sqliteStore({ path: "./replica.db" }),
+  backends: ["tasks"],
+});
+await sync.start(); // resolves once caught up
+
+const issues = sync.records<TasksIssue>("tasks", "issue");
+issues.subscribe((change) => console.log(change.kind, change.confirmed));
+
+// A new task in the first state's team; the service numbers it.
+const todo = sync.records<TasksState>("tasks", "state").all()[0];
+if (!todo) throw new Error("the workspace has no states yet");
+const issue = tasks.putIssue({
+  identifier: "",
+  number: 0,
+  title: "Ship the launch",
+  state_id: todo.id,
+  team_id: todo.team_id,
+});
+const [outcome] = await sync.write(issue);
+console.log(outcome?.status, await sync.pending());
+await sync.stop();
+```
+
 ## Development
 
 The public repository is a standalone source mirror maintained from RemoteHost's
