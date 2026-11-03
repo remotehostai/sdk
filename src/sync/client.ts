@@ -44,6 +44,7 @@ import {
   helloCursors,
   layoutCheck,
   readCursors,
+  readGroups,
   seqOf,
   setSeq,
   shardKey,
@@ -220,6 +221,12 @@ class Client implements SyncClient {
     if (this.reconnectTimer !== null) this.clearTimer(this.reconnectTimer);
     this.pushTimer = null;
     this.reconnectTimer = null;
+  }
+
+  /** One shard current; the client is live once every pending shard is. */
+  private caughtUp(group: string, shard: number): void {
+    this.pendingShards.delete(shardKey(group, shard));
+    if (!this.pendingShards.size && this.status === "catching_up") this.setStatus("live");
   }
 
   private setStatus(s: SyncStatus, broadcast = true): void {
@@ -679,9 +686,15 @@ class Client implements SyncClient {
       }
       case "rows_end": {
         await store.transaction((tx) => {
-          if (layoutCheck(tx, f.group, f.layout_version) === "ok")
+          // An instant set's filtered rows_end moves no cursor (REM-2462):
+          // a reconnect from it would skip the rest of the group.
+          if (f.coverage?.complete && layoutCheck(tx, f.group, f.layout_version) === "ok")
             setSeq(tx, f.group, f.shard, f.layout_version, f.upto_seq);
         });
+        // atlas-sync ends each shard's catch-up with a complete `rows_end`
+        // and sends no `caught_up` (stream/catchup.rs); the desktop replica
+        // settles on it too. An instant set's filtered one is not the end.
+        if (f.coverage?.complete) this.caughtUp(f.group, f.shard);
         return;
       }
       case "change": {
@@ -709,8 +722,7 @@ class Client implements SyncClient {
         return;
       }
       case "caught_up": {
-        this.pendingShards.delete(shardKey(f.group, f.shard));
-        if (!this.pendingShards.size && this.status === "catching_up") this.setStatus("live");
+        this.caughtUp(f.group, f.shard);
         return;
       }
       case "groups": {
@@ -719,10 +731,27 @@ class Client implements SyncClient {
         return;
       }
       case "reset": {
-        await store.transaction((tx) => dropGroup(tx, this.overlay, f.group ?? null, touched));
+        // A reset comes inside a catch-up the service is already sending
+        // (every cursor at 0 is a "bootstrap"; a purge or a removed
+        // link's tombstone restarts it): drop the group and wait for its
+        // shards' caught_up again, as the desktop replica does. A new
+        // hello here would be welcomed with a rotated secret and reset
+        // again, forever, until the subject's registrations run out.
+        // Only a server rollback asks for a hello.
+        const groups = await store.transaction((tx) => {
+          dropGroup(tx, this.overlay, f.group ?? null, touched);
+          return readGroups(tx);
+        });
         this.changed(touched);
+        if (f.reason === "server_rollback") {
+          this.setStatus("catching_up");
+          await this.sendHello();
+          return;
+        }
+        for (const g of groups)
+          if (f.group == null || g.id === f.group)
+            for (let s = 0; s < g.shards; s++) this.pendingShards.add(shardKey(g.id, s));
         this.setStatus("catching_up");
-        await this.sendHello();
         return;
       }
       case "push_result": {

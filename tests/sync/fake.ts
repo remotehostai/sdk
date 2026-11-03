@@ -1,7 +1,7 @@
 // A small in-process sync server for the client's tests: no network. It
 // follows protocol v1's shapes (REM-5443's brief, app backends design 3)
 // closely enough to drive the client: challenge, auth, hello, welcome with a
-// minted and rotating device, rows/rows_end/caught_up per shard, push with
+// minted and rotating device, rows and a complete rows_end per shard, push with
 // record ops applied into its own table and a `change` per op, and
 // device.results. Tests reach in (`frames`, `send`, `refuse`) for the rest.
 
@@ -197,7 +197,11 @@ export class FakeServer {
     });
     for (const g of this.groups()) {
       const have = w.cursors?.seqs?.[`${g.id}/0`] ?? 0;
-      if (have < this.seq || have === 0) {
+      // atlas-sync starts a catch-up from cursors all at 0 with a reset
+      // (stream/catchup.rs, RESET_BOOTSTRAP), then pages the group.
+      if (have === 0)
+        s.push({ event: "reset", workspace: this.workspace, group: g.id, reason: "bootstrap" });
+      if (have < this.seq || have === 0)
         s.push({
           event: "rows",
           workspace: this.workspace,
@@ -209,23 +213,17 @@ export class FakeServer {
             .map(({ entity, id, rev, row }) => ({ entity, id, rev, row })),
           tombstones: [],
         });
+      // Every shard's catch-up ends with a complete rows_end, current or
+      // not; atlas-sync sends no caught_up (stream/catchup.rs).
+      for (let shard = 0; shard < g.shards; shard++)
         s.push({
           event: "rows_end",
           workspace: this.workspace,
           group: g.id,
-          shard: 0,
-          layout_version: 1,
-          upto_seq: this.seq,
-          coverage: { complete: true },
-        });
-      }
-      for (let shard = 0; shard < g.shards; shard++)
-        s.push({
-          event: "caught_up",
-          workspace: this.workspace,
-          group: g.id,
           shard,
-          seq: this.seq,
+          layout_version: 1,
+          upto_seq: shard === 0 ? this.seq : 0,
+          coverage: { complete: true },
         });
     }
   }

@@ -210,3 +210,29 @@ test("a record's json and bool fields arrive as JSON values and survive a reload
   assert.equal(typeof back?.meta, "object");
   await b.stop();
 });
+
+test("a catch-up's bootstrap reset drops the group and goes live on the same hello, never sending another", async () => {
+  const server = new FakeServer();
+  server.rows.set("checklist.list/l1", {
+    entity: "checklist.list",
+    id: "l1",
+    rev: 1,
+    row: { id: "l1", title: "kept" },
+  } as any);
+  server.seq = 1;
+  const client = createSyncClient({
+    url: "ws://fake/v1/connect",
+    workspace: server.workspace,
+    token,
+    store: memoryStore(),
+    backends: ["checklist"],
+    webSocket: server.WebSocket,
+  });
+  await client.start();
+  assert.equal(client.status, "live");
+  await new Promise((r) => setTimeout(r, 50));
+  assert.equal(server.sent("hello").length, 1, "the reset asked for no second hello");
+  assert.equal(server.generation, 1, "the device secret was rotated no more");
+  assert.equal(client.records<{ title: string }>("checklist", "list").get("l1")?.title, "kept");
+  await client.stop();
+});
