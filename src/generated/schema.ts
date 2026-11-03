@@ -375,7 +375,7 @@ export interface paths {
         post?: never;
         /**
          * Delete an empty project
-         * @description Deletes a project that holds nothing: no sandbox, environment, environment template, agent session, repository, MCP or skill connection, resource allocation, pending egress change or volume. Its members and invitations go with it. Needs `project.delete` (owners and admins); audited as `project.delete`. API keys cannot call it.
+         * @description Deletes a project that holds nothing: no sandbox that is not deleted, environment, environment template, active agent session, repository, MCP or skill connection, resource allocation, pending egress change or volume. Its members and invitations go with it, and so do its closed agent sessions. Its deleted sandboxes stay, with their usage and billing records, and let go of the project. Needs `project.delete` (owners and admins); audited as `project.delete`. API keys cannot call it.
          */
         delete: operations["deleteProject"];
         options?: never;
